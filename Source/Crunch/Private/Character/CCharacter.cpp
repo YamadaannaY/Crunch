@@ -27,8 +27,10 @@ ACCharacter::ACCharacter()
 void ACCharacter::ServerSideInit()
 {
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
-	//在服务端对属性初始化
+	
+	//在服务端对属性初始化,GA初始化
 	CAbilitySystemComponent->ApplyInitialEffects();
+	CAbilitySystemComponent->GiveInitialAbilities();
 }
 
 void ACCharacter::ClientSideInit()

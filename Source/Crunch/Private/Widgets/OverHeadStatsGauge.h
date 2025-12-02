@@ -19,7 +19,7 @@ public:
 	void ConfigureWithASC(class UAbilitySystemComponent* AbilitySystemComponent);
 private:
 	UPROPERTY(meta=(BindWidget))
-	UValueGauge* HealthBar;
+	class UValueGauge* HealthBar;
 	
 	UPROPERTY(meta=(BindWidget))
 	UValueGauge* ManaBar;
