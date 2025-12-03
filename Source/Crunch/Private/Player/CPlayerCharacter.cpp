@@ -2,6 +2,8 @@
 
 
 #include "Player/CPlayerCharacter.h"
+
+#include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
@@ -51,6 +53,11 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::Jump);
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
 		EnhancedInputComp->BindAction(MoveInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleMoveInput);
+
+		for (const TPair<ECAbilityInputID,UInputAction*>& InputActionPair:GameplayAbilityInputAction)
+		{
+			EnhancedInputComp->BindAction(InputActionPair.Value,ETriggerEvent::Triggered,this,&ThisClass::HandleAbilityInput,InputActionPair.Key);
+		}
 	}
 }
 
@@ -70,6 +77,21 @@ void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValu
 
 	//将摄像机的坐标系作为位移方向参考，添加映射实现位移
 	AddMovementInput(GetMoveFwdDir()*InputVal.Y+GetLookRightDir()*InputVal.X);
+}
+
+void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionValue, ECAbilityInputID InputID)
+{
+	bool  bPressed=InputActionValue.Get<bool>();
+
+	//触发对应ID下的GA
+	if (bPressed)
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
+	}
+	else
+	{
+		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+	}
 }
 
 FVector ACPlayerCharacter::GetLookRightDir() const

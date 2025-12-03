@@ -6,6 +6,7 @@
 #include "CGameplayAbilitiesType.generated.h"
 
 UENUM(BlueprintType)
+//定义InputID,通过ID触发GA
 enum class ECAbilityInputID:uint8
 {
 	None			UMETA(DisplayName="None"),

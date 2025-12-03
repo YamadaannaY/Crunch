@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/CCharacter.h"
+#include "GAS/CGameplayAbilitiesType.h"
 #include "CPlayerCharacter.generated.h"
 
 struct FInputActionValue;
@@ -30,6 +31,8 @@ private:
 	UPROPERTY(VisibleDefaultsOnly,Category="View")
 	class UCameraComponent* ViewCamera;
 
+	/*******************	Input	********************************/
+
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputAction* JumpInputAction;
 	
@@ -38,12 +41,16 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputAction* MoveInputAction;
+
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputAction; 
 	
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputMappingContext* GameplayInputMappingContext;
 	
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
+	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
 
 	FVector GetLookRightDir() const ;
 	FVector GetLookFwdDir() const ;
