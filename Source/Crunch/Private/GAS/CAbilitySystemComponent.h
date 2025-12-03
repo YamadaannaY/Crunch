@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "CGameplayAbilitiesType.h"
 #include "CAbilitySystemComponent.generated.h"
 
 /**
@@ -16,8 +17,8 @@ class UCAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	//遍历InitGE并调用
 	void ApplyInitialEffects();
-	void ();
-GiveInitialAbilities
+	void GiveInitialAbilities();
+
 private:
 	//对属性集所有初始属性的InitGE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
@@ -25,9 +26,9 @@ private:
 
 	//技能
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> Abilities;
+	TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>> Abilities;
 
 	//角色的ASC直接具有的基础能力
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> BasicAbilities;
+	TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>> BasicAbilities;
 };
