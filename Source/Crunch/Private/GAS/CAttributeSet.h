@@ -29,7 +29,10 @@ public:
 
 	//如果一个变量声明了UPROPERTY(Replicated)，但没有加入GetLifetimeReplicatedProps()，不会进行同步,因为缺少同步规则。
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
+	//处理由代码直接修改属性值的情况，会在属性值改变前执行
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+	//处理所有由GE修改的属性值，会在属性值改变后执行
+	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 private:
 	/**ReplicatedUsing表示服务端复制这个宏标记的属性到客户端，同时调用OnRep函数 **/
 	

@@ -2,6 +2,7 @@
 
 #include "GAS/CAttributeSet.h"
 #include "Net/UnrealNetwork.h"
+#include "GameplayEffectExtension.h"
 
 void UCAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -15,6 +16,32 @@ void UCAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MaxHealth,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,Mana,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MaxMana,COND_None,REPNOTIFY_Always);
+}
+
+//在属性值改变操作执行前调用的函数，一般用于Clamp对要改变的值进行限制
+void UCAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
+{
+	if (Attribute==GetHealthAttribute())
+	{
+		NewValue=FMath::Clamp(NewValue,0.f,GetMaxHealth());
+	}
+	if (Attribute==GetManaAttribute())
+	{
+		NewValue=FMath::Clamp(NewValue,0.f,GetMaxMana());
+	}
+}
+
+//在GE改变值后调用的函数，同样进行限制
+void UCAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
+{
+	if (Data.EvaluatedData.Attribute==GetHealthAttribute())
+	{
+		SetHealth(FMath::Clamp(GetHealth(),0.f,GetMaxHealth()));
+	}
+	if (Data.EvaluatedData.Attribute==GetManaAttribute())
+	{
+		SetMana(FMath::Clamp(GetMana(),0.f,GetMaxMana()));
+	}
 }
 
 /**	GAMEPLAYATTRIBUTE_REPNOTIFY:主要触发OnAttributeChanged，广播当前属性和这个属性被修改前的值	 **/

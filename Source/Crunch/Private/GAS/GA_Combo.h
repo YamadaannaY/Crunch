@@ -36,12 +36,19 @@ private:
 	//press后，若NextComboName存在，则设置NextSection为这个Name对应的Section
 	void TryCommitCombo();
 
+	//SphereTrace检测半径
+	UPROPERTY(EditDefaultsOnly,Category="Targetting")
+	float TargetSweepSphereRadius=30.f;
+
+	//DamageGE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
 	TSubclassOf<UGameplayEffect> DefaultDamageEffect;
 
+	//对不同Section对应的Montage触发的DamageGE进行不同的设置
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
 	TMap<FName,TSubclassOf<UGameplayEffect>> DamageEffectMap;
 
+	//找到当前Section对应的DamageGE
 	TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const ;
 	
 	//包含所有ComboAnimationSequence的Montage

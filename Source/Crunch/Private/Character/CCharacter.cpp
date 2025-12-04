@@ -6,6 +6,7 @@
 #include "Components/WidgetComponent.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
+#include "GAS/UCAbilitySystemStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
@@ -21,6 +22,8 @@ ACCharacter::ACCharacter()
 
 	OverHeadWidgetComponent=CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
+
+	BindGASChangeDelegates();
 
 }
 
@@ -81,6 +84,26 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 	return CAbilitySystemComponent;
 }
 
+void ACCharacter::BindGASChangeDelegates()
+{
+	if (CAbilitySystemComponent)
+	{
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
+	}
+}
+
+void ACCharacter::DeadTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	if (NewCount != 0)
+	{
+		StartDeathSequence();
+	}
+	else
+	{
+		Respawn();
+	}
+}
+
 void ACCharacter::ConfigureOverHeadStatusWidget()
 {
 	if (!OverHeadWidgetComponent) return ;
@@ -118,5 +141,15 @@ void ACCharacter::UpdateHeadGaugeVisibility()
 		//决定是否显示UI
 		OverHeadWidgetComponent->SetHiddenInGame(DistSquared>HeadStatGaugeVisibilityRangeSquared);
 	}
+}
+
+void ACCharacter::StartDeathSequence()
+{
+	UE_LOG(LogTemp,Warning,TEXT("Dead"));
+}
+
+void ACCharacter::Respawn()
+{
+	UE_LOG(LogTemp,Warning,TEXT("Respawn"));
 }
 

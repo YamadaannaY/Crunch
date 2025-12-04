@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
 #include "CGameplayAbilitiesType.h"
+#include "GameplayEffectTypes.h"
 #include "CAbilitySystemComponent.generated.h"
 
 /**
@@ -15,11 +16,19 @@ class UCAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 public:
+	UCAbilitySystemComponent();
+	
 	//遍历InitGE并调用
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
 
 private:
+	//监听Health属性值，变化时调用函数，处理死亡逻辑
+	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
+
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
+	TSubclassOf<UGameplayEffect> DeathEffect;
+	
 	//对属性集所有初始属性的InitGE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;

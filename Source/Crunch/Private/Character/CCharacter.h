@@ -7,6 +7,8 @@
 #include  "AbilitySystemInterface.h"
 #include "CCharacter.generated.h"
 
+struct FGameplayTag;
+
 UCLASS()
 class ACCharacter : public ACharacter,public IAbilitySystemInterface
 {
@@ -44,6 +46,13 @@ public:
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 private:
+
+	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
+	void BindGASChangeDelegates();
+
+	//当DeadTag（附加或者删除时）实现的函数
+	void DeadTagUpdated(const FGameplayTag Tag,int32 NewCount);
+	
 	UPROPERTY(VisibleDefaultsOnly,Category="Gameplay Ability")
 	class UCAbilitySystemComponent* CAbilitySystemComponent;
 	UPROPERTY()
@@ -70,5 +79,13 @@ private:
 
 	//Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
 	void  UpdateHeadGaugeVisibility();
+
+	/*********** Death and Respawn ************/
+
+	//当DeadTag生效时的触发函数
+	void StartDeathSequence();
+
+	//当DeadTag到期移除时的函数
+	void Respawn();
 
 };
