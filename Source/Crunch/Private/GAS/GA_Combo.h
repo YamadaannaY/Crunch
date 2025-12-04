@@ -22,6 +22,8 @@ public:
 	static FGameplayTag GetComboChangedEventTag();
 	//获得ComboChange下的endTag
 	static FGameplayTag GetComboChangedEventEndTag();
+	//获得TargetEvent对应的DamageTag
+	static FGameplayTag GetComboTargetEventTag();
 
 private:
 	//实现一个WaitInputPressTask，绑定触发输入后的回调HandleInputPress
@@ -33,6 +35,14 @@ private:
 
 	//press后，若NextComboName存在，则设置NextSection为这个Name对应的Section
 	void TryCommitCombo();
+
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
+	TSubclassOf<UGameplayEffect> DefaultDamageEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
+	TMap<FName,TSubclassOf<UGameplayEffect>> DamageEffectMap;
+
+	TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const ;
 	
 	//包含所有ComboAnimationSequence的Montage
 	UPROPERTY(EditDefaultsOnly,Category="Animation")
@@ -41,6 +51,10 @@ private:
 	//EventReceived的回调函数，找到下一个Tag的后缀，即NextComboName
 	UFUNCTION()
 	void ComboChangedEventReceived(FGameplayEventData InPayLoad);
+
+	//实现伤害逻辑
+	UFUNCTION()
+	void DoDamage(FGameplayEventData Data);
 
 	//获得当前ComboMontage对应的下一个ComboMontage的字面量后缀，同时设置ComboSection的字面量和后缀相等
 	FName NextComboName;
