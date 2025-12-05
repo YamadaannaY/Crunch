@@ -3,9 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/GameModeBase.h"
 #include "CGameMode.generated.h"
 
+struct FGenericTeamId;
 /**
  * 
  */
@@ -13,5 +15,20 @@ UCLASS()
 class ACGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+public:
+	//在“服务器端”生成一个PlayerController实例,客户端会收到这个Controller的镜像（也是一个实例）
+	virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
+
+private:
+	//为生成的Controller分配ID，采用一个static值在0,1两个TeamID之间轮流分配（暂时，方便测试）
+	FGenericTeamId GetTeamIDForPlayer(const APlayerController*  PlayerController) const;
+
+	//根据当前ControllerID的Map对应Tag遍历所有StartPoint，找到没有被使用的点并返回，作为Controller的生成点
+	AActor* FindNextStartSpotTeam(const FGenericTeamId TeamID) const;
+
+	//让TeamID和设置的StartPoint中的TagName对应映射
+	UPROPERTY(EditDefaultsOnly,Category="Team")
+
+	//将TeamID和StartPointTag绑定
+	TMap<FGenericTeamId,FName> TeamStartSpotTagMap;
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/GameplayAbility.h"
+#include "GenericTeamAgentInterface.h"
 #include "CGameplayAbility.generated.h"
 
 /**
@@ -19,5 +20,6 @@ protected:
 	UAnimInstance* GetOwnerAnimInstance() const;
 
 	//以AN中记录的起始点和结束点为参数进行SphereTrace
-	TArray<FHitResult> GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle,float SphereSweepRadius=30.f,bool bShowDebug=false,bool bIgnoreSelf=true);
+	TArray<FHitResult> GetHitResultsFromSweepLocationTargetData(const FGameplayAbilityTargetDataHandle& TargetDataHandle,float SphereSweepRadius=30.f,ETeamAttitude::Type TargetTeam=ETeamAttitude::Hostile,bool bShowDebug=false,bool bIgnoreSelf=true);
+	
 };

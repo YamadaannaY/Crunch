@@ -17,18 +17,19 @@ UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
 }
 
 TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
-	const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, bool bShowDebug,
+	const FGameplayAbilityTargetDataHandle& TargetDataHandle, float SphereSweepRadius, ETeamAttitude::Type TargetTeam,bool bShowDebug,
 	bool bIgnoreSelf)
 {
 	//输出的碰撞结果数组
 	TArray<FHitResult> OutResults;
-
 	TArray<AActor*> HitActors;
 
+	const IGenericTeamAgentInterface* OwnerTeamInterface=Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+	
 	for (const TSharedPtr<FGameplayAbilityTargetData> TargetData : TargetDataHandle.Data)
 	{
-		FVector StartLoc=TargetData->GetOrigin().GetTranslation();
-		FVector EndLoc=TargetData->GetEndPoint();
+		const FVector StartLoc=TargetData->GetOrigin().GetTranslation();
+		const FVector EndLoc=TargetData->GetEndPoint();
 
 		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectType;
 		ObjectType.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
@@ -51,6 +52,12 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 			if (HitActors.Contains(Result.GetActor()))
 			{
 				continue;
+			}
+			//如果碰撞对象的TeamAttitude不是Hostile，忽略
+			if (OwnerTeamInterface)
+			{
+				const ETeamAttitude::Type OtherActorTeamAttitude = OwnerTeamInterface->GetTeamAttitudeTowards(*Result.GetActor());
+				if (OtherActorTeamAttitude != TargetTeam) continue;
 			}
 			HitActors.Add(Result.GetActor());
 			OutResults.Add(Result);

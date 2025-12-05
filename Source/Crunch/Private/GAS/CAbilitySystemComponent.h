@@ -22,9 +22,15 @@ public:
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
 
+	void ApplyFullStatsEffect();
+
 private:
+	void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect>GameplayEffect,int Level=1);
 	//监听Health属性值，变化时调用函数，处理死亡逻辑
 	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
+
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
+	TSubclassOf<UGameplayEffect> FullStatEffect;
 
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
 	TSubclassOf<UGameplayEffect> DeathEffect;

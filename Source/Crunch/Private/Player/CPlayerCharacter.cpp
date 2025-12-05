@@ -109,3 +109,21 @@ FVector ACPlayerCharacter::GetMoveFwdDir() const
 	//Right × Up = Forward 向量叉乘，左手定则
 	return FVector::CrossProduct(GetLookRightDir(),FVector::UpVector);
 }
+
+void ACPlayerCharacter::OnDead()
+{
+	APlayerController* PlayerController=GetController<APlayerController>();
+	if (PlayerController)
+	{
+		DisableInput(PlayerController);
+	}
+}
+
+void ACPlayerCharacter::OnRespawn()
+{
+	APlayerController* PlayerController=GetController<APlayerController>();
+	if (PlayerController)
+	{
+		EnableInput(PlayerController);
+	}
+}

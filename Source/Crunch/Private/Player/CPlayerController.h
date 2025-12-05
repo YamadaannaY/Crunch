@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "GenericTeamAgentInterface.h"
 #include "CPlayerController.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ACPlayerController : public APlayerController
+class ACPlayerController : public APlayerController ,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 public:
@@ -19,6 +20,14 @@ public:
 	
 	//只在客户端和监听服务器执行，调用ClientInit
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
+
+	/** Assigns Team Agent to given TeamID */
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	
+	/** Retrieve team identifier in form of FGenericTeamId */
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 
@@ -33,4 +42,8 @@ private:
 
 	UPROPERTY()
 	UGameplayWidget* GameplayWidget;
+
+	//这个TeamID是由位于服务端的ServerPC权威设置的，设置Replicated的目的是把ID同步给ClientPC
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamID;
 };

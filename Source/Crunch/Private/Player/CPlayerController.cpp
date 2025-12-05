@@ -5,6 +5,7 @@
 #include "CPlayerCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "Widgets/GameplayWidget.h"
+#include "net/UnrealNetwork.h"
 
 void ACPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -16,6 +17,8 @@ void ACPlayerController::OnPossess(APawn* NewPawn)
 	if (CPlayerCharacter)
 	{
 		CPlayerCharacter->ServerSideInit();
+		//为Character分配ID
+		CPlayerCharacter->SetGenericTeamId(TeamID);
 	}
 }
 
@@ -31,6 +34,23 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
 		//在客户端渲染即可，使用复制的值进行UI动态
 		SpawnGameplayWidget();
 	}
+}
+
+void ACPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	TeamID=NewTeamID;
+}
+
+FGenericTeamId ACPlayerController::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+void ACPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ACPlayerController, TeamID);
+	
 }
 
 void ACPlayerController::SpawnGameplayWidget()

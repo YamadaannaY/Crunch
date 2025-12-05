@@ -130,7 +130,7 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData InPayLoad)
 void UGA_Combo::DoDamage(FGameplayEventData Data)
 {
 	//通过Data.TargetData中的位置值调用SphereTrace检测函数并返回检测结果数组
-	TArray<FHitResult> HitResults=GetHitResultsFromSweepLocationTargetData(Data.TargetData,TargetSweepSphereRadius,false,true);
+	TArray<FHitResult> HitResults=GetHitResultsFromSweepLocationTargetData(Data.TargetData,TargetSweepSphereRadius);
 
 	//遍历，找到当前ComboSection对应的DamageEffect（这个Event每一个Section都触发）
 	for (const FHitResult& Result : HitResults)

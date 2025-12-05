@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include  "AbilitySystemInterface.h"
+#include "GenericTeamAgentInterface.h"
 #include "CCharacter.generated.h"
 
 struct FGameplayTag;
 
 UCLASS()
-class ACCharacter : public ACharacter,public IAbilitySystemInterface
+class ACCharacter : public ACharacter,public IAbilitySystemInterface,public  IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -28,6 +29,9 @@ public:
 
 	//用于AIController控制CCharacter时也能进行ServerInit
 	virtual void PossessedBy(AController* NewController) override;
+
+	//用于复制所有需要给客户端的值
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -80,12 +84,52 @@ private:
 	//Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
 	void  UpdateHeadGaugeVisibility();
 
+	//Death状态下调用，判断是否显示OverHeadWidget
+	void SetStatusGaugeEnabled(bool bEnabled);
+
 	/*********** Death and Respawn ************/
+	FTransform MeshRelativeTransform;
+
+	UPROPERTY(EditDefaultsOnly,Category="Death")
+	UAnimMontage* DeathMontage;
+
+	//如果在Montage完成的一瞬间就改变其Physics可能会造成不自然卡顿，因此加一个缓冲值
+	UPROPERTY(EditDefaultsOnly,Category="Death")
+	float DeathMontageFinishTimeShift=-0.8f;
+	FTimerHandle DeathMontageTImerHandle;
+
+	//当DeathMontage播放完毕时调用，进入RagDoll状态
+	void DeathMontageFinished();
+
+	//RagDoll实现
+	void SetRagDollEnabled(bool bEnabled);
+
+	//播放DeathMontage，记录这个Montage的持续时间，设置一个定时器，间隔为持续时间加上DeathMontageFinishTimeShift，调用 DeathMontageFinished
+	void PlayDeathAnimation();
 
 	//当DeadTag生效时的触发函数
 	void StartDeathSequence();
 
 	//当DeadTag到期移除时的函数
 	void Respawn();
+
+	//Dead / Respawn 函数调用时进行的逻辑，根据不同的Character子类执行不同的逻辑
+	virtual void OnDead();
+	virtual void OnRespawn();
+
+	/******************************* Team ***********************************/
+public:
+	/** Assigns Team Agent to given TeamID */
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	
+	/** Retrieve team identifier in form of FGenericTeamId */
+	virtual FGenericTeamId GetGenericTeamId() const override;
+
+private:
+	//虽然已经在Controller上设置了，但是Character本身也需要设置，用来在其他客户端端口让其他的Character能够辨别TeamID
+	//这样设计是因为Controller唯一，但是Character是可以改变的，所以用Controller上的ID作为在权威端的赋值，而Character
+	//本身并不关心决定ID，只负责将ID带在身上让其他客户端进行辨别
+	UPROPERTY(Replicated)
+	FGenericTeamId TeamID;
 
 };

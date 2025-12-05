@@ -52,7 +52,12 @@ private:
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
 
+
 	FVector GetLookRightDir() const ;
 	FVector GetLookFwdDir() const ;
 	FVector GetMoveFwdDir() const ;
+
+	/******************* Death and Respawn **************************/
+	virtual void OnDead() override;
+	virtual void OnRespawn() override;
 };
