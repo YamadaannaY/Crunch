@@ -80,12 +80,30 @@ private:
 	//Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
 	void  UpdateHeadGaugeVisibility();
 
+	void SetStatusGaugeEnabled(bool bEnabled);
+
 	/*********** Death and Respawn ************/
+	FTransform MeshRelativeTransform;
+
+	UPROPERTY(EditDefaultsOnly,Category="Death")
+	UAnimMontage* DeathMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="Death")
+	float DeathMontageFinishTimeShift=-0.8f;
+	FTimerHandle DeathMontageTImerHandle;
+
+	void DeathMontageFinished();
+	void SetRagDollEnabled(bool bEnabled);
+
+	void PlayDeathAnimation();
 
 	//当DeadTag生效时的触发函数
 	void StartDeathSequence();
 
 	//当DeadTag到期移除时的函数
 	void Respawn();
+
+	virtual void OnDead();
+	virtual void OnRespawn();
 
 };

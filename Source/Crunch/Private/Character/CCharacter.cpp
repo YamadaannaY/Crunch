@@ -2,8 +2,11 @@
 
 
 #include "Character/CCharacter.h"
+
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
@@ -63,6 +66,7 @@ void ACCharacter::BeginPlay()
 	Super::BeginPlay();
 	//对于每个客户端中每个Character都要渲染一次OverHeadUI
 	ConfigureOverHeadStatusWidget();
+	MeshRelativeTransform=GetMesh()->GetRelativeTransform();
 }
 
 // Called every frame
@@ -143,13 +147,81 @@ void ACCharacter::UpdateHeadGaugeVisibility()
 	}
 }
 
+void ACCharacter::SetStatusGaugeEnabled(bool bEnabled)
+{
+	if (bEnabled)
+	{
+		ConfigureOverHeadStatusWidget();
+		OverHeadWidgetComponent->SetVisibility(true);
+	}
+	else
+	{
+		OverHeadWidgetComponent->SetHiddenInGame(true);
+		OverHeadWidgetComponent->SetVisibility(false);
+	}
+}
+
+void ACCharacter::DeathMontageFinished()
+{
+	SetRagDollEnabled(true);
+}
+
+void ACCharacter::SetRagDollEnabled(bool bEnabled)
+{
+	if (bEnabled)
+	{
+		GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		GetMesh()->SetSimulatePhysics(true);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::PhysicsOnly);
+	}
+	else
+	{
+		GetMesh()->SetSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
+		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
+	}
+}
+
+void ACCharacter::PlayDeathAnimation()
+{
+	if (DeathMontage)
+	{
+		const float MontageDuration=PlayAnimMontage(DeathMontage);
+		GetWorldTimerManager().SetTimer(DeathMontageTImerHandle,this,&ThisClass::DeathMontageFinished,MontageDuration+DeathMontageFinishTimeShift);
+	}
+}
+
 void ACCharacter::StartDeathSequence()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Dead"));
+	OnDead();
+	PlayDeathAnimation();
+	SetStatusGaugeEnabled(false);
+	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 }
 
 void ACCharacter::Respawn()
 {
-	UE_LOG(LogTemp,Warning,TEXT("Respawn"));
+	OnRespawn();
+	SetRagDollEnabled(false);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	//用于让DeathMontage BlendOut
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
+	SetStatusGaugeEnabled(true);
+
+	if (CAbilitySystemComponent)
+	{
+		CAbilitySystemComponent->ApplyFullStatsEffect();
+	}
+}
+
+void ACCharacter::OnDead()
+{
+}
+
+void ACCharacter::OnRespawn()
+{
 }
 
