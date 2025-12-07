@@ -99,12 +99,16 @@ void UGA_Combo::TryCommitCombo()
 TSubclassOf<UGameplayEffect> UGA_Combo::GetDamageEffectForCurrentCombo() const
 {
 	UAnimInstance* OwnerAnimInst=GetOwnerAnimInstance();
-	if (!OwnerAnimInst) return DefaultDamageEffect;
-
-	const FName CurrentSectionName=OwnerAnimInst->Montage_GetCurrentSection(ComboMontage);
-	const TSubclassOf<UGameplayEffect>* FoundEffectPtr=DamageEffectMap.Find(CurrentSectionName);
-
-	return *FoundEffectPtr;
+	if (OwnerAnimInst)
+	{
+		const FName CurrentSectionName=OwnerAnimInst->Montage_GetCurrentSection(ComboMontage);
+		const TSubclassOf<UGameplayEffect>* FoundEffectPtr=DamageEffectMap.Find(CurrentSectionName);
+		if (FoundEffectPtr)
+		{
+			return *FoundEffectPtr;
+		}
+	}
+	return DefaultDamageEffect;
 }
 
 void UGA_Combo::ComboChangedEventReceived(FGameplayEventData InPayLoad)

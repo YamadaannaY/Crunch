@@ -3,8 +3,12 @@
 
 #include "CAIController.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/CCharacter.h"
+#include "GAS/UCAbilitySystemStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -38,6 +42,13 @@ void ACAIController::OnPossess(APawn* InPawn)
 	{
 		PawnTeamInterface->SetGenericTeamId(GetGenericTeamId());
 	}
+
+	//监听DeadTag，根据Tag状态添加或者清理所有Sense
+	UAbilitySystemComponent* PawnASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InPawn);
+	if (PawnASC)
+	{
+		PawnASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::PawnDeadTagUpdated);
+	}
 }
 
 void ACAIController::BeginPlay()
@@ -48,13 +59,18 @@ void ACAIController::BeginPlay()
 
 void ACAIController::TargetPerceptionUpdated(AActor* TargetActor, FAIStimulus Stimulus)
 {
-	//如果当前目标为空并且成功感知到新目标，则更新目标，否则不更新，即使有新目标也继续锁定旧目标
-	if (!GetCurrentTarget())
+	//如果当前目标为空并且成功感知到目标，则更新目标，否则不更新，即使有新目标也继续锁定旧目标
+	if (Stimulus.WasSuccessfullySensed())
 	{
-		if (Stimulus.WasSuccessfullySensed())
-		{
-			SetCurrenTarget(TargetActor);
-		}
+		if(!GetCurrentTarget())
+			{
+				SetCurrenTarget(TargetActor);
+			}
+	}
+	else
+	{
+		//判断目标是否死亡，如果是就直接忘记目标
+		ForgetActorIfDead(TargetActor);
 	}
 }
 
@@ -110,5 +126,68 @@ AActor* ACAIController::GetNextPerceivedActor() const
 		}
 	}
 	return nullptr;
+}
+
+void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
+{
+	//获得ASC，通过ASC判断是否含有DeadTag
+	const UAbilitySystemComponent* ActorASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(ActorToForget);
+	if (!ActorASC) return ;
+
+	if (ActorASC->HasMatchingGameplayTag(UCAbilitySystemStatics::GetDeadStatTag()))
+	{
+		//这个Container保存了所有AI感知过的Actor和他们最新的Stimuli（sight、hear、etc）
+		for (UAIPerceptionComponent::TActorPerceptionContainer::TIterator Iter=AIPerceptionComponent->GetPerceptualDataIterator();Iter;++Iter)
+		{
+			//找到当前需要遗忘的对象
+			if (Iter->Key!=ActorToForget)
+			{
+				continue;
+			}
+			//遍历其所有Stimuli,设置其Age直接为最大
+			for (FAIStimulus& Stimulus : Iter->Value.LastSensedStimuli)
+			{
+				//把这个刺激的“存在年龄”设为无限大，让AI认为它已经过期到不能再过期。
+				Stimulus.SetStimulusAge(TNumericLimits<float>::Max());
+			}
+		}
+	}
+}
+
+void ACAIController::ClearAndDisabledAllSenses()
+{
+	AIPerceptionComponent->AgeStimuli(TNumericLimits<float>::Max());
+
+	for (auto SenseConfigIt=AIPerceptionComponent->GetSensesConfigIterator();SenseConfigIt;++SenseConfigIt)
+	{
+		AIPerceptionComponent->SetSenseEnabled((*SenseConfigIt)->GetSenseImplementation(),false);
+	}
+	if (GetBlackboardComponent())
+	{
+		GetBlackboardComponent()->ClearValue(TargetBlackboardKeyName);
+	}
+}
+
+void ACAIController::EnableAllSenses()
+{
+	for (auto SenseConfigIt=AIPerceptionComponent->GetSensesConfigIterator();SenseConfigIt;++SenseConfigIt)
+	{
+		AIPerceptionComponent->SetSenseEnabled((*SenseConfigIt)->GetSenseImplementation(),true);
+	}
+}
+
+void ACAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	//根据Tag调用两个Sense操控函数
+	if (Count!=0)
+	{
+		GetBrainComponent()->StopLogic("Dead");
+		ClearAndDisabledAllSenses();
+	}
+	else
+	{
+		GetBrainComponent()->StartLogic();
+		EnableAllSenses();
+	}
 }
 

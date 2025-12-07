@@ -6,6 +6,7 @@
 #include "AIController.h"
 #include "CAIController.generated.h"
 
+struct FGameplayTag;
 struct FAIStimulus;
 
 /**
@@ -54,4 +55,15 @@ private:
 
 	//返回当前感知到敌对Actor数组的第一个对象
 	AActor* GetNextPerceivedActor() const;
+
+	//虽然Character类中在Dead状态设置取消AI感知注册，但是MaxAge仍然作用，需要立刻忘记Actor
+	void ForgetActorIfDead(AActor* ActorToForget);
+
+	//DeadTag添加时调用，清除所有感知
+	void ClearAndDisabledAllSenses();
+	//DeadTag被移除时调用，重新开启所有感知
+	void EnableAllSenses();
+
+	//监听AI的DeadTag
+	void PawnDeadTagUpdated(const FGameplayTag Tag,int32 Count);
 };

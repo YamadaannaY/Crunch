@@ -132,4 +132,15 @@ private:
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamID;
 
+	/****************************** AI ******************************/
+	
+	//在Game.ini中我们手动关闭了bAutoRegisterAllPawnAsSource，目的是为了自己配置感知刺激源，让AI在某些情况无法感知Pawn。
+
+	//设置AI感知刺激源，如果true则将角色注册为AI可以感知的目标，如果false则取消注册，让AI无法感知。这个函数用于在角色Dead和ReSpawn中
+	//实现在角色拥有DeadTag的情况下让AI无法感知
+	void SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled);
+	
+	UPROPERTY()
+	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
+	
 };
