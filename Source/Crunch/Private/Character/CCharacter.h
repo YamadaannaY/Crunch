@@ -119,7 +119,10 @@ private:
 
 	/******************************* Team ***********************************/
 public:
-	/** Assigns Team Agent to given TeamID */
+	/** Assigns Team Agent to given TeamID 在Controller OnPossess时调用*/
+	//Problem:为什么不可以在这里调用PickSkin函数，根据ID换Mesh?
+	//Answer:这个函数只在服务端执行，如果在服务端调用，ID会复制给所有客户端，但是Mesh默认是不复制的，也就是不会复制给客户端。
+	//换句话说，PickSkin确实执行了，但是客户端看不到，应该用OnRep，让客户端收到ID的那一刻根据ID改变Mesh
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
 	/** Retrieve team identifier in form of FGenericTeamId */
@@ -128,9 +131,12 @@ public:
 private:
 	//虽然已经在Controller上设置了，但是Character本身也需要设置，用来在其他客户端端口让其他的Character能够辨别TeamID
 	//这样设计是因为Controller唯一，但是Character是可以改变的，所以用Controller上的ID作为在权威端的赋值，而Character
-	//本身并不关心决定ID，只负责将ID带在身上让其他客户端进行辨别
-	UPROPERTY(Replicated)
+	//本身并不决定ID，只负责将ID带在身上让其他客户端进行辨别
+	UPROPERTY(ReplicatedUsing="OnRep_TeamID")
 	FGenericTeamId TeamID;
+
+	UFUNCTION()
+	virtual void OnRep_TeamID();
 
 	/****************************** AI ******************************/
 	

@@ -270,6 +270,11 @@ FGenericTeamId ACCharacter::GetGenericTeamId() const
 	return TeamID;
 }
 
+void ACCharacter::OnRep_TeamID()
+{
+	//override in AI class
+}
+
 void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled)
 {
 	if (!PerceptionStimuliSourceComponent) return ;

@@ -23,6 +23,7 @@ public:
 	ACAIController();
 	//只在服务端执行
 	virtual void OnPossess(APawn* InPawn) override;
+	
 	virtual void BeginPlay() override;
 
 private:

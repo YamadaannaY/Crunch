@@ -34,13 +34,14 @@ ACAIController::ACAIController()
 void ACAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
-	SetGenericTeamId(FGenericTeamId(0));
-
+	
 	IGenericTeamAgentInterface* PawnTeamInterface=Cast<IGenericTeamAgentInterface>(InPawn);
 	if (PawnTeamInterface)
 	{
-		PawnTeamInterface->SetGenericTeamId(GetGenericTeamId());
+		SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
+		//fresh Senses
+		ClearAndDisabledAllSenses();
+		EnableAllSenses();
 	}
 
 	//监听DeadTag，根据Tag状态添加或者清理所有Sense
