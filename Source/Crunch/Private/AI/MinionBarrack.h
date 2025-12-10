@@ -27,6 +27,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Spawn")
 	int MinionPerGroup=3;
+
+	UPROPERTY(EditAnywhere,Category="Spawn")
+	AActor* Goal;
 	
 	//池化机制：由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
 	//的所有AI类，只在开始时生成一批，后续的销毁和生成都是基于这些存储好的AI实例来操作，显著减小了CPU负担。

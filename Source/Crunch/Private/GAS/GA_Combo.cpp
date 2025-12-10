@@ -119,16 +119,12 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData InPayLoad)
 	{
 		//此时到Section末尾，需要重置NextComboName（因为逻辑上设置只要不是空就执行Name对应的Section）
 		NextComboName=NAME_None;
-		UE_LOG(LogTemp,Warning,TEXT("next combo is cleared"));
-
 		return;
 	}
 
 	TArray<FName> TagNames;
 	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag, TagNames);
 	NextComboName=TagNames.Last();
-
-	UE_LOG(LogTemp,Warning,TEXT("next combo is now :%s"),*NextComboName.ToString());
 }
 
 void UGA_Combo::DoDamage(FGameplayEventData Data)
@@ -140,15 +136,7 @@ void UGA_Combo::DoDamage(FGameplayEventData Data)
 	for (const FHitResult& Result : HitResults)
 	{
 		TSubclassOf<UGameplayEffect> DamageEffect=GetDamageEffectForCurrentCombo();
-		
-		//这个DamageGE计算伤害，并赋予HitActor
-		FGameplayEffectSpecHandle EffectSpecHandle=MakeOutgoingGameplayEffectSpec(DamageEffect,GetAbilityLevel(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo()));
 
-		//特别配置当前GA的EffectContext，用于记录碰撞对象用于GameplayCue
-		FGameplayEffectContextHandle EffectContext=MakeEffectContext(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo());
-		EffectContext.AddHitResult(Result);
-		EffectSpecHandle.Data->SetContext(EffectContext);
-		
-		ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(),CurrentActorInfo,CurrentActivationInfo,EffectSpecHandle,UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(Result.GetActor()));
+		ApplyGameplayEffectToHitResultActor(Result,DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
 	}
 }

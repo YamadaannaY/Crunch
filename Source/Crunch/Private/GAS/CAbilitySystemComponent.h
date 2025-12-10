@@ -21,7 +21,6 @@ public:
 	//遍历InitGE并调用
 	void ApplyInitialEffects();
 	void GiveInitialAbilities();
-
 	void ApplyFullStatsEffect();
 
 private:

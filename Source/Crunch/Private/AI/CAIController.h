@@ -67,4 +67,8 @@ private:
 
 	//监听AI的DeadTag
 	void PawnDeadTagUpdated(const FGameplayTag Tag,int32 Count);
+	void PawnStunTagUpdated(const FGameplayTag Tag,int32 Count);
+
+	//DeadTag回调函数中改变的bool
+	bool bIsPawnDead;
 };

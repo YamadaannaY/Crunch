@@ -21,6 +21,9 @@ public:
 	
 	//激活AI，即移除DeadTag
 	void Activate();
+	
+	//为Minion确定一个Goal
+	void SetGoal(AActor* Goal);
 
 private:
 	//根据SkinMap中的映射关系以及自己的TeamID选择Mesh
@@ -28,6 +31,9 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	TMap<FGenericTeamId,USkeletalMesh*> SkinMap;
+
+	UPROPERTY(EditDefaultsOnly,Category="AI")
+	FName GoalBlackBoardKeyName="Goal";
 
 	virtual void OnRep_TeamID() override;
 };

@@ -3,7 +3,16 @@
 
 #include "CGameplayAbility.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "GAP_Launch.h"
+#include "UCAbilitySystemStatics.h"
+#include "Character/CCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+
+UCGameplayAbility::UCGameplayAbility()
+{
+	ActivationBlockedTags.AddTag(UCAbilitySystemStatics::GetStunStatTag());
+}
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
 {
@@ -22,9 +31,11 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 {
 	//输出的碰撞结果数组
 	TArray<FHitResult> OutResults;
+	//记录HitActor以避免重复记录同一目标的Result
 	TArray<AActor*> HitActors;
-
+	
 	const IGenericTeamAgentInterface* OwnerTeamInterface=Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+
 	
 	for (const TSharedPtr<FGameplayAbilityTargetData> TargetData : TargetDataHandle.Data)
 	{
@@ -35,6 +46,7 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 		ObjectType.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
 
 		TArray<AActor*> ActorsToIgnore;
+		
 		if (bIgnoreSelf)
 		{
 			ActorsToIgnore.Add(GetAvatarActorFromActorInfo());
@@ -53,6 +65,7 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 			{
 				continue;
 			}
+			
 			//如果碰撞对象的TeamAttitude不是Hostile，忽略
 			if (OwnerTeamInterface)
 			{
@@ -65,4 +78,54 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 	}
 
 	return OutResults;
+}
+
+void UCGameplayAbility::PushSelf(const FVector& PushVel)
+{
+	ACharacter* OwningAvatarCharacter=GetOwningAvatarCharacter();
+	if (OwningAvatarCharacter)
+	{
+		OwningAvatarCharacter->LaunchCharacter(PushVel,true,true);
+	}
+}
+
+ACharacter* UCGameplayAbility::GetOwningAvatarCharacter()
+{
+	if (!AvatarCharacter)
+	{
+		AvatarCharacter=Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	}
+	return AvatarCharacter;
+}
+
+void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
+{
+	if (!Target) return;
+
+	
+	FGameplayEventData EventData;
+
+	FGameplayAbilityTargetData_SingleTargetHit* HitData=new FGameplayAbilityTargetData_SingleTargetHit;
+	FHitResult HitResult;
+	HitResult.ImpactNormal=PushVel;
+	
+	HitData->HitResult=HitResult;
+	EventData.TargetData.Add(HitData);
+
+	//PassiveGA中设置了以GameplayEvent+EventTag触发
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target,UGAP_Launch::GetLaunchedAbilityActivationTag(),EventData);
+}
+
+void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,
+	TSubclassOf<UGameplayEffect> GameplayEffect, int Level)
+{
+	//这个DamageGE计算伤害，并赋予HitActor
+	FGameplayEffectSpecHandle EffectSpecHandle=MakeOutgoingGameplayEffectSpec(GameplayEffect,Level);
+
+	//特别配置当前GA的EffectContext，用于记录碰撞对象用于GameplayCue
+	FGameplayEffectContextHandle EffectContext=MakeEffectContext(GetCurrentAbilitySpecHandle(),GetCurrentActorInfo());
+	EffectContext.AddHitResult(HitResult);
+	EffectSpecHandle.Data->SetContext(EffectContext);
+		
+	ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(),CurrentActorInfo,CurrentActivationInfo,EffectSpecHandle,UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor()));
 }

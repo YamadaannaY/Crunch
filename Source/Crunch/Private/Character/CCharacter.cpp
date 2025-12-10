@@ -107,6 +107,7 @@ void ACCharacter::BindGASChangeDelegates()
 	if (CAbilitySystemComponent)
 	{
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 	}
 }
 
@@ -119,6 +120,22 @@ void ACCharacter::DeadTagUpdated(const FGameplayTag Tag, int32 NewCount)
 	else
 	{
 		Respawn();
+	}
+}
+
+void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	if (IsDead()) return;
+
+	if (NewCount != 0)
+	{
+		OnStun();
+		PlayAnimMontage(StunMontage);
+	}
+	else
+	{
+		OnRecoveryFromStun();
+		StopAnimMontage(StunMontage);
 	}
 }
 
@@ -175,9 +192,28 @@ void ACCharacter::SetStatusGaugeEnabled(bool bEnabled)
 	}
 }
 
+bool ACCharacter::IsDead() const
+{
+	return GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetDeadStatTag());
+
+}
+
+void ACCharacter::ReSpawnImmediative()
+{
+	if (HasAuthority())
+	{
+		GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(UCAbilitySystemStatics::GetDeadStatTag()));
+	}
+}
+
 void ACCharacter::DeathMontageFinished()
 {
-	SetRagDollEnabled(true);
+	//BUG修复：由于池化ReSpawn机制，可能在DeathMontage还没有播放完就重生了，此时RagDoll还是会在Duration之后触发，需要明确
+	//触发条件在DeathStat下
+	if (IsDead())
+	{
+		SetRagDollEnabled(true);
+	}
 }
 
 void ACCharacter::SetRagDollEnabled(bool bEnabled)
@@ -290,4 +326,12 @@ void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled)
 	}
 }
 
+void ACCharacter::OnStun()
+{
+	//override in character class 
+}
 
+void ACCharacter::OnRecoveryFromStun()
+{
+	//override in character class 
+}

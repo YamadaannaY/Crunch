@@ -57,7 +57,13 @@ private:
 	FVector GetLookFwdDir() const ;
 	FVector GetMoveFwdDir() const ;
 
+	void SetInputEnabledFromPlayerController(bool bEnabled);
+
 	/******************* Death and Respawn **************************/
 	virtual void OnDead() override;
 	virtual void OnRespawn() override;
+
+	/******************* Death and Respawn **************************/
+	virtual void OnStun() override;
+	virtual void OnRecoveryFromStun() override;
 };

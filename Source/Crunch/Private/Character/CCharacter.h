@@ -54,8 +54,9 @@ private:
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
 	void BindGASChangeDelegates();
 
-	//当DeadTag（附加或者删除时）实现的函数
+	//当Tag（附加或者删除时）实现的函数
 	void DeadTagUpdated(const FGameplayTag Tag,int32 NewCount);
+	void StunTagUpdated(const FGameplayTag Tag,int32 NewCount);
 	
 	UPROPERTY(VisibleDefaultsOnly,Category="Gameplay Ability")
 	class UCAbilitySystemComponent* CAbilitySystemComponent;
@@ -86,8 +87,16 @@ private:
 
 	//Death状态下调用，判断是否显示OverHeadWidget
 	void SetStatusGaugeEnabled(bool bEnabled);
+	
+	/************************** Death and Respawn ********************************/
+public:
+	//通过DeadTag判断DeadStat
+	bool IsDead() const ;
 
-	/*********** Death and Respawn ************/
+	//直接移除DeadTag
+	void ReSpawnImmediative();
+private:
+	
 	FTransform MeshRelativeTransform;
 
 	UPROPERTY(EditDefaultsOnly,Category="Death")
@@ -148,5 +157,13 @@ private:
 	
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
-	
+
+	/****************************** Stun ******************************/
+private:
+	UPROPERTY(EditDefaultsOnly,Category="Stun")
+	UAnimMontage* StunMontage;
+
+	//RegisterTagEvent对StunTag的回调
+	virtual void OnStun();
+	virtual void OnRecoveryFromStun();
 };

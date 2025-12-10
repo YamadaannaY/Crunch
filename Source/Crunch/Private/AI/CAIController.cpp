@@ -8,6 +8,7 @@
 #include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/CCharacter.h"
+#include "Crunch/DebugHelper.h"
 #include "GAS/UCAbilitySystemStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -49,6 +50,7 @@ void ACAIController::OnPossess(APawn* InPawn)
 	if (PawnASC)
 	{
 		PawnASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::PawnDeadTagUpdated);
+		PawnASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::PawnStunTagUpdated);
 	}
 }
 
@@ -148,7 +150,7 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 			//遍历其所有Stimuli,设置其Age直接为最大
 			for (FAIStimulus& Stimulus : Iter->Value.LastSensedStimuli)
 			{
-				//把这个刺激的“存在年龄”设为无限大，让AI认为它已经过期到不能再过期。
+				//把这个刺激的“Age”设为无限大，让AI认为它已经过期到不能再过期。
 				Stimulus.SetStimulusAge(TNumericLimits<float>::Max());
 			}
 		}
@@ -184,11 +186,27 @@ void ACAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
 	{
 		GetBrainComponent()->StopLogic("Dead");
 		ClearAndDisabledAllSenses();
+		bIsPawnDead=true;
 	}
 	else
 	{
 		GetBrainComponent()->StartLogic();
 		EnableAllSenses();
+		bIsPawnDead=false;
+	}
+}
+
+void ACAIController::PawnStunTagUpdated(const FGameplayTag Tag, int32 Count)
+{
+	if (bIsPawnDead) return ;
+
+	if (Count!=0)
+	{
+		GetBrainComponent()->StopLogic("Stun");
+	}
+	else
+	{
+		GetBrainComponent()->StartLogic();
 	}
 }
 
