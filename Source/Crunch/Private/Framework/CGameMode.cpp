@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//GameMode是生成Controller的关键类
+//适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置 etc..
 
 
 #include "Framework/CGameMode.h"
@@ -11,16 +12,18 @@ APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, cons
 	//获得生成的Controller
 	APlayerController* NewPlayerController = Super::SpawnPlayerController(InRemoteRole, Options);
 
-	//获取Controller继承的TeamInterface处理TeamID
+	//获取Controller的TeamInterface接口处理TeamID
 	IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayerController);
+
 	//为Controller分配ID
 	const FGenericTeamId TeamId=GetTeamIDForPlayer(NewPlayerController);
 	
-	//为当前生成的Controller分配一个ID
+	//将ID赋予Controller
 	if (NewPlayerTeamInterface)
 	{
 		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
 	}
+	
 	//为当前生成的Controller指定生成点
 	NewPlayerController->StartSpot = FindNextStartSpotTeam(TeamId);
 	
@@ -49,12 +52,13 @@ AActor* ACGameMode::FindNextStartSpotTeam(const FGenericTeamId TeamID) const
 
 	for (TActorIterator<APlayerStart> It(World);It;++It)
 	{
+		//ActorType* operator->() return **this
 		if (It->PlayerStartTag == *StartSpotTag)
 		{
 			It->PlayerStartTag=FName("Taken");
+			//*this
 			return *It;
 		}
 	}
-
 	return nullptr;
 }

@@ -22,9 +22,12 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (OwnerCharacter)
 	{
 		Speed=OwnerCharacter->GetVelocity().Length();
+		
 		FRotator BodyRot=OwnerCharacter->GetActorRotation();
-		//获得Rotator并归一化，归一化是为了匹配BP
-		FRotator BodyRotDelta=UKismetMathLibrary::NormalizedDeltaRotator(BodyRot,BodyPrevRot);
+		
+		//获得Rotator增量并归一化，归一化是为了匹配BS
+		const FRotator BodyRotDelta=UKismetMathLibrary::NormalizedDeltaRotator(BodyRot,BodyPrevRot);
+
 		//更新PrevRot
 		BodyPrevRot=BodyRot;
 		//通过差值与时间的差值获得旋转速度

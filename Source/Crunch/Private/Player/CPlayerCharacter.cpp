@@ -3,12 +3,14 @@
 
 #include "Player/CPlayerCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GAS/UCAbilitySystemStatics.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
@@ -30,6 +32,7 @@ ACPlayerCharacter::ACPlayerCharacter()
 void ACPlayerCharacter::PawnClientRestart()
 {
 	Super::PawnClientRestart();
+	
 	APlayerController* OwningPlayerController=GetController<APlayerController>();
 	if (OwningPlayerController)
 	{
@@ -37,6 +40,8 @@ void ACPlayerCharacter::PawnClientRestart()
 
 		if (InputSubsystem)
 		{
+			//这样设计十分有必要，因为Enhanced Input不会自动去重，在Actor重新被Possess的情况下（最重要的场景：Player死亡又重生）如果不去重
+			//会导致多个IMC叠加
 			InputSubsystem->RemoveMappingContext(GameplayInputMappingContext);
 			InputSubsystem->AddMappingContext(GameplayInputMappingContext,0);
 		}
@@ -91,6 +96,17 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	else
 	{
 		GetAbilitySystemComponent()->AbilityLocalInputReleased((int32)InputID);
+	}
+	
+    //InputID为BasicAttack时发送一个PressedTag，用于UpperCut中
+	if (InputID==ECAbilityInputID::BasicAttacks)
+	{
+		//Press在UpperCut监听Event，不会影响正常Attack
+		
+		//SetUpInput只在客户端执行，所以这里只有客户端的ASC知道发生了什么，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
+		//相同的Event发送给服务端，因为GA的逻辑必须在权威端执行
+		Server_SendGameplayEventTSelf(UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
 	}
 }
 

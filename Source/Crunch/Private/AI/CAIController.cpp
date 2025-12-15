@@ -8,7 +8,6 @@
 #include "BrainComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Character/CCharacter.h"
-#include "Crunch/DebugHelper.h"
 #include "GAS/UCAbilitySystemStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"

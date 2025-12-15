@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include  "AbilitySystemInterface.h"
+#include "GameplayTagContainer.h"
 #include "GenericTeamAgentInterface.h"
 #include "CCharacter.generated.h"
 
+struct FGameplayEventData;
 struct FGameplayTag;
 
 UCLASS()
@@ -21,6 +23,7 @@ public:
 
 	//服务端的Init,处理了对ASC的初始化，并且应用初始化基础属性的函数（仅在客户端初始化）
 	void ServerSideInit();
+	
 	//客户端的Init，只处理对ASC的初始化，对属性的初始化交给权威端
 	void ClientSideInit();
 
@@ -34,13 +37,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
-	// Called when the game starts or when spawned
+	//BeginPlay会被当前Actor所在所有客户端的镜像所调用，是显示OverHeadUI的完美时机
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -49,6 +50,10 @@ public:
 	/****************************************************/
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	//将GameplayEvent发送的行为也传递给服务端，在服务端执行权威逻辑，触发WaitEvent回调
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_SendGameplayEventTSelf(const FGameplayTag EventTag,const FGameplayEventData& EventData);
 private:
 
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
@@ -96,7 +101,7 @@ public:
 	//直接移除DeadTag
 	void ReSpawnImmediative();
 private:
-	
+	//Mesh相对Capsule的变换，用于换Mesh，RagDoll复位等情景下保持新的Mesh变换与最开始相同
 	FTransform MeshRelativeTransform;
 
 	UPROPERTY(EditDefaultsOnly,Category="Death")

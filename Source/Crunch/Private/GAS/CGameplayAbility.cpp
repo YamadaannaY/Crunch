@@ -21,7 +21,6 @@ UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
 	{
 		return OwnerSkeletalMeshComp->GetAnimInstance();
 	}
-	
 	return nullptr;
 }
 
@@ -76,7 +75,6 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 			OutResults.Add(Result);
 		}
 	}
-
 	return OutResults;
 }
 
@@ -101,7 +99,6 @@ ACharacter* UCGameplayAbility::GetOwningAvatarCharacter()
 void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
 {
 	if (!Target) return;
-
 	
 	FGameplayEventData EventData;
 
@@ -119,7 +116,7 @@ void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
 void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,
 	TSubclassOf<UGameplayEffect> GameplayEffect, int Level)
 {
-	//这个DamageGE计算伤害，并赋予HitActor
+	//制作GE的SpecHandle
 	FGameplayEffectSpecHandle EffectSpecHandle=MakeOutgoingGameplayEffectSpec(GameplayEffect,Level);
 
 	//特别配置当前GA的EffectContext，用于记录碰撞对象用于GameplayCue

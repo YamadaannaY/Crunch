@@ -24,10 +24,13 @@ public:
 	void ApplyFullStatsEffect();
 
 private:
+	//将GE应用给自身的调用函数
 	void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect>GameplayEffect,int Level=1);
+
 	//监听Health属性值，变化时调用函数，处理死亡逻辑
 	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
 
+	//Respawn用，应用满状态GE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
 	TSubclassOf<UGameplayEffect> FullStatEffect;
 
@@ -38,6 +41,7 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
 	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
 
+	/***********	GA会带有一个ID，激活能力时依据ID找到要激活的GA，其中PassiveGA不需要ID，直接用None，表示不能主动触发	****************/
 	//技能
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
 	TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>> Abilities;

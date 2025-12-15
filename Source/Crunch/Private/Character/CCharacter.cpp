@@ -3,10 +3,10 @@
 
 #include "Character/CCharacter.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
@@ -19,8 +19,9 @@
 // Sets default values
 ACCharacter::ACCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+
+	//Mesh本身没有碰撞，依赖Box进行碰撞判定
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
 	CAbilitySystemComponent=CreateDefaultSubobject<UCAbilitySystemComponent>("CAbility System Component");
@@ -39,7 +40,7 @@ void ACCharacter::ServerSideInit()
 {
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
 	
-	//在服务端对属性初始化,GA初始化
+	//在服务端对使用GE对属性初始化,并将GA赋予ASC（指定ID）
 	CAbilitySystemComponent->ApplyInitialEffects();
 	CAbilitySystemComponent->GiveInitialAbilities();
 }
@@ -71,35 +72,44 @@ void ACCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ACCharacter,TeamID);
 }
 
-// Called when the game starts or when spawned ， it will be  called both in all client and server
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	//对于每个客户端中每个Character都要渲染一次OverHeadUI
 	ConfigureOverHeadStatusWidget();
+
+	//获得当前Mesh相对于CapsuleComponent的变换（所谓Transform，指的是一个坐标系的摆放方式，想象Transform是一张坐标纸，而Vector只是其中一个点，Rotator则表明这张纸相对最开始旋转了多少，
+	//Scale表示这张纸相对最开始扩张了多少，最终集合成FTransform）
+	
 	MeshRelativeTransform=GetMesh()->GetRelativeTransform();
 
 	//为刺激源组件添加视觉刺激，即能够触发AI的Sense_Sight
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 }
 
-// Called every frame
-void ACCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
 void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 {
 	return CAbilitySystemComponent;
+}
+
+//将SendEvent也发送给服务端
+
+void ACCharacter::Server_SendGameplayEventTSelf_Implementation(const FGameplayTag EventTag,
+	const FGameplayEventData& EventData)
+{
+	//Actor=this
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,EventTag,EventData);
+}
+
+bool ACCharacter::Server_SendGameplayEventTSelf_Validate(const FGameplayTag EventTag,
+	const FGameplayEventData& EventData)
+{
+	return true;
 }
 
 void ACCharacter::BindGASChangeDelegates()
@@ -220,7 +230,9 @@ void ACCharacter::SetRagDollEnabled(bool bEnabled)
 {
 	if (bEnabled)
 	{
+		//将Mesh与Capsule解耦，否则Mesh在被物理施加移动时会被拽回去
 		GetMesh()->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		
 		GetMesh()->SetSimulatePhysics(true);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::PhysicsOnly);
 	}
@@ -228,6 +240,8 @@ void ACCharacter::SetRagDollEnabled(bool bEnabled)
 	{
 		GetMesh()->SetSimulatePhysics(false);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+		
+		//解除RagDoll后将其重新绑定到RootComponent并且恢复到原先设定好的变换
 		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
@@ -253,7 +267,9 @@ void ACCharacter::StartDeathSequence()
 	}
 	PlayDeathAnimation();
 	SetStatusGaugeEnabled(false);
-	GetCharacterMovement()->SetMovementMode(MOVE_None);
+	//取消这个限制，使得目标因为LaunchCombo最后一段带有击飞效果的攻击死亡时能够正常被击飞
+	/*GetCharacterMovement()->SetMovementMode(MOVE_None);*/
+	
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 	SetAIPerceptionStimuliSourceEnabled(false);
 }
@@ -264,7 +280,8 @@ void ACCharacter::Respawn()
 	SetAIPerceptionStimuliSourceEnabled(true);
 	SetRagDollEnabled(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	/*GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
+	
 	//用于让DeathMontage BlendOut
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
