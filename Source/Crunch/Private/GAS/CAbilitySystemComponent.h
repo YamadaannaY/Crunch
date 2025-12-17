@@ -23,6 +23,8 @@ public:
 	void GiveInitialAbilities();
 	void ApplyFullStatsEffect();
 
+	//获得Character特有的GA，不包括BasicGA
+	const TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>>& GetAbilities() const ;
 private:
 	//将GE应用给自身的调用函数
 	void AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect>GameplayEffect,int Level=1);

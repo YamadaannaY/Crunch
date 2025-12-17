@@ -9,6 +9,8 @@
 #include "GenericTeamAgentInterface.h"
 #include "CCharacter.generated.h"
 
+enum class ECAbilityInputID : uint8;
+class UGameplayAbility;
 struct FGameplayEventData;
 struct FGameplayTag;
 
@@ -36,6 +38,8 @@ public:
 	//用于复制所有需要给客户端的值
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦，Character本身就可以获取位于ASC组件上的Abilities而不是通过Cast对ASC进行转换到CASC，这会导致CASC与Abilities强绑定
+	const TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>>& GetAbilities() const ;
 protected:
 	//BeginPlay会被当前Actor所在所有客户端的镜像所调用，是显示OverHeadUI的完美时机
 	virtual void BeginPlay() override;

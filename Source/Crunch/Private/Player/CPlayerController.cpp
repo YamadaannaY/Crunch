@@ -62,5 +62,8 @@ void ACPlayerController::SpawnGameplayWidget()
 	if (GameplayWidget)
 	{
 		GameplayWidget->AddToViewport();
+
+		//配置GA在ListItem中的Widget
+		GameplayWidget->ConfigureAbilities(CPlayerCharacter->GetAbilities());
 	}
 }

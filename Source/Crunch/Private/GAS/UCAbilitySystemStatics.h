@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include  "UCAbilitySystemStatics.generated.h"
 
+class UGameplayAbility;
 /**
  * 
  */
@@ -18,5 +19,7 @@ public:
 	static FGameplayTag GetBasicAttackInputPressedTag();
 	static FGameplayTag GetDeadStatTag();
 	static FGameplayTag GetStunStatTag();
+	static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
+	static float GetStaticCostForAbility(const UGameplayAbility* Ability);
 	
 };

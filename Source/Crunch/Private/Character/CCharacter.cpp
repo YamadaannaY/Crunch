@@ -72,6 +72,11 @@ void ACCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Ou
 	DOREPLIFETIME(ACCharacter,TeamID);
 }
 
+const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACCharacter::GetAbilities() const
+{
+	return CAbilitySystemComponent->GetAbilities();
+}
+
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();
