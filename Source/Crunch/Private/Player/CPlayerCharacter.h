@@ -32,6 +32,12 @@ private:
 	UPROPERTY(VisibleDefaultsOnly,Category="View")
 	class UCameraComponent* ViewCamera;
 
+	/*******************	GA	********************************/
+private:
+	//Aim逻辑重写
+	virtual void OnAimStatChanged(bool bIsAiming) override;
+
+	
 	/*******************	Input	********************************/
 
 	UPROPERTY(EditDefaultsOnly,Category="Input")
@@ -64,7 +70,26 @@ private:
 	virtual void OnDead() override;
 	virtual void OnRespawn() override;
 
-	/******************* Death and Respawn **************************/
+	/******************* Stun **************************/
 	virtual void OnStun() override;
 	virtual void OnRecoveryFromStun() override;
+
+	/******************* Camera View **************************/
+private:
+	//Camera偏移值
+	UPROPERTY(EditDefaultsOnly,Category="View")
+	FVector CameraAimLocalOffset;
+
+	//偏移强度，注意这里不是速度的意义，而是1s内靠近目标的比例
+	UPROPERTY(EditDefaultsOnly,Category="View")
+	float CameraLerpSpeed=20.f;
+
+	//处理位置逼近的定时器
+	FTimerHandle CameraLerpTimerHandle;
+
+	//传入Goal位置并为下一帧设置定时器，调用位置逼近函数
+	void LerpCameraToLocalOffset(const FVector& Goal);
+
+	//递归使Camera的位置逼近Goal，实现插值移动
+	void TickCameraLocalOffsetLerp(FVector Goal);
 };

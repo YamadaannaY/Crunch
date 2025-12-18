@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "Crunch/Crunch.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GAS/UCAbilitySystemStatics.h"
@@ -18,6 +19,9 @@ ACPlayerCharacter::ACPlayerCharacter()
 	//相机臂跟随Controller(鼠标)一起旋转
 	CameraBoom->bUsePawnControlRotation=true;
 	
+	//只有对SpringArmBlock的对象才会阻挡摄像机
+	CameraBoom->ProbeChannel=ECC_SpringArm;
+		
 	ViewCamera=CreateDefaultSubobject<UCameraComponent>("ViewCamera");
 	ViewCamera->SetupAttachment(CameraBoom,USpringArmComponent::SocketName);
 
@@ -121,7 +125,7 @@ FVector ACPlayerCharacter::GetLookFwdDir() const
 
 FVector ACPlayerCharacter::GetMoveFwdDir() const
 {
-	//Right × Up = Forward 向量叉乘，左手定则
+	//左手定则,以大拇指为A，食指为B，中指即结果Vector
 	return FVector::CrossProduct(GetLookRightDir(),FVector::UpVector);
 }
 
@@ -161,4 +165,49 @@ void ACPlayerCharacter::OnRecoveryFromStun()
 {
 	if (IsDead()) return;
 	SetInputEnabledFromPlayerController(true);
+}
+
+void ACPlayerCharacter::OnAimStatChanged(bool bIsAiming)
+{
+	//传入Offset
+	LerpCameraToLocalOffset(bIsAiming ? CameraAimLocalOffset : FVector{0.f});	
+}
+
+void ACPlayerCharacter::LerpCameraToLocalOffset(const FVector& Goal)
+{
+	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
+}
+
+void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
+{
+	//当前摄像机位置
+	FVector CurrentLocalOffset =CameraBoom->SocketOffset;	/* ViewCamera->GetRelativeLocation();*/
+	
+	//距离小于1uu时递归结束
+	if (FVector::Dist(CurrentLocalOffset,Goal) < 1.f)
+	{
+		/*ViewCamera->SetRelativeLocation(Goal);*/
+		
+		CameraBoom->SocketOffset = Goal;
+		//保证Camera在便宜过程严格位于Socket位置
+		ViewCamera->SetRelativeLocation(FVector::ZeroVector);
+		return ;
+	}
+
+	//使用真实帧时间，Alpha即一帧内打算靠近目标多少
+	const float LerpAlpha=FMath::Clamp(GetWorld()->GetDeltaSeconds() * CameraLerpSpeed,0.f,1.f);
+
+	//Lerp::  New = Current + (Goal - Current) * Alpha ，插值的意义在于补全移动过程，而Alpha决定了其强度
+	const FVector NewLocalOffset=FMath::Lerp(CurrentLocalOffset,Goal,LerpAlpha);
+
+	
+	//更新Loc
+	/*ViewCamera->SetRelativeLocation(NewLocalOffset);*/
+
+	CameraBoom->SocketOffset = NewLocalOffset;
+	ViewCamera->SetRelativeLocation(FVector::ZeroVector);
+
+	//递归逼近
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
 }

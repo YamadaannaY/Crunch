@@ -7,6 +7,9 @@
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
 	GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this,&ThisClass::HealthUpdated);
+	//为Confirm/Cancel 添加InputID
+	GenericConfirmInputID=(int32) ECAbilityInputID::Confirm;
+	GenericCancelInputID=(int32) ECAbilityInputID::Cancel;
 }
 
 void UCAbilitySystemComponent::ApplyInitialEffects()

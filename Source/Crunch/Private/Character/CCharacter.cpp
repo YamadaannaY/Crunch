@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
@@ -14,15 +15,20 @@
 #include "net/UnrealNetwork.h"
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
+#include "Crunch/Crunch.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 // Sets default values
 ACCharacter::ACCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	//Mesh本身没有碰撞，依赖Box进行碰撞判定
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+
+	//碰撞胶囊体忽略SpringArm和Target，避免Character类对象与SpringArm和Target的碰撞
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_SpringArm,ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target,ECR_Ignore);
 
 	CAbilitySystemComponent=CreateDefaultSubobject<UCAbilitySystemComponent>("CAbility System Component");
 	CAttributeSet=CreateDefaultSubobject<UCAttributeSet>("CAttribute Set");
@@ -123,6 +129,7 @@ void ACCharacter::BindGASChangeDelegates()
 	{
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
 	}
 }
 
@@ -152,6 +159,26 @@ void ACCharacter::StunTagUpdated(const FGameplayTag Tag, int32 NewCount)
 		OnRecoveryFromStun();
 		StopAnimMontage(StunMontage);
 	}
+}
+
+void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	//瞄准逻辑
+	SetIsAiming(NewCount!=0);
+}
+
+void ACCharacter::SetIsAiming(bool bIsAiming)
+{
+	//让角色跟随视角进行旋转，调用具体逻辑
+	
+	bUseControllerRotationYaw=bIsAiming;
+	GetCharacterMovement()->bOrientRotationToMovement =!bIsAiming;
+	OnAimStatChanged(bIsAiming);
+}
+
+void ACCharacter::OnAimStatChanged(bool bIsAiming)
+{
+	//override in child class ;
 }
 
 void ACCharacter::ConfigureOverHeadStatusWidget()
