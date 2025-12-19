@@ -15,12 +15,35 @@ class ATargetActor_GroundPick : public AGameplayAbilityTargetActor
 
 public:
 	ATargetActor_GroundPick();
-protected:
+	
+	void SetTargetAreaRadius(float NewRadius);
+	FORCEINLINE void SetTargetTraceRange(float NewRange) {TargetTraceRange=NewRange;};
+
+	//Overlap范围检测，获取要作用的所有目标对象并广播Confirm
+	virtual void ConfirmTargetingAndContinue() override;
+
+	//用于设置此GA影响目标群体
+	void SetTargetOptions(bool bTargetFriendly,bool bTargetEnemy=true);
+
+	FORCEINLINE void SetShouldDrawDebug(bool bDrawDebug) {bShouldDrawDebug=bDrawDebug;}
+
+private:
+	UPROPERTY(EditDefaultsOnly,Category="Visual")
+	UDecalComponent* DecalComp;
+
 	virtual void Tick(float DeltaSeconds) override;
 
-	//设置TargetActor的位置
+	bool bShouldTargetEnemy=true;
+	bool bShouldTargetFriendly=false;
+	
+	//射线检测，通过HitResult确定TargetActor的位置
 	FVector GetTargetPoint()const ;
 
 	UPROPERTY(EditDefaultsOnly,Category="Targeting")
 	float TargetTraceRange=2000.f;
+
+	UPROPERTY(EditDefaultsOnly,Category="Targeting")
+	float TargetAreaRadius=300.f;
+
+	bool bShouldDrawDebug=false;
 };

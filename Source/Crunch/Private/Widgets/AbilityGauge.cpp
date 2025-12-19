@@ -54,7 +54,7 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
 
 void UAbilityGauge::AbilityCommitted(UGameplayAbility* Ability)
 {
-	//确认调用GA类默认对象就是这个Gauge存储的GA CDO 用CDO的原因：在ListItem中传入的是GASubClassof，即一个默认类对象而非实例
+	//确认调用GA类默认对象就是这个Gauge存储的GA的CDO 使用CDO的原因：在ListItem中传入的是GASubClassof，即一个默认类对象而非实例
 	if (Ability->GetClass()->GetDefaultObject() ==AbilityCDO)
 	{
 		//这两个值用局部变量定义，因为需要多次调用此函数，每次都是初始化为0

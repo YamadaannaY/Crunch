@@ -32,10 +32,14 @@ protected:
 	//获得AvatarCharacter，即Push对象
 	ACharacter* GetOwningAvatarCharacter();
 
-	//给目标施加一个Push速度
+	//对单施加一个Push速度
 	void PushTarget(AActor*Target,const FVector& PushVel);
-
-
+	//对群
+	void PushTargets(const TArray<AActor*>& Targets,const FVector PushVel);
+	
+	//对TargetData所有Actors
+	void PushTarget(const FGameplayAbilityTargetDataHandle& TargetDataHandle,const FVector& PushVel);
+	
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
 	
 private:
