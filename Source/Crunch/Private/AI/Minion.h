@@ -14,6 +14,7 @@ class AMinion : public ACCharacter
 {
 	GENERATED_BODY()
 public:
+	//设置ID并
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
 	//判断AI是否具有DeadTag

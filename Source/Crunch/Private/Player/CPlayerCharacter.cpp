@@ -10,6 +10,7 @@
 #include "Crunch/Crunch.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GAS/CHeroAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
 
 ACPlayerCharacter::ACPlayerCharacter()
@@ -30,6 +31,8 @@ ACPlayerCharacter::ACPlayerCharacter()
 	
 	GetCharacterMovement()->bOrientRotationToMovement=true;
 	GetCharacterMovement()->RotationRate=FRotator(0,720.f,0.0f);
+
+	HeroAttributesSet=CreateDefaultSubobject<UCHeroAttributeSet>("Hero Attributes Set ");
 }
 
 void ACPlayerCharacter::PawnClientRestart()

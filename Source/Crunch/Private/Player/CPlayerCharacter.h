@@ -26,6 +26,9 @@ public:
 	//只在本地客户端执行，处理用户输入（这也是不在服务端执行的原因，服务端不需要知道输入是什么），只是处理输入后要调用的逻辑
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 private:
+	UPROPERTY()
+	class UCHeroAttributeSet* HeroAttributesSet;
+	
 	UPROPERTY(VisibleDefaultsOnly,Category="View")
 	class USpringArmComponent* CameraBoom;
 	

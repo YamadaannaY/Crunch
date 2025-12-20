@@ -7,6 +7,7 @@
 #include "GameplayWidget.generated.h"
 
 class UGameplayAbility;
+class UStatsGauge;
 enum class ECAbilityInputID : uint8;
 struct FGenericTeamId;
 /**
@@ -30,10 +31,25 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	UValueGauge* ManaBar;
 
+	UPROPERTY(meta=(BindWidget))
+	UStatsGauge* AttackDamageGauge;
+	
+	UPROPERTY(meta=(BindWidget))
+	UStatsGauge* ArmorGauge;
+	
+	UPROPERTY(meta=(BindWidget))
+	UStatsGauge* MoveSpeedGauge;
+
+	UPROPERTY(meta=(BindWidget))
+	UStatsGauge* IntelligenceGauge;
+
+	UPROPERTY(meta=(BindWidget))
+	UStatsGauge* StrengthGauge;
+	
 	//一个List，显示GAIcon
 	UPROPERTY(meta=(BindWidget))
 	class UAbilityListView* AbilityListView;
-
+	
 	UPROPERTY()
 	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
 	

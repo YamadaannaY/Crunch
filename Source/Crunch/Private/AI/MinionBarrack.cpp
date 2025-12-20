@@ -52,6 +52,7 @@ void AMinionBarrack::SpawnNewGroup()
 		{
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
+		
 		//找到死亡状态的Minion
 		AMinion* NextAvailableMinion=GetNextAvailableMinion();
 		if (!NextAvailableMinion) break;
@@ -62,7 +63,7 @@ void AMinionBarrack::SpawnNewGroup()
 		--i;
 	}
 
-	//意味着当前所有Minion都没有死亡，这种情况下新生成Minion To do：设置上限？）
+	//意味着当前所有Minion都没有死亡，这种情况下新生成Minion To Do：设置上限？）
 	SpawnNewMinion(i);
 }
 
@@ -76,12 +77,14 @@ void AMinionBarrack::SpawnNewMinion(int Amt)
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
 
-		//生成Actor，但是不会自动完成构造，使调用时能够有机会设置参数
+		//延迟生成Actor，因为Actor生成依赖ID来选择Skin，所以要延迟生成，先设置好ID
 		AMinion* NewMinion=GetWorld()->SpawnActorDeferred<AMinion>(MinionClass,SpawnTransform,this,nullptr,ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 		NewMinion->SetGenericTeamId(BarrackTeamId);
-		//完成构造
 		NewMinion->FinishSpawning(SpawnTransform);
+
 		NewMinion->SetGoal(Goal);
+
+		//新的Minion要被加到池中
 		MinionPool.Add(NewMinion);
 	}
 }

@@ -69,9 +69,11 @@ void ACAIController::TargetPerceptionUpdated(AActor* TargetActor, FAIStimulus St
 				SetCurrenTarget(TargetActor);
 			}
 	}
+
+	//AI失去对目标的感知
 	else
 	{
-		//判断目标是否死亡，如果是就直接忘记目标
+		//判断目标失去感知的原因是否是因为死亡，如果是就直接忘记目标
 		ForgetActorIfDead(TargetActor);
 	}
 }
@@ -158,8 +160,10 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 
 void ACAIController::ClearAndDisabledAllSenses()
 {
+	//清空当前AI的一切记忆，让所有感知到期。   但是下一帧还是会重新感知到。这里会触发Updated
 	AIPerceptionComponent->AgeStimuli(TNumericLimits<float>::Max());
 
+	//关闭所有感知
 	for (auto SenseConfigIt=AIPerceptionComponent->GetSensesConfigIterator();SenseConfigIt;++SenseConfigIt)
 	{
 		AIPerceptionComponent->SetSenseEnabled((*SenseConfigIt)->GetSenseImplementation(),false);
