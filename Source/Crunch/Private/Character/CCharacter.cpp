@@ -2,7 +2,6 @@
 
 
 #include "Character/CCharacter.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -16,6 +15,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Crunch/Crunch.h"
+#include "Crunch/DebugHelper.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 // Sets default values
@@ -47,8 +47,7 @@ void ACCharacter::ServerSideInit()
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
 	
 	//在服务端对使用GE对属性初始化,并将GA赋予ASC（指定ID）
-	CAbilitySystemComponent->ApplyInitialEffects();
-	CAbilitySystemComponent->GiveInitialAbilities();
+	CAbilitySystemComponent->ServerSideInit();
 }
 
 void ACCharacter::ClientSideInit()
@@ -58,7 +57,7 @@ void ACCharacter::ClientSideInit()
 
 bool ACCharacter::IsLocallyControlledByPlayer()
 {
-	//判断LocalController从而判
+	//判断LocalController从而找到当前客户端的主Player
 	return GetController() && GetController()->IsLocalPlayerController();
 }
 
@@ -130,6 +129,10 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
+
+		//根据DT修改Hero移动速度
+		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
+
 	}
 }
 
@@ -174,6 +177,11 @@ void ACCharacter::SetIsAiming(bool bIsAiming)
 	bUseControllerRotationYaw=bIsAiming;
 	GetCharacterMovement()->bOrientRotationToMovement =!bIsAiming;
 	OnAimStatChanged(bIsAiming);
+}
+
+void ACCharacter::MoveSpeedUpdated(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxWalkSpeed=Data.NewValue;
 }
 
 void ACCharacter::OnAimStatChanged(bool bIsAiming)

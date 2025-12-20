@@ -9,6 +9,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "CCharacter.generated.h"
 
+struct FOnAttributeChangeData;
 enum class ECAbilityInputID : uint8;
 class UGameplayAbility;
 struct FGameplayEventData;
@@ -54,7 +55,6 @@ public:
 	/****************************************************/
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
 	//将GameplayEvent发送的行为也传递给服务端，在服务端执行权威逻辑，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventTSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
@@ -68,6 +68,9 @@ private:
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void SetIsAiming(bool bIsAiming);
+	
+	//修改HeroSpeed
+	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
 	
 	//分不同的角色进行不同的具体逻辑设置
 	virtual void OnAimStatChanged(bool bIsAiming);

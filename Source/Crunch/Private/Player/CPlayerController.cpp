@@ -14,9 +14,11 @@ void ACPlayerController::OnPossess(APawn* NewPawn)
 
 	//获取服务端中权威的PlayerCharacter，对其进行初始化。这样做而不是在客户端进行初始化有效防止了作弊
 	CPlayerCharacter=Cast<ACPlayerCharacter>(NewPawn);
+
 	if (CPlayerCharacter)
 	{
 		CPlayerCharacter->ServerSideInit();
+		
 		//为Character分配ID
 		CPlayerCharacter->SetGenericTeamId(TeamID);
 	}

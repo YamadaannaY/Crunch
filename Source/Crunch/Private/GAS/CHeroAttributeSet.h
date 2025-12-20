@@ -23,6 +23,8 @@ public:
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Intelligence)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Strength)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Experience)
+    ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, StrengthGrowthRate)
+    ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, IntelligenceGrowthRate)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, PrevLevelExperience)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, NextLevelExperience)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Level)
@@ -38,7 +40,7 @@ private:
 	
 	UPROPERTY(ReplicatedUsing = OnRep_Experience)
 	FGameplayAttributeData Experience;
-
+	
 	UPROPERTY(ReplicatedUsing = OnRep_PrevLevelExperience)
 	FGameplayAttributeData PrevLevelExperience;
 
@@ -54,6 +56,13 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Gold)
 	FGameplayAttributeData Gold;
 
+    //这两个属性值用于GE中，不需要被客户端知道，所以不Rep
+	UPROPERTY()
+	FGameplayAttributeData StrengthGrowthRate;
+	
+	UPROPERTY()
+	FGameplayAttributeData IntelligenceGrowthRate;
+
 	UFUNCTION()
 	void OnRep_Intelligence(const FGameplayAttributeData& OldValue);
 
@@ -62,7 +71,6 @@ private:
 
 	UFUNCTION()
 	void OnRep_Experience(const FGameplayAttributeData& OldValue);
-
 	UFUNCTION()
 	void OnRep_PrevLevelExperience(const FGameplayAttributeData& OldValue);
 
