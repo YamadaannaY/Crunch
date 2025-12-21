@@ -33,6 +33,6 @@ float UMMC_LevelBased::CalculateBaseMagnitude_Implementation(const FGameplayEffe
 
 	if (!bFound) return 0.0f;
 
-	//等级越高Rate的系数越高，对应需要的经验值也越高
+	//等级越高此数值越高，增加的Health和Mana也线性增长
 	return (Level-1)* RateAttributeVal;
 }
