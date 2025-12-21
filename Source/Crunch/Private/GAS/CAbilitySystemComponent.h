@@ -43,19 +43,7 @@ private:
 	//监听Health、Mana属性值，变化时调用函数
 	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
 	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
-
-	//Respawn用，应用满状态GE
-	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
-	TSubclassOf<UGameplayEffect> FullStatEffect;
-
-	//死亡用GE，添加Cue，Tag等
-	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
-	TSubclassOf<UGameplayEffect> DeathEffect;
 	
-	//对属性集所有初始属性的InitGE
-	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
-	TArray<TSubclassOf<UGameplayEffect>> InitialEffects;
-
 	/***********	GA会带有一个ID，激活能力时依据ID找到要激活的GA，其中PassiveGA不需要ID，直接用None，表示不能主动触发	****************/
 
 	//技能
@@ -66,11 +54,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
 	TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>> BasicAbilities;
 
-	//被动技能
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
-	TArray<TSubclassOf<UGameplayAbility>> PassiveAbilities;
-
-	//记录Stats属性数值的DT
-	UPROPERTY(EditDefaultsOnly,Category="Base Stats")
-	UDataTable* BaseStatsDataTable;
+	class UPA_AbilitySystemGeneric* AbilitySystemGeneric;
 };

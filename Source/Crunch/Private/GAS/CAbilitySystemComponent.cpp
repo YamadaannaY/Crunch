@@ -6,6 +6,7 @@
 #include "GameplayEffectExtension.h"
 #include "UCAbilitySystemStatics.h"
 #include "GAS/CAttributeSet.h"
+#include "PA_AbilitySystemGeneric.h"
 
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
@@ -19,8 +20,10 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 void UCAbilitySystemComponent::InitializeBaseAttribute()
 {
 	//找到DT中对应于ASC组件拥有者的Class
-	if (!BaseStatsDataTable || !GetOwner()) return ;
+	if (!AbilitySystemGeneric || !AbilitySystemGeneric->GetBaseStatsDataTable() || !GetOwner()) return ;
 
+	const UDataTable* BaseStatsDataTable=AbilitySystemGeneric->GetBaseStatsDataTable();
+	
 	const FHeroBaseStats* BaseStats=nullptr;
 
 	for (const TPair<FName,uint8*>& DataPair : BaseStatsDataTable->GetRowMap())
@@ -60,8 +63,10 @@ void UCAbilitySystemComponent::ServerSideInit()
 void UCAbilitySystemComponent::ApplyInitialEffects()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
+
+	if (!AbilitySystemGeneric) return;
 	
-	for (const TSubclassOf<UGameplayEffect>& Effect : InitialEffects)
+	for (const TSubclassOf<UGameplayEffect>& Effect : AbilitySystemGeneric->GetInitialEffects())
 	{
 		//应用自身直接用默认的EffectContext
 		AuthApplyGameplayEffect(Effect);
@@ -82,7 +87,9 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,1,(int32)AbilityPair.Key,nullptr));
 	}
 
-	for (const TSubclassOf<UGameplayAbility>& PassiveAbility : PassiveAbilities)
+	if (!AbilitySystemGeneric) return;
+	
+	for (const TSubclassOf<UGameplayAbility>& PassiveAbility :AbilitySystemGeneric->GetPassiveAbilities())
 	{
 		GiveAbility(FGameplayAbilitySpec(PassiveAbility,1,-1,nullptr));
 	}
@@ -99,7 +106,9 @@ void UCAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffe
 
 void UCAbilitySystemComponent::ApplyFullStatsEffect()
 {
-	AuthApplyGameplayEffect(FullStatEffect);
+	if (!AbilitySystemGeneric) return;
+	
+	AuthApplyGameplayEffect(AbilitySystemGeneric->GetFullStateEffect());
 }
 
 const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& UCAbilitySystemComponent::GetAbilities() const
@@ -131,9 +140,11 @@ void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Chang
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag()))
 		{
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
-			if (DeathEffect)
+
+
+			if (AbilitySystemGeneric && AbilitySystemGeneric->GetDeathEffect())
 			{
-				AuthApplyGameplayEffect(DeathEffect);
+				AuthApplyGameplayEffect(AbilitySystemGeneric->GetDeathEffect());
 
 				FGameplayEventData DeadAbilityEventData;
 				if (ChangeData.GEModData)
