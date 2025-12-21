@@ -25,6 +25,29 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Reward")
 	float RewardRange=1000.f;
 
+	//基础Gold奖励
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	float BaseGoldReward=200.f;
+
+	//基础Experience奖励
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	float BaseExperienceReward=200.f;
+
+	//被击杀者Experience值参与Experience结算的计算系数
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	float ExperienceRewardPerExperience=0.1f;
+
+	//被击杀者Experience值参与Gold结算的计算系数
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	float GoldRewardPerExperience=0.05f;
+
+	//击杀者获取Reward占比
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	float KillerRewardPortion=0.5f;
+	
 	//获取范围内对象
 	TArray<AActor*> GetRewardTargets() const ;
+
+	UPROPERTY(EditDefaultsOnly,Category="Reward")
+	TSubclassOf<UGameplayEffect> RewardEffect;
 };

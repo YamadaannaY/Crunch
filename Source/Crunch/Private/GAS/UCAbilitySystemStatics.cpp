@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GAS/UCAbilitySystemStatics.h"
-
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
@@ -60,6 +59,16 @@ FGameplayTag UCAbilitySystemStatics::GetCameraShakeCueTag()
 	return FGameplayTag::RequestGameplayTag("GameplayCue.cameraShake");
 }
 
+FGameplayTag UCAbilitySystemStatics::GetGoldAttributeTag()
+{
+	return FGameplayTag::RequestGameplayTag("attr.gold");
+}
+
+FGameplayTag UCAbilitySystemStatics::GetExperienceAttributeTag()
+{
+	return FGameplayTag::RequestGameplayTag("attr.experience");
+}
+
 FGameplayTag UCAbilitySystemStatics::GetHeroRoleTag()
 {
 	return FGameplayTag::RequestGameplayTag("role.hero");
@@ -108,6 +117,5 @@ bool UCAbilitySystemStatics::IsHero(const AActor* ActorToCheck)
 			return ActorASC->HasMatchingGameplayTag(GetHeroRoleTag());
 		}
 	}
-
 	return false;
 }

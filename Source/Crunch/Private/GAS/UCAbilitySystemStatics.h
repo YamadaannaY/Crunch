@@ -25,6 +25,8 @@ public:
 	static FGameplayTag GetManaFullStatTag();
 	static FGameplayTag GetManaEmptyStatTag();
 	static FGameplayTag GetCameraShakeCueTag();
+	static FGameplayTag GetGoldAttributeTag();
+	static FGameplayTag GetExperienceAttributeTag();
 	static FGameplayTag GetHeroRoleTag();
 	static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const UGameplayAbility* Ability);
