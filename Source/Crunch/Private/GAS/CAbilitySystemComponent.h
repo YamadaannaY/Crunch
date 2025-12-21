@@ -30,6 +30,8 @@ public:
 	//获得Character特有的GA，不包括BasicGA
 	const TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>>& GetAbilities() const ;
 
+	//判断当前是否处于MaxLevel
+	bool IsAtMaxLevel() const;
 private:
 	//应用初始GE
 	void ApplyInitialEffects();
@@ -43,6 +45,7 @@ private:
 	//监听Health、Mana属性值，变化时调用函数
 	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
 	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
+	void ExperienceUpdated(const FOnAttributeChangeData& ChangeData);
 	
 	/***********	GA会带有一个ID，激活能力时依据ID找到要激活的GA，其中PassiveGA不需要ID，直接用None，表示不能主动触发	****************/
 

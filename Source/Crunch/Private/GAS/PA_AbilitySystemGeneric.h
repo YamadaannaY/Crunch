@@ -22,6 +22,9 @@ public:
 	FORCEINLINE const TArray<TSubclassOf<UGameplayEffect>>& GetInitialEffects() const {return InitialEffects;}
 	FORCEINLINE const TArray<TSubclassOf<UGameplayAbility>>& GetPassiveAbilities() const {return PassiveAbilities;}
 	FORCEINLINE const UDataTable* GetBaseStatsDataTable() const {return BaseStatsDataTable;}
+
+	//获取经验值行
+	const FRealCurve* GetExperienceCurve() const ;
 private:
 	//Respawn用，应用满状态GE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effects")
@@ -43,4 +46,11 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Base Stats")
 	UDataTable* BaseStatsDataTable;
 
+	//经验值行的行名
+	UPROPERTY(EditDefaultsOnly,Category="Level")
+	FName ExperienceRowName="ExperienceNeededToReachNextLevel";
+
+	//经验值CT
+	UPROPERTY(EditDefaultsOnly,Category="Level")
+	UCurveTable* ExperienceCurveTable;
 };
