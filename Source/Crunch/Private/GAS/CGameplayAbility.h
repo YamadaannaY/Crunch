@@ -16,6 +16,9 @@ class CRUNCH_API UCGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 public:
 	UCGameplayAbility();
+
+	// Returns true if this ability can be activated right now. Has no side effects
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override; 
 protected:
 	//通过MeshComp获得AnimInstance
 	UAnimInstance* GetOwnerAnimInstance() const;

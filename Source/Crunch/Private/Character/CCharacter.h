@@ -59,6 +59,9 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventTSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
 
+protected:
+	//在服务端实现对GA和属性集数值的修改
+	void UpgradeAbilityWithInputID(ECAbilityInputID InputID);
 private:
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
 	void BindGASChangeDelegates();

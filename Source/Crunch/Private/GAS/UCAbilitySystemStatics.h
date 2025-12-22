@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include  "UCAbilitySystemStatics.generated.h"
 
+struct FGameplayAbilitySpec;
 class UGameplayAbility;
 /**
  * 
@@ -30,5 +31,7 @@ public:
 	static FGameplayTag GetHeroRoleTag();
 	static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const UGameplayAbility* Ability);
+
 	static bool IsHero(const AActor* ActorToCheck);
+	static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
 };

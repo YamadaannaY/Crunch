@@ -122,6 +122,15 @@ bool ACCharacter::Server_SendGameplayEventTSelf_Validate(const FGameplayTag Even
 	return true;
 }
 
+void ACCharacter::UpgradeAbilityWithInputID(ECAbilityInputID InputID)
+{
+	//通过触发操作对应的触发ID调用升级逻辑
+	if (CAbilitySystemComponent)
+	{
+		CAbilitySystemComponent->Server_UpgradeAbilityWithID(InputID);
+	}
+}
+
 void ACCharacter::BindGASChangeDelegates()
 {
 	if (CAbilitySystemComponent)

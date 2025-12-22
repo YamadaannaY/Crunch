@@ -79,6 +79,17 @@ void UCAbilitySystemComponent::ServerSideInit()
 	GiveInitialAbilities();
 }
 
+void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGameplayAbilitySpecHandle Handle,
+	int Level)
+{
+	FGameplayAbilitySpec* Spec=FindAbilitySpecFromHandle(Handle);
+	if (Spec)
+	{
+		Spec->Level=Level;
+		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
+	}
+}
+
 void UCAbilitySystemComponent::ApplyInitialEffects()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
@@ -98,7 +109,7 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: Abilities)
 	{
-		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,1,(int32)AbilityPair.Key,nullptr));
+		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,0,(int32)AbilityPair.Key,nullptr));
 	}
 	
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: BasicAbilities)
@@ -150,6 +161,29 @@ bool UCAbilitySystemComponent::IsAtMaxLevel() const
 	}
 
 	return CurrentLevel>=CurrentMaxLevel;
+}
+
+void UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Implementation(ECAbilityInputID InputID)
+{
+	bool bFound=false;
+
+	const float UpgradePoint=GetGameplayAttributeValue(UCHeroAttributeSet::GetUpgradePointAttribute(),bFound);
+	if (!bFound || UpgradePoint<=0) return ;
+	
+	FGameplayAbilitySpec* AbilitySpec=FindAbilitySpecFromInputID((int32)InputID);
+	if (! AbilitySpec || UCAbilitySystemStatics::IsAbilityAtMaxLevel(*AbilitySpec)) return;
+
+	//一个升级点使GA升一级
+	SetNumericAttributeBase(UCHeroAttributeSet::GetUpgradePointAttribute(),UpgradePoint-1);
+	AbilitySpec->Level+=1;
+
+	//Call to mark that an ability spec has been modified
+	MarkAbilitySpecDirty(*AbilitySpec);
+}
+
+bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInputID InputID)
+{
+	return true;
 }
 
 void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)

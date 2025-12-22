@@ -32,6 +32,14 @@ public:
 
 	//判断当前是否处于MaxLevel
 	bool IsAtMaxLevel() const;
+
+	//服务端调用，在触发Upgrade的IA输入时执行技能升级逻辑
+	UFUNCTION(Server,Reliable,WithValidation)
+	void Server_UpgradeAbilityWithID(ECAbilityInputID InputID);
+
+	//客户端接收改变后的GA信息，用于修改UI
+	UFUNCTION(Client,Reliable)
+	void Client_AbilitySpecLevelUpdated(FGameplayAbilitySpecHandle Handle,int Level);
 private:
 	//应用初始GE
 	void ApplyInitialEffects();
