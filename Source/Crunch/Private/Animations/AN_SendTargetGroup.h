@@ -40,5 +40,6 @@ private:
 	UPROPERTY(EditAnywhere,Category="Gameplay Ability")
 	TArray<FName> TargetSocketName;
 
+	//AN跟随Montage中的AN自动同步发送给所有客户端，避开了网络RPC的输送，利用客户端内存进行加载，减小了带宽压力
 	void SendLocalGameplayCue(const FHitResult& HitResult) const ;
 };

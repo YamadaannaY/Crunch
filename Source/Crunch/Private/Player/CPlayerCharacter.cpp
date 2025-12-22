@@ -193,14 +193,17 @@ void ACPlayerCharacter::OnRecoveryFromStun()
 
 void ACPlayerCharacter::OnAimStatChanged(bool bIsAiming)
 {
-	//传入Offset
-	LerpCameraToLocalOffset(bIsAiming ? CameraAimLocalOffset : FVector{0.f});	
+	if (IsLocallyControlledByPlayer())
+	{
+		//传入Offset
+		LerpCameraToLocalOffset(bIsAiming ? CameraAimLocalOffset : FVector{0.f});	
+	}
 }
 
 void ACPlayerCharacter::LerpCameraToLocalOffset(const FVector& Goal)
 {
 	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
-	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
+	CameraLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
 }
 
 void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
@@ -233,5 +236,5 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 	ViewCamera->SetRelativeLocation(FVector::ZeroVector);
 
 	//递归逼近
-	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
+	CameraLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
 }
