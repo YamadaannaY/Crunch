@@ -124,3 +124,75 @@ bool UCAbilitySystemStatics::IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spe
 {
 	return Spec.Level>=4;
 }
+
+bool UCAbilitySystemStatics::CheckAbilityCost(const FGameplayAbilitySpec& AbilitySpec,
+	const UAbilitySystemComponent& ASC)
+{
+	const UGameplayAbility* AbilityCDO=AbilitySpec.Ability;
+	if (AbilityCDO)
+	{
+		return AbilityCDO->CheckCost(AbilitySpec.Handle,ASC.AbilityActorInfo.Get());
+	}
+	
+	return false;
+}
+
+float UCAbilitySystemStatics::GetManaCostFor(const UGameplayAbility* AbilityCDO, const UAbilitySystemComponent&ASC,
+	int AbilityLevel)
+{
+	float ManaCost=0.f;
+	if (AbilityCDO)
+	{
+		UGameplayEffect* CostEffect=AbilityCDO->GetCostGameplayEffect();
+		if (CostEffect)
+		{
+			FGameplayEffectSpecHandle EffectSpec=ASC.MakeOutgoingSpec(CostEffect->GetClass(),AbilityLevel,ASC.MakeEffectContext());
+			CostEffect->Modifiers[0].ModifierMagnitude.AttemptCalculateMagnitude(*EffectSpec.Data.Get(),ManaCost);
+		}
+	}
+
+	return FMath::Abs(ManaCost);
+}
+
+float UCAbilitySystemStatics::GetCoolDownDurationFor(const UGameplayAbility* AbilityCDO,
+	const UAbilitySystemComponent&ASC, int AbilityLevel)
+{
+	float CoolDownDuration=0.f;
+	if (AbilityCDO)
+	{
+		UGameplayEffect* CoolDownEffect=AbilityCDO->GetCooldownGameplayEffect();
+		if (CoolDownEffect)
+		{
+			FGameplayEffectSpecHandle EffectSpec=ASC.MakeOutgoingSpec(CoolDownEffect->GetClass(),AbilityLevel,ASC.MakeEffectContext());
+			CoolDownEffect->DurationMagnitude.AttemptCalculateMagnitude(*EffectSpec.Data.Get(),CoolDownDuration);
+		}
+	}
+	return FMath::Abs(CoolDownDuration);
+}
+
+float UCAbilitySystemStatics::GetCoolDownRemainingFor(const UGameplayAbility* AbilityCDO,
+	const UAbilitySystemComponent&ASC)
+{
+	if (!AbilityCDO)
+	{
+		return 0.f;
+	}
+
+	UGameplayEffect* CooldownEffect=AbilityCDO->GetCooldownGameplayEffect();
+	if (!CooldownEffect) return 0.f;
+
+	FGameplayEffectQuery CooldownEffectQuery;
+	CooldownEffectQuery.EffectDefinition=CooldownEffect->GetClass();
+
+	float CooldownRemaining=0.f;
+	FJsonSerializableArrayFloat CooldownTimeRemainings=ASC.GetActiveEffectsTimeRemaining(CooldownEffectQuery);
+
+	for (float Remaining : CooldownTimeRemainings)
+	{
+		if (Remaining>CooldownRemaining)
+		{
+			CooldownRemaining=Remaining;
+		}
+	}
+	return CooldownRemaining;
+}

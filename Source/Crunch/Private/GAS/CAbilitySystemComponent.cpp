@@ -86,6 +86,7 @@ void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGa
 	if (Spec)
 	{
 		Spec->Level=Level;
+		//广播SpecDirtied
 		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
 	}
 }
@@ -179,6 +180,8 @@ void UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Implementation(ECAbil
 
 	//Call to mark that an ability spec has been modified
 	MarkAbilitySpecDirty(*AbilitySpec);
+
+	Client_AbilitySpecLevelUpdated(AbilitySpec->Handle,AbilitySpec->Level);
 }
 
 bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInputID InputID)

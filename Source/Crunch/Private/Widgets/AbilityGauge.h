@@ -6,6 +6,10 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "AbilityGauge.generated.h"
 
+struct FOnAttributeChangeData;
+class ULevelGauge;
+struct FGameplayAbilitySpec;
+class UAbilitySystemComponent;
 //存储了GAWidget的数据结构体,用一个DT存储
 USTRUCT(BlueprintType)
 struct FAbilityWidgetData :public FTableRowBase
@@ -64,14 +68,29 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	FName CooldownPercentParaName="Percent";
 
+	//ProgressBar变化表示等级
+	UPROPERTY(EditDefaultsOnly,Category="Visual")
+	FName AbilityLevelParaName="Level";
+
+	//图标变灰表示是否可用
+	UPROPERTY(EditDefaultsOnly,Category="Visual")
+	FName CanCastAbilityParaName="CanCast";
+
+	//图标闪烁表示是否可以升级
+	UPROPERTY(EditDefaultsOnly,Category="Visual")
+	FName UpgradePointAvailableParaName="UpgradeAvailable";
+
 	//要覆盖的Image
 	UPROPERTY(meta=(BindWidget))
 	UImage* Icon;
 
+	UPROPERTY(meta=(BindWidget))
+	UImage* LevelGauge;
+	
 	//技能冷却剩余时间的计数文本
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* CooldownCounterText;
-
+	
 	//冷却总时间的计数文本
 	UPROPERTY(meta=(BindWidget))
 	UTextBlock* CooldownDurationText;
@@ -103,6 +122,28 @@ private:
 	//Cooldown冷却逻辑
 	void UpdateCooldown();
 
+	UPROPERTY()
+	const UAbilitySystemComponent* OwnerASComp;
+	
+	const FGameplayAbilitySpec* CacheAbilitySpec;
+
+	//通过此Gauge中存储的AbilityCDO对应的Class获取Spec
+	const FGameplayAbilitySpec* GetAbilitySpec();
+
+	bool bIsAbilityLearned=false;
+
+	//SpecDirtied广播的回调
+	void AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec);
+
+	//等级为0或者Mana值变化时调用，判断是否可以释放技能，改变Material
+	void UpdateCanCast();
+
+	//Point属性值的回调，内部调用UpdateCanCast判断，同时改变Material使其闪烁
+	void UpgradePointUpdated(const FOnAttributeChangeData& Data);
+
+	//调用UpdateCanCast判断Mana值是否足以释放技能
+	void ManaUpdated(const FOnAttributeChangeData& Data);
+	
 	//Options用于对Text的AsNumber参数进行数位限制
 	FNumberFormattingOptions WholeNumberFormattingOptions;
 	FNumberFormattingOptions TwoDigitNumberFormattingOptions;

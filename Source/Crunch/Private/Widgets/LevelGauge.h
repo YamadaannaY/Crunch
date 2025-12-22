@@ -19,6 +19,7 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	FName PercentMaterialParamName="Percent";
+
 	UPROPERTY(meta=(BindWidget))
 	class UImage* LevelProgressImage;
 

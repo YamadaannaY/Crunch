@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpec.h"
 #include "GameplayTagContainer.h"
 #include  "UCAbilitySystemStatics.generated.h"
 
@@ -34,4 +35,9 @@ public:
 
 	static bool IsHero(const AActor* ActorToCheck);
 	static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
+
+	static bool CheckAbilityCost(const FGameplayAbilitySpec& AbilitySpec,const UAbilitySystemComponent& ASC);
+	static float GetManaCostFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC,int AbilityLevel);
+	static float GetCoolDownDurationFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC,int AbilityLevel);
+	static float GetCoolDownRemainingFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC);
 };

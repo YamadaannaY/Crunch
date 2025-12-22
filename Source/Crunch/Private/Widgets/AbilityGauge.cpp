@@ -2,10 +2,13 @@
 
 #include "Widgets/AbilityGauge.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "LevelGauge.h"
 #include "Abilities/GameplayAbility.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "GAS/CAbilitySystemComponent.h"
+#include "GAS/CAttributeSet.h"
+#include "GAS/CHeroAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
 
 void UAbilityGauge::NativeConstruct()
@@ -21,8 +24,27 @@ void UAbilityGauge::NativeConstruct()
 	{
 		//当Cost/Cooldown调用时触发的委托
 		OwnerASC->AbilityCommittedCallbacks.AddUObject(this,&ThisClass::AbilityCommitted);
-	}
+		
+		//接受SpecDirtied广播，执行回调函数
+		OwnerASC->AbilitySpecDirtiedCallbacks.AddUObject(this,&ThisClass::AbilitySpecUpdated);
 
+		//当UpgradePoint和Mana值变化时对应的回调
+		OwnerASC->GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetUpgradePointAttribute()).AddUObject(this,&ThisClass::UpgradePointUpdated);
+		OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&ThisClass::ManaUpdated);
+
+		//初始化UpgradePoint
+		bool bFound=false;
+		const float UpgradePoint=OwnerASC->GetGameplayAttributeValue(UCHeroAttributeSet::GetUpgradePointAttribute(),bFound);
+		if (bFound)
+		{
+			FOnAttributeChangeData ChangeData;
+			ChangeData.NewValue=UpgradePoint;
+			UpgradePointUpdated(ChangeData);
+		}
+	}
+	//存储，其他函数也会调用ASC
+	OwnerASComp=OwnerASC;
+	
 	WholeNumberFormattingOptions.MaximumFractionalDigits=0;
 	TwoDigitNumberFormattingOptions.MaximumFractionalDigits=2;
 }
@@ -38,9 +60,10 @@ void UAbilityGauge::NativeOnListItemObjectSet(UObject* ListItemObject)
 	const float CooldownDuration=UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
 	const float Cost=UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
 
-	//设置Text
+	//设置Text，初始化LevelGauge，最开始是0级
 	CooldownDurationText->SetText(FText::AsNumber(CooldownDuration));
 	CostText->SetText(FText::AsNumber(Cost));
+	LevelGauge->GetDynamicMaterial()->SetScalarParameterValue(AbilityLevelParaName,0);
 }
 
 void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData)
@@ -110,4 +133,71 @@ void UAbilityGauge::UpdateCooldown()
 
 	//加上一个倒计时渲染
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(CooldownPercentParaName,1.0f-CacheCooldownTimeRemaining/CacheCooldownDuration);
+}
+
+const FGameplayAbilitySpec* UAbilityGauge::GetAbilitySpec()
+{
+	if (!CacheAbilitySpec)
+	{
+		if (AbilityCDO &&  OwnerASComp)
+		{
+			CacheAbilitySpec=OwnerASComp->FindAbilitySpecFromClass(AbilityCDO->GetClass());
+		}
+	}
+	return CacheAbilitySpec;
+}
+
+void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)
+{
+	if (AbilitySpec.Ability != AbilityCDO) return ;
+
+	bIsAbilityLearned=AbilitySpec.Level>0;
+
+	LevelGauge->GetDynamicMaterial()->SetScalarParameterValue(AbilityLevelParaName,AbilitySpec.Level);
+
+	UpdateCanCast();
+
+	float NewCooldownDuration=UCAbilitySystemStatics::GetCoolDownDurationFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
+	float NewCost=UCAbilitySystemStatics::GetManaCostFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
+
+	CooldownDurationText->SetText(FText::AsNumber(NewCooldownDuration));
+	CostText->SetText(FText::AsNumber(NewCost));
+}
+
+void UAbilityGauge::UpdateCanCast()
+{
+	const FGameplayAbilitySpec* AbilitySpec=GetAbilitySpec();
+	bool bCanCast=bIsAbilityLearned;
+	
+	if (AbilitySpec)
+	{
+		if (OwnerASComp && !UCAbilitySystemStatics::CheckAbilityCost(*AbilitySpec,*OwnerASComp))
+		{
+			bCanCast=false;
+		}
+	}
+	
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(CanCastAbilityParaName,bCanCast ? 1 :0);
+}
+
+void UAbilityGauge::UpgradePointUpdated(const FOnAttributeChangeData& Data)
+{
+	bool HasUpgradePoint=Data.NewValue>0;
+
+	const FGameplayAbilitySpec* AbilitySpec=GetAbilitySpec();
+
+	if (AbilitySpec)
+	{
+		if (UCAbilitySystemStatics::IsAbilityAtMaxLevel(*AbilitySpec))
+		{
+			Icon->GetDynamicMaterial()->SetScalarParameterValue(UpgradePointAvailableParaName,0);
+			return;
+		}
+	}
+	Icon->GetDynamicMaterial()->SetScalarParameterValue(UpgradePointAvailableParaName,HasUpgradePoint ? 1:0);
+}
+
+void UAbilityGauge::ManaUpdated(const FOnAttributeChangeData& Data)
+{
+	UpdateCanCast();
 }
