@@ -3,6 +3,7 @@
 
 #include "GAS/UpperCut.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayTagsManager.h"
 #include "GA_Combo.h"
 #include "UCAbilitySystemStatics.h"
@@ -69,15 +70,16 @@ void UUpperCut::StartLaunching(FGameplayEventData EventData)
 	//在服务端执行
 	if (K2_HasAuthority())
 	{
-		//获得Sweep轨迹记录的HitResult数组
-		TArray<FHitResult> TargetHitResult=GetHitResultsFromSweepLocationTargetData(EventData.TargetData,TargetSweepSphereRadius,ETeamAttitude::Hostile,ShouldDrawDebug());
-
 		//自身施加向上击飞效果
 		PushTarget(GetAvatarActorFromActorInfo(),FVector::UpVector*UpperCutLaunchSpeed);
 
-		//所有Hit对象施加向上击飞效果
-		for (FHitResult& HitResult : TargetHitResult)
+		int HitResultCount=UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
+	
+		//AN_SendGroup中获得的每一个HitResult都用一个TargetData传递并且存储起来；
+		for (int i=0;i<HitResultCount;i++)
 		{
+			FHitResult HitResult=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData,i);
+
 			PushTarget(HitResult.GetActor(),FVector::UpVector*UpperCutLaunchSpeed);
 
 			ApplyGameplayEffectToHitResultActor(HitResult,LaunchDamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
@@ -133,17 +135,19 @@ void UUpperCut::HandleComboDamageEvent(FGameplayEventData EventData)
 	//在服务端执行
 	if (K2_HasAuthority())
 	{
-		//获得Sweep轨迹记录的HitResult数组
-		TArray<FHitResult> TargetHitResult=GetHitResultsFromSweepLocationTargetData(EventData.TargetData,TargetSweepSphereRadius,ETeamAttitude::Hostile,ShouldDrawDebug());
-
 		//自身施加向上击飞效果
 		PushTarget(GetAvatarActorFromActorInfo(),FVector::UpVector*UpperComboHoldSpeed);
 
 		const FGenericDamageEffectDef* EffectDef=GetDamageEffectDefForCurrentCombo();
 		if (!EffectDef) return;
-		//所有Hit对象施加向上击飞效果
-		for (FHitResult& HitResult : TargetHitResult)
+
+		int HitResultCount=UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(EventData.TargetData);
+	
+		//AN_SendGroup中获得的每一个HitResult都用一个TargetData传递并且存储起来；
+		for (int i=0;i<HitResultCount;i++)
 		{
+			FHitResult HitResult=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData,i);
+
 			//TransformVector：把角色自身坐标系里的方向，旋转到世界坐标系，也就是PushVel的结果是在角色当前坐标系内PushVelocity的xyz值应用于世界内
 			//eg：（FVector(1000, 0, 200);） 即PushVel：向角色前方推1000，向上推200
 			//可优化：可以改为按照ImpactNormal作为PushVel

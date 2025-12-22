@@ -34,11 +34,7 @@ private:
 	//击飞期间连招下的击飞速度
 	UPROPERTY(EditDefaultsOnly,Category="Launch")
 	float UpperComboHoldSpeed=100.f;	
-
-	//检测半径
-	UPROPERTY(EditDefaultsOnly,Category="Targeting")
-	float TargetSweepSphereRadius=80.f;
-
+	
 	//上勾拳动画
 	UPROPERTY(EditDefaultsOnly,Category="Animation")
 	UAnimMontage* UpperCutMontage;

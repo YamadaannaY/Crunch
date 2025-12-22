@@ -1,8 +1,13 @@
-/*****************  用于将	************************/
+/*****************  用于利用多个Socket组成的轨迹进行碰撞检测并返回TargetGroup	************************/
 
 
 #include "Animations/AN_SendTargetGroup.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayCueManager.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "GameplayEffectTypes.h"
+#include "Abilities/GameplayAbilityTypes.h"
 
 void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
 	const FAnimNotifyEventReference& EventReference)
@@ -18,26 +23,64 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 
 	//用Data存储Socket的位置
 	FGameplayEventData Data;
+	TSet<AActor*> HitActors;
+	
+	AActor* OwnerActor=MeshComp->GetOwner();
+	const IGenericTeamAgentInterface* OwnerTeamInterface=Cast<IGenericTeamAgentInterface>(OwnerActor);
 	
 	for (int i=1;i<TargetSocketName.Num();++i)
 	{
-		//需要new，在堆上进行动态分配,因为Add函数内部使用智能指针托管了这个指针，并且会引用计数为0时delete，所以必须在堆上分配，
-		//栈指针delete是未定义行为会崩溃，同样不能使用智能指针，这会导致引用计数双重为0释放两次造成崩溃
-		FGameplayAbilityTargetData_LocationInfo* LocationInfo=new FGameplayAbilityTargetData_LocationInfo();
-
-		//遍历所有Socket，每两个一组形成一段轨迹，两组轨迹模拟攻击路径
+		//遍历所有Socket，每两个一组形成一段轨迹以模拟路径
 		FVector StratLoc=MeshComp->GetSocketLocation(TargetSocketName[i-1]);
 		FVector EndLoc=MeshComp->GetSocketLocation(TargetSocketName[i]);
 
-		//记录起始点和结束点
-		LocationInfo->SourceLocation.LiteralTransform.SetLocation(StratLoc);
-		LocationInfo->TargetLocation.LiteralTransform.SetLocation(EndLoc);
+		TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+		ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_Pawn));
+		
+		TArray<FHitResult> HitResults;
 
-		/** Adds a new target data to handle, it must have been created with new */
-		Data.TargetData.Add(LocationInfo);
+		TArray<AActor*> ActorsToIgnore;
+		if (bIgnoreSelf)
+		{
+			ActorsToIgnore.Add(OwnerActor);
+		}
+
+		EDrawDebugTrace::Type DrawDebugTrace=bDrawDebug ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None;
+		
+		UKismetSystemLibrary::SphereTraceMultiForObjects(MeshComp,StratLoc,EndLoc,SphereSweepRadius,
+			ObjectTypes,false,ActorsToIgnore,DrawDebugTrace,HitResults,false);
+
+		for (const FHitResult& HitResult : HitResults)
+		{
+			if (HitActors.Contains(HitResult.GetActor()))
+			{
+				continue;
+			}
+			if (OwnerTeamInterface)
+			{
+				if (OwnerTeamInterface->GetTeamAttitudeTowards(*HitResult.GetActor()) !=TargetTeam)
+				{
+					continue;
+				}
+			}
+			FGameplayAbilityTargetData_SingleTargetHit* TargetHit=new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+			Data.TargetData.Add(TargetHit);
+			SendLocalGameplayCue(HitResult);
+		}
 	}
-
 	//让EventTag对应的Event获得Socket的SourceLocation和TargetLocation，执行伤害逻辑
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(MeshComp->GetOwner(),EventTag,Data);
-	
+}
+
+void UAN_SendTargetGroup::SendLocalGameplayCue(const FHitResult& HitResult) const
+{
+	FGameplayCueParameters CueParams;
+	CueParams.Location=HitResult.ImpactPoint;
+	CueParams.Normal=HitResult.ImpactNormal;
+
+	for (const FGameplayTag& GameplayCueTag : TriggerGameplayCueTag)
+	{
+		//local execute cue
+		UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(HitResult.GetActor(),GameplayCueTag,EGameplayCueEvent::Executed,CueParams);
+	}
 }

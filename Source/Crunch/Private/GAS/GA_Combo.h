@@ -35,11 +35,7 @@ private:
 
 	//press后，若NextComboName存在，则设置NextSection为这个Name对应的Section
 	void TryCommitCombo();
-
-	//SphereTrace检测半径
-	UPROPERTY(EditDefaultsOnly,Category="Targetting")
-	float TargetSweepSphereRadius=30.f;
-
+	
 	//DamageGE
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
 	TSubclassOf<UGameplayEffect> DefaultDamageEffect;

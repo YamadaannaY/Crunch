@@ -129,14 +129,16 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData InPayLoad)
 
 void UGA_Combo::DoDamage(FGameplayEventData Data)
 {
-	//通过Data.TargetData中的位置值调用SphereTrace检测函数并返回检测结果数组
-	TArray<FHitResult> HitResults=GetHitResultsFromSweepLocationTargetData(Data.TargetData,TargetSweepSphereRadius);
 
-	//遍历，找到当前ComboSection对应的DamageEffect（这个Event每一个Section都触发）
-	for (const FHitResult& Result : HitResults)
+	int HitResultCount=UAbilitySystemBlueprintLibrary::GetDataCountFromTargetData(Data.TargetData);
+	
+	//AN_SendGroup中获得的每一个HitResult都用一个TargetData传递并且存储起来；
+	for (int i=0;i<HitResultCount;i++)
 	{
+		FHitResult HitResult=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Data.TargetData,i);
+		
 		TSubclassOf<UGameplayEffect> DamageEffect=GetDamageEffectForCurrentCombo();
 
-		ApplyGameplayEffectToHitResultActor(Result,DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
+		ApplyGameplayEffectToHitResultActor(HitResult,DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
 	}
 }
