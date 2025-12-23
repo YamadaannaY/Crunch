@@ -38,7 +38,7 @@ bool UCAssetManager::GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) co
 
 void UCAssetManager::ShopItemLoadFinished(FStreamableDelegate Callback)
 {
-	//执行回调
+	//为调用者提供的异步回调函数
 	Callback.ExecuteIfBound();
 
 	//加载完Item对Map赋值

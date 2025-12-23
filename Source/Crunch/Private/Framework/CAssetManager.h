@@ -19,7 +19,7 @@ public:
 	//返回全局单例的AssetManager并将其Cast到当前Manager类
 	static UCAssetManager& Get();
 
-	//一键加载属于特定Type的所有资源，这里用于加载ShopItem,并且绑定一个回调函数，这个函数额外带有一个Delegate
+	//一键加载属于特定Type的所有资源，这里用于加载ShopItem,并且绑定一个回调函数，这个函数额外带有一个Delegate,用于加载此函数的对象能够实现自己想要调用的异步回调函数
 	void LoadShopItems(const FStreamableDelegate& LoadFinishedCallback);
 
 	//获得当前商店内所有被加载的Item
