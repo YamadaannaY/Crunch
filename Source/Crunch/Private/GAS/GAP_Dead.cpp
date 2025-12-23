@@ -64,7 +64,7 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 			const float KillerExperienceReward=TotalExperienceReward*KillerRewardPortion;
 			const float KillerGoldReward=TotalGoldReward*KillerRewardPortion;
 
-			//利用SetByCaller，在代码中即可修改值
+			//利用SetByCaller，在代码中即可修改值,这个值在编辑器中设置SetByCaller后根据ModOp修改属性值
 			FGameplayEffectSpecHandle EffectSpec=MakeOutgoingGameplayEffectSpec(RewardEffect);
 			EffectSpec.Data->SetSetByCallerMagnitude(UCAbilitySystemStatics::GetExperienceAttributeTag(),KillerExperienceReward);
 			EffectSpec.Data->SetSetByCallerMagnitude(UCAbilitySystemStatics::GetGoldAttributeTag(),KillerGoldReward);
@@ -77,7 +77,7 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 
 		//平均分配
 		float ExperiencePerTarget=TotalExperienceReward/RewardTargets.Num();
-		float  GoldPerTarget=TotalGoldReward/RewardTargets.Num();
+		float GoldPerTarget=TotalGoldReward/RewardTargets.Num();
 
 		FGameplayEffectSpecHandle EffectSpec=MakeOutgoingGameplayEffectSpec(RewardEffect);
 		EffectSpec.Data->SetSetByCallerMagnitude(UCAbilitySystemStatics::GetExperienceAttributeTag(),ExperiencePerTarget);

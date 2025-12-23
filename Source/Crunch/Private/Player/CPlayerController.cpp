@@ -3,7 +3,9 @@
 
 #include "Player/CPlayerController.h"
 #include "CPlayerCharacter.h"
-#include "Blueprint/UserWidget.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "Crunch/DebugHelper.h"
 #include "Widgets/GameplayWidget.h"
 #include "net/UnrealNetwork.h"
 
@@ -55,6 +57,25 @@ void ACPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	
 }
 
+void ACPlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+	
+	UEnhancedInputLocalPlayerSubsystem* InputSubsystem=GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+
+	if (InputSubsystem)
+	{
+		InputSubsystem->RemoveMappingContext(UIInputMapping);
+		InputSubsystem->AddMappingContext(UIInputMapping,1);
+	}
+	
+	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(InputComponent);
+	if (EnhancedInputComp)
+	{
+		EnhancedInputComp->BindAction(ShopToggleInputAction,ETriggerEvent::Triggered,this,&ThisClass::ToggleShop);
+	}
+}
+
 void ACPlayerController::SpawnGameplayWidget()
 {
 	if (!IsLocalPlayerController()) return;
@@ -67,5 +88,13 @@ void ACPlayerController::SpawnGameplayWidget()
 
 		//配置GA在ListItem中的Widget
 		GameplayWidget->ConfigureAbilities(CPlayerCharacter->GetAbilities());
+	}
+}
+
+void ACPlayerController::ToggleShop()
+{
+	if (GameplayWidget)
+	{
+		GameplayWidget->ToggleShop();
 	}
 }

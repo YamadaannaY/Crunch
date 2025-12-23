@@ -29,6 +29,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual void SetupInputComponent() override;
 private:
 
 	//在本地Player的视口内渲染UI
@@ -46,4 +47,13 @@ private:
 	//这个TeamID是由位于服务端的ServerPC权威设置的，设置Replicated的目的是把ID同步给ClientPC
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamID;
+
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	class UInputMappingContext* UIInputMapping;
+
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	class UInputAction* ShopToggleInputAction;
+
+	UFUNCTION()
+	void ToggleShop();
 };

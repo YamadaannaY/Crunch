@@ -15,8 +15,14 @@ void UShopWidget::NativeConstruct()
 	//调用ShopItemType的加载
 	LoadShopItem();
 
-	//创建一个新实例Widget时触发，由于池化机制，这个函数不会被频繁调用，适合用于初始哈
+	//创建一个新实例Widget时触发，由于池化机制，这个函数不会被频繁调用，适合用于初始化
 	ShopItemList->OnEntryWidgetGenerated().AddUObject(this,&ThisClass::ShopItemWidgetGenerated);
+
+	//获取组件
+	if (APawn* OwnerPawn=GetOwningPlayerPawn())
+	{
+		InventoryComponent=OwnerPawn->GetComponentByClass<UInventoryComponent>();
+	}
 }
 
 void UShopWidget::LoadShopItem()
@@ -43,6 +49,12 @@ void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
 
 	if (ItemWidget)
 	{
+		//当生成实例时，为Purchase委托绑定回调
+		if (InventoryComponent)
+		{
+			ItemWidget->OnItemPurchaseIssued.AddUObject(InventoryComponent,&UInventoryComponent::TryPurchase);
+		}
+		
 		ItemsMap.Add(ItemWidget->GetShopItem(),ItemWidget);
 	}
 }

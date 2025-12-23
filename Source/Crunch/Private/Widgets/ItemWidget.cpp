@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Widgets/ItemWidget.h"
-
+#include "Widgets/ItemToolTip.h"
 #include "Components/Image.h"
-#include "Crunch/DebugHelper.h"
+
 
 void UItemWidget::NativeConstruct()
 {
@@ -18,6 +17,27 @@ void UItemWidget::NativeConstruct()
 void UItemWidget::SetIcon(UTexture2D* IconTexture)
 {
 	ItemIcon->SetBrushFromTexture(IconTexture);
+}
+
+UItemToolTip* UItemWidget::SetToolTipWidget(const UPA_ShopItem* Item)
+{
+	if (!Item) return nullptr;
+
+	if (GetOwningPlayer() && ToolTipWidgetClass)
+	{
+		UItemToolTip* ToolTip=CreateWidget<UItemToolTip>(GetOwningPlayer(),ToolTipWidgetClass);
+
+		if (ToolTip)
+		{
+			//为Tip设置参数
+			ToolTip->SetItem(Item);
+			
+			//引擎会自动检测鼠标悬停，并在鼠标进入区域时显示该Widget，移出时隐藏。
+			SetToolTip(ToolTip);
+		}
+		return ToolTip;
+	}
+	return nullptr;
 }
 
 FReply UItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -62,11 +82,10 @@ FReply UItemWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPo
 
 void UItemWidget::RightButtonClicked()
 {
-	Debug::Print("RightMouse Button Clicked");
+	
 }
 
 void UItemWidget::LeftButtonClicked()
 {
-	Debug::Print("LeftMouse Button Clicked");
 	
 }

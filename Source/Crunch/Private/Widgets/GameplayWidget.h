@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GameplayWidget.generated.h"
 
+class UAbilitySystemComponent;
+class UShopWidget;
 class UGameplayAbility;
 class UStatsGauge;
 enum class ECAbilityInputID : uint8;
@@ -24,6 +26,8 @@ public:
 
 	//将所有GA作为List数据源传入
 	void ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities);
+
+	void ToggleShop();
 private:
 	UPROPERTY(meta=(BindWidget))
 	class UValueGauge* HealthBar;
@@ -46,11 +50,23 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	UStatsGauge* StrengthGauge;
 	
-	//一个List，显示GAIcon
+	//ListView显示GAIcon
 	UPROPERTY(meta=(BindWidget))
 	class UAbilityListView* AbilityListView;
 	
 	UPROPERTY()
-	class UAbilitySystemComponent* OwnerAbilitySystemComponent;
+	UAbilitySystemComponent* OwnerAbilitySystemComponent;
+
+	UPROPERTY(meta=(BindWidget))
+	UShopWidget* ShopWidget;
+
+	UPROPERTY(Transient,meta=(BindWidgetAnim))
+	UWidgetAnimation* ShopPopupAnimation;
 	
+	void PlayShopPopupAnimation(bool bPlayForward);
+	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
+	void SetShowMouseCursor(bool bShow);
+	void SetFocusToGameAndUI();
+	void SetFocusToGameOnly();
 };
+  

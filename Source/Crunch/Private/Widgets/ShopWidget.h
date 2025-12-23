@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Inventory/InventoryComponent.h"
 #include "ShopWidget.generated.h"
 
 class UShopItemWidget;
 class UPA_ShopItem;
 class UTileView;
+
 /**
  * 商店UI
  */
@@ -31,5 +33,8 @@ private:
 	//存储所有ShopItemWidget
 	UPROPERTY()
 	TMap<const UPA_ShopItem*,const UShopItemWidget*> ItemsMap;
-	
+
+	//利用组件处理Purchase逻辑
+	UPROPERTY()
+	UInventoryComponent* InventoryComponent;
 };

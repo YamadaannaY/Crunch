@@ -101,4 +101,9 @@ private:
 
 	//递归使Camera的位置逼近Goal，实现插值移动
 	void TickCameraLocalOffsetLerp(FVector Goal);
+
+	/************************Inventory *********************************/
+private:
+	UPROPERTY()
+	class UInventoryComponent* InventoryComponent;
 };
