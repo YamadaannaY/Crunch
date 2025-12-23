@@ -10,7 +10,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 
-UUpperCut::UUpperCut()
+UUpperCut::UUpperCut():UpperCutMontage(nullptr)
 {
 	//防止BasicAttack中断UpperCut
 	BlockAbilitiesWithTag.AddTag(UCAbilitySystemStatics::GetBasicAttackAbilityTag());
