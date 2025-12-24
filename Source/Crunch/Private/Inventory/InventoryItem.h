@@ -65,20 +65,34 @@ class CRUNCH_API UInventoryItem : public UObject
 {
 	GENERATED_BODY()
 public:
+	UInventoryItem();
+	
 	//为新创建的InventoryItem赋值
 	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem);
 
-	const UPA_ShopItem* GetShopItem() const {return ShopItem;}
-	FInventoryItemHandle GetHandle() const {return Handle;}
+	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
+	FORCEINLINE FInventoryItemHandle GetHandle() const {return Handle;}
+	FORCEINLINE int GetStackCount() const {return StackCount;}
+	
+	bool IsValid() const;
 
 	//为ASC应用GE
 	void ApplyGasModifications(UAbilitySystemComponent* AbilitySystemComponent);
+
+	//更新Slot
+	void SetSlot(int NewSlot);
 private:
 	FInventoryItemHandle Handle;
 
 	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
 
+	//已经叠加的层数
+	int StackCount;
+
+	//占的Slot位置
+	int Slot;
+	
 	//为了移除Effect保留其Handle
 	FActiveGameplayEffectHandle ApplyEquippedEffectHandle;
 

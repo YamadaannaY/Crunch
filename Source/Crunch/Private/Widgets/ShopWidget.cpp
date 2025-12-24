@@ -41,12 +41,11 @@ void UShopWidget::ShopItemLoadFinished()
 	}
 }
 
-
 void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
 {
 	//Cast到Item层，将其添加到Map中存储
 	UShopItemWidget* ItemWidget=Cast<UShopItemWidget>(&NewWidget);
-
+	
 	if (ItemWidget)
 	{
 		//当生成实例时，为Purchase委托绑定回调

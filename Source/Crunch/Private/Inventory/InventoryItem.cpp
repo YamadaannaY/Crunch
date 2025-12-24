@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "InventoryItem.h"
-
 #include "PA_ShopItem.h"
 
 FInventoryItemHandle::FInventoryItemHandle() :HandleId(GetInvalidId())
@@ -51,6 +50,11 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key)
 	return Key.GetHandleId();
 }
 
+UInventoryItem::UInventoryItem():StackCount(1)
+{
+	
+}
+
 void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem)
 {
 	Handle=NewHandle;
@@ -86,4 +90,14 @@ void UInventoryItem::ApplyGasModifications(UAbilitySystemComponent* AbilitySyste
 			GrantedAbilitySpecHandle=AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(GrantedAbility));
 		}
 	}
+}
+
+void UInventoryItem::SetSlot(int NewSlot)
+{
+	Slot=NewSlot;
+}
+
+bool UInventoryItem::IsValid() const
+{
+	return ShopItem != nullptr;
 }

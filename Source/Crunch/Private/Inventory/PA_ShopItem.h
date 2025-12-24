@@ -52,7 +52,7 @@ public:
 	FText GetItemName() const {return ItemName;}
 	FText GteItemDescription() const {return ItemDescription;}
 	float GetPrice() const {return Price;}
-	float GetSelfPrice() const {return Price/2.f;}
+	float GetSellPrice() const {return Price/2.f;}
 	bool GetIsStackable() const {return bIsStackable;}
 	bool GetIsConsumable() const {return bIsConsumable;}
 	int GetMaxStackCount() const {return MaxStackCount;}
@@ -86,6 +86,7 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="ShopItem")
 	TSubclassOf<UGameplayAbility> GrantAbility;
 
+	//这个物品是否可以叠加存储
 	UPROPERTY(EditDefaultsOnly,Category="ShopItem")
 	bool bIsStackable=false;
 

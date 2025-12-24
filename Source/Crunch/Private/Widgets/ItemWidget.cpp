@@ -11,7 +11,6 @@ void UItemWidget::NativeConstruct()
 
 	//处理鼠标焦点
 	SetIsFocusable(true);
-	
 }
 
 void UItemWidget::SetIcon(UTexture2D* IconTexture)
