@@ -45,6 +45,45 @@ void UInventoryComponent::BeginPlay()
 	OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 }
 
+void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
+{
+	if (!GetOwner()->HasAuthority()) return;
+
+	//创建InventoryItem,对应分配一个ID
+	UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
+	FInventoryItemHandle NewHandle=FInventoryItemHandle::CreateHandle();
+
+	InventoryItem->InitItem(NewHandle,NewItem);
+
+	//存到哈希表中
+	InventoryMap.Add(NewHandle,InventoryItem);
+
+	//当库存Item创建成功后广播这个Item
+	OnItemAddedDelegate.Broadcast(InventoryItem);
+
+	UE_LOG(LogTemp,Warning,TEXT("Server Adding Shop Item:%s,with id :%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),NewHandle.GetHandleId());
+
+	//在客户端也进行相同的Item生成操作
+	Client_ItemAdded(NewHandle,NewItem);
+
+	//应用ItemGE
+	InventoryItem->ApplyGasModifications(OwnerASC);
+}
+
+void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignHandle, const UPA_ShopItem* Item)
+{
+	if (GetOwner()->HasAuthority()) return;
+
+	UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
+
+	InventoryItem->InitItem(AssignHandle,Item);
+	InventoryMap.Add(AssignHandle,InventoryItem);
+	
+	OnItemAddedDelegate.Broadcast(InventoryItem);
+
+	UE_LOG(LogTemp,Warning,TEXT("Client Adding Shop Item:%s,with id :%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),AssignHandle.GetHandleId());
+}
+
 bool UInventoryComponent::Server_Purchase_Validate(const UPA_ShopItem* ItemToPurchase)
 {
 	return true;
@@ -60,7 +99,6 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 	OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
 
 	UE_LOG(LogTemp,Warning,TEXT("Bought Item:%s"),*(ItemToPurchase->GetName()));
+
+	GrantItem(ItemToPurchase);
 }
-
-
-

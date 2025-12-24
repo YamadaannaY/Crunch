@@ -4,15 +4,18 @@
 
 
 /*
- *	角色组件：处理ShopWidget相关的逻辑
+ *	角色组件：处理ShopWidget相关的逻辑，处理Inventory和Shop之间的Item逻辑
  */
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Inventory/InventoryItem.h"
 #include "InventoryComponent.generated.h"
 
 class UPA_ShopItem;
 class UAbilitySystemComponent;
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, UInventoryItem*);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -20,6 +23,8 @@ class CRUNCH_API UInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	FOnItemAddedDelegate OnItemAddedDelegate;
+	
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
@@ -36,9 +41,20 @@ private:
 	UPROPERTY()
 	UAbilitySystemComponent* OwnerASC;
 
+	UPROPERTY()
+	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
+
 	/******************* Server **********************/
 
 	//购买逻辑应该在服务端执行
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
+
+	//服务端购买操作实现后调用,为买到的ShopItem建立InventoryItem以及对应的ItemHandle,存储在Map中
+	void GrantItem(const UPA_ShopItem* NewItem);
+
+private:
+	//在客户端也生成一个与服务端相同的InventoryItem
+	UFUNCTION(Client,Reliable)
+	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item);
 };
