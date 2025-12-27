@@ -24,7 +24,7 @@ void UCAnimInstance::NativeInitializeAnimation()
 	{
 		OwnerASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::OwnerAimTagChanged);
 	}
-}
+} 
 
 void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -50,9 +50,9 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		//获得差值，这个差值就是BS中要转过的角度。
 		LookRotOffset=UKismetMathLibrary::NormalizedDeltaRotator(ControlRot,BodyRot);
 
+		//将速度向量进行投影，获得在视角朝向方向的前向速度和右向速度
 		FwdSpeed=Vel.Dot(ControlRot.Vector());
 		RightSpeed=-Vel.Dot(ControlRot.Vector().Cross(FVector::UpVector));
-		
 	}
 
 	if (OwnerMovementComp)

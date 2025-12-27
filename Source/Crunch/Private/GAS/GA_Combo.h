@@ -29,27 +29,15 @@ private:
 	//实现一个WaitInputPressTask，绑定触发输入后的回调HandleInputPress
 	void SetupWaitComboInputPress();
 
-	//再次实现WaitInputPressTask处理下一次输入，形成循环，同时处理当前press
+	//再次实现WaitInputPressTask处理下一次输入，形成循环，同时处理当前输入
 	UFUNCTION()
 	void HandleInputPress(float TimeWaited);
 
-	//press后，若NextComboName存在，则设置NextSection为这个Name对应的Section
+	//输入后，若NextComboName存在，则设置NextSection为这个Name对应的Section
 	void TryCommitCombo();
-	
-	//DamageGE
-	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
-	TSubclassOf<UGameplayEffect> DefaultDamageEffect;
-
-	//对不同Section对应的Montage触发的DamageGE进行不同的设置
-	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
-	TMap<FName,TSubclassOf<UGameplayEffect>> DamageEffectMap;
 
 	//找到当前Section对应的DamageGE
 	TSubclassOf<UGameplayEffect> GetDamageEffectForCurrentCombo() const ;
-	
-	//包含所有ComboAnimationSequence的Montage
-	UPROPERTY(EditDefaultsOnly,Category="Animation")
-	UAnimMontage* ComboMontage;
 
 	//EventReceived的回调函数，找到下一个Tag的后缀，即NextComboName
 	UFUNCTION()
@@ -58,6 +46,18 @@ private:
 	//实现伤害逻辑
 	UFUNCTION()
 	void DoDamage(FGameplayEventData Data);
+	
+	//DamageGE
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
+	TSubclassOf<UGameplayEffect> DefaultDamageEffect;
+
+	//对不同Section对应的Montage触发的DamageGE进行不同的设置
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Effect")
+	TMap<FName,TSubclassOf<UGameplayEffect>> DamageEffectMap;
+	
+	//包含所有ComboAnimationSequence的Montage
+	UPROPERTY(EditDefaultsOnly,Category="Animation")
+	UAnimMontage* ComboMontage;
 
 	//获得当前ComboMontage对应的下一个ComboMontage的字面量后缀，同时设置ComboSection的字面量和后缀相等
 	FName NextComboName;

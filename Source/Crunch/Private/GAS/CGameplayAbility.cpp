@@ -47,7 +47,6 @@ TArray<FHitResult> UCGameplayAbility::GetHitResultsFromSweepLocationTargetData(
 	TArray<AActor*> HitActors;
 	
 	const IGenericTeamAgentInterface* OwnerTeamInterface=Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
-
 	
 	for (const TSharedPtr<FGameplayAbilityTargetData> TargetData : TargetDataHandle.Data)
 	{
@@ -122,7 +121,7 @@ void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
 	HitData->HitResult=HitResult;
 	EventData.TargetData.Add(HitData);
 
-	//PassiveGA中设置了以GameplayEvent+EventTag触发
+	//PassiveGA中设置了以GameplayEvent+EventTag，这里直接触发
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target,UGAP_Launch::GetLaunchedAbilityActivationTag(),EventData);
 }
 

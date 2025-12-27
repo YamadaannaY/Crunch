@@ -30,6 +30,7 @@ public:
 	static FGameplayTag GetGoldAttributeTag();
 	static FGameplayTag GetExperienceAttributeTag();
 	static FGameplayTag GetHeroRoleTag();
+	
 	static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const UGameplayAbility* Ability);
 

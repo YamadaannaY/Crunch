@@ -36,17 +36,16 @@ ACCharacter::ACCharacter()
 	OverHeadWidgetComponent=CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
 
-	BindGASChangeDelegates();
-
 	PerceptionStimuliSourceComponent=CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("Perception StimuliSource Component");
 
+	BindGASChangeDelegates();
 }
 
 void ACCharacter::ServerSideInit()
 {
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
 	
-	//在服务端对使用GE对属性初始化,并将GA赋予ASC（指定ID）
+	//在服务端对GA、GE、Attribute进行赋值
 	CAbilitySystemComponent->ServerSideInit();
 }
 
@@ -108,7 +107,6 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 }
 
 //将SendEvent也发送给服务端
-
 void ACCharacter::Server_SendGameplayEventTSelf_Implementation(const FGameplayTag EventTag,
 	const FGameplayEventData& EventData)
 {
@@ -139,9 +137,8 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
 
-		//根据DT修改Hero移动速度
+		//根据PA修改Hero移动速度
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
-
 	}
 }
 
@@ -216,9 +213,8 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 		OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
 		
 		OverHeadWidgetComponent->SetHiddenInGame(false);
-
-		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);
 		
+		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);
 		GetWorldTimerManager().SetTimer(HeadStatGaugeVisibilityUpdateTimerHandle,this,&ACCharacter::UpdateHeadGaugeVisibility,HeadStatGaugeVisibilityUpdateGap,true);
 	}
 }
@@ -254,7 +250,6 @@ void ACCharacter::SetStatusGaugeEnabled(bool bEnabled)
 bool ACCharacter::IsDead() const
 {
 	return GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetDeadStatTag());
-
 }
 
 void ACCharacter::ReSpawnImmediative()

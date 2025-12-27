@@ -1,4 +1,4 @@
-//GameMode是生成Controller的关键类
+	//GameMode是生成Controller的关键类
 //适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置 etc..
 
 

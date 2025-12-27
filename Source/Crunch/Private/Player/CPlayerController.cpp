@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Player/CPlayerController.h"
 #include "CPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
@@ -54,7 +53,6 @@ void ACPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ACPlayerController, TeamID);
-	
 }
 
 void ACPlayerController::SetupInputComponent()

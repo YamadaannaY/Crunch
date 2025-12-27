@@ -10,9 +10,9 @@
 
 /*
  *与其只在服务端构建Item然后发送给客户端，不如直接在两端分别创建，然后以一个Handle进行管理，每个Handle分配一个独特的ID
- *当Purchase在服务端进行完毕后，服务端向客户端发送这个ID，客户端根据ID找到Handle从而创建Item
+ *当Purchase在服务端进行完毕后，服务端向客户端发送这个ID，客户端根据ID找到Handle对应的Item进行相同的操作
  *
- *对应关系：ShopItem+ItemHandle=InventoryItem
+ *对应关系：PA_ShopItem+ItemHandle=InventoryItem
  */
 
 
@@ -80,8 +80,8 @@ public:
 	void ApplyGasModifications(UAbilitySystemComponent* AbilitySystemComponent);
 
 	//更新Slot
-	void SetSlot(int NewSlot);
 private:
+	void SetSlot(int NewSlot);
 	FInventoryItemHandle Handle;
 
 	UPROPERTY()

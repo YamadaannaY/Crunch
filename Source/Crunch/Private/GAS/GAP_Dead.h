@@ -44,10 +44,10 @@ private:
 	//击杀者获取Reward占比
 	UPROPERTY(EditDefaultsOnly,Category="Reward")
 	float KillerRewardPortion=0.5f;
-	
-	//获取范围内对象
-	TArray<AActor*> GetRewardTargets() const ;
 
 	UPROPERTY(EditDefaultsOnly,Category="Reward")
 	TSubclassOf<UGameplayEffect> RewardEffect;
+	
+	//获取范围内对象
+	TArray<AActor*> GetRewardTargets() const ;
 };

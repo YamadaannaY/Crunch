@@ -28,7 +28,5 @@ private:
 
 	//让TeamID和设置的StartPoint中的TagName对应映射
 	UPROPERTY(EditDefaultsOnly,Category="Team")
-
-	//将TeamID和StartPointTag绑定
 	TMap<FGenericTeamId,FName> TeamStartSpotTagMap;
 };

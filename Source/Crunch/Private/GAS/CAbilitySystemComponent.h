@@ -65,6 +65,8 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
 	TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>> BasicAbilities;
 
+	//找到ASC中绑定好的PAGeneric,存储了每个Hero都会具有的InitGA和InitGE，
+	//为了加强复用性用一个PA存储起来，创建新角色直接赋予这个PA，再增加特殊GE/GA即可
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
 	class UPA_AbilitySystemGeneric* AbilitySystemGeneric;
 };

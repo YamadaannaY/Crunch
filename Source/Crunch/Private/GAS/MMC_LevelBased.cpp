@@ -8,8 +8,8 @@ UMMC_LevelBased::UMMC_LevelBased()
 {
 
 	//获取Level值
-	LevelCaptureDefinition.AttributeSource=EGameplayEffectAttributeCaptureSource::Target;
 	LevelCaptureDefinition.AttributeToCapture=UCHeroAttributeSet::GetLevelAttribute();
+	LevelCaptureDefinition.AttributeSource=EGameplayEffectAttributeCaptureSource::Target;
 
 	RelevantAttributesToCapture.Add(LevelCaptureDefinition);
 }
@@ -24,7 +24,7 @@ float UMMC_LevelBased::CalculateBaseMagnitude_Implementation(const FGameplayEffe
 	
 	FAggregatorEvaluateParameters EvaluateParams;
 	EvaluateParams.SourceTags=Spec.CapturedSourceTags.GetAggregatedTags();
-	EvaluateParams.TargetTags=Spec.CapturedTargetTags.GetAggregatedTags();
+	EvaluateParams.TargetTags=Spec.CapturedTargetTags.GetAggregatedTags(); 
 
 	GetCapturedAttributeMagnitude(LevelCaptureDefinition,Spec,EvaluateParams,Level);
 	

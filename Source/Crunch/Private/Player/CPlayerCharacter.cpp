@@ -39,6 +39,7 @@ ACPlayerCharacter::ACPlayerCharacter()
 
 void ACPlayerCharacter::PawnClientRestart()
 {
+	//这段代码只会在本地客户端生效
 	Super::PawnClientRestart();
 	
 	APlayerController* OwningPlayerController=GetController<APlayerController>();
@@ -48,8 +49,6 @@ void ACPlayerCharacter::PawnClientRestart()
 
 		if (InputSubsystem)
 		{
-			//这样设计十分有必要，因为Enhanced Input不会自动去重，在Actor重新被Possess的情况下（最重要的场景：Player死亡又重生）如果不去重
-			//会导致多个IMC叠加
 			InputSubsystem->RemoveMappingContext(GameplayInputMappingContext);
 			InputSubsystem->AddMappingContext(GameplayInputMappingContext,0);
 		}
@@ -89,7 +88,7 @@ void ACPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValu
 void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValue)
 {
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
-	//W+D 组合时输入会是 (1,1)，长度 √2,也就是输入值比直线更快，通过归一化避免
+	//W+D 组合时输入会是 (1,1)，长度 √2,也就是输入值比直线更快，通过归一化获取单位向量避免
 	InputVal.Normalize();
 
 	//将摄像机的坐标系作为位移方向参考，添加映射实现位移
@@ -99,7 +98,6 @@ void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValu
 void ACPlayerCharacter::LearnAbilityLeaderDown(const FInputActionValue& InputActionValue)
 {
 	bIsLearnAbilityLeaderDown=true;
-	
 }
 
 void ACPlayerCharacter::LearnAbilityLeaderUp(const FInputActionValue& InputActionValue)
@@ -109,7 +107,7 @@ void ACPlayerCharacter::LearnAbilityLeaderUp(const FInputActionValue& InputActio
 
 void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionValue, ECAbilityInputID InputID)
 {
-	bool  bPressed=InputActionValue.Get<bool>();
+	const bool bPressed=InputActionValue.Get<bool>();
 
 	//对于拥有等级的Abilities，配合Leader按键进行触发的结果是升级此GA
 	if (bPressed && bIsLearnAbilityLeaderDown)
@@ -134,7 +132,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 		
 		//SetUpInput只在客户端执行，所以这里只有客户端的ASC知道发生了什么，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
-		//相同的Event发送给服务端，因为GA的逻辑必须在权威端执行
+		//相同的Event发送给服务端，因为SendGE的逻辑必须在权威端执行
 		Server_SendGameplayEventTSelf(UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
 	}
 }
@@ -203,7 +201,7 @@ void ACPlayerCharacter::OnAimStatChanged(bool bIsAiming)
 }
 
 void ACPlayerCharacter::LerpCameraToLocalOffset(const FVector& Goal)
-{
+{	
 	GetWorldTimerManager().ClearTimer(CameraLerpTimerHandle);
 	CameraLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
 }
@@ -211,7 +209,7 @@ void ACPlayerCharacter::LerpCameraToLocalOffset(const FVector& Goal)
 void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 {
 	//当前摄像机位置
-	FVector CurrentLocalOffset =CameraBoom->SocketOffset;	/* ViewCamera->GetRelativeLocation();*/
+	const FVector CurrentLocalOffset =CameraBoom->SocketOffset;	/* ViewCamera->GetRelativeLocation();*/
 	
 	//距离小于1uu时递归结束
 	if (FVector::Dist(CurrentLocalOffset,Goal) < 1.f)
@@ -219,8 +217,10 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 		/*ViewCamera->SetRelativeLocation(Goal);*/
 		
 		CameraBoom->SocketOffset = Goal;
-		//保证Camera在便宜过程严格位于Socket位置
+		
+		//保证Camera在偏移过程严格位于Socket位置
 		ViewCamera->SetRelativeLocation(FVector::ZeroVector);
+
 		return ;
 	}
 

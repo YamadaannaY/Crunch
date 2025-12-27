@@ -3,7 +3,7 @@
 
 #include "PA_ShopItem.h"
 
-FItemCollection::FItemCollection() :Items()
+FItemCollection::FItemCollection()
 {
 }
 

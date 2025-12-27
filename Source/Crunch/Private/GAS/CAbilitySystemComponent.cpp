@@ -22,13 +22,14 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 
 void UCAbilitySystemComponent::InitializeBaseAttribute()
 {
-	//找到DT中对应于ASC组件拥有者的Class
 	if (!AbilitySystemGeneric || !AbilitySystemGeneric->GetBaseStatsDataTable() || !GetOwner()) return ;
 
+	//存储了所有Hero各项属性的DT
 	const UDataTable* BaseStatsDataTable=AbilitySystemGeneric->GetBaseStatsDataTable();
 	
 	const FHeroBaseStats* BaseStats=nullptr;
 
+	//遍历DT，找到当前ASC拥有者的属性行，将其赋予BaseStats
 	for (const TPair<FName,uint8*>& DataPair : BaseStatsDataTable->GetRowMap())
 	{
 		BaseStats=BaseStatsDataTable->FindRow<FHeroBaseStats>(DataPair.Key,"");
@@ -86,6 +87,7 @@ void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGa
 	if (Spec)
 	{
 		Spec->Level=Level;
+		
 		//广播SpecDirtied
 		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
 	}

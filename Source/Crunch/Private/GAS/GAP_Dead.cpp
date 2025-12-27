@@ -25,7 +25,7 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 {
 	if (K2_HasAuthority())
 	{
-		//击杀者，通过EffectContext获取
+		//击杀者，通过EffectContext获取	
 		AActor* Killer=TriggerEventData->ContextHandle.GetEffectCauser();
 		if (!Killer || !UCAbilitySystemStatics::IsHero(Killer))
 		{
@@ -93,7 +93,7 @@ TArray<AActor*> UGAP_Dead::GetRewardTargets() const
 {
 	TSet<AActor*> OutActors;
 
-	AActor* AvatarActor=GetAvatarActorFromActorInfo();
+	const AActor* AvatarActor=GetAvatarActorFromActorInfo();
 
 	if (!AvatarActor || !GetWorld())
 	{
@@ -122,7 +122,6 @@ TArray<AActor*> UGAP_Dead::GetRewardTargets() const
 			{
 				continue;
 			}
-
 			OutActors.Add(OverlapResult.GetActor());
 		}
 	}

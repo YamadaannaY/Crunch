@@ -81,7 +81,7 @@ void UUpperCut::StartLaunching(FGameplayEventData EventData)
 			FHitResult HitResult=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(EventData.TargetData,i);
 
 			PushTarget(HitResult.GetActor(),FVector::UpVector*UpperCutLaunchSpeed);
-
+	
 			ApplyGameplayEffectToHitResultActor(HitResult,LaunchDamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
 		}
 	}
@@ -161,4 +161,3 @@ void UUpperCut::HandleComboDamageEvent(FGameplayEventData EventData)
 		}
 	}
 }
-
