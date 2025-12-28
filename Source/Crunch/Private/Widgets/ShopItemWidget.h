@@ -24,7 +24,9 @@ public:
 	FOnItemPurchaseIssused OnItemPurchaseIssued;
 	FOnShopItemSelected OnShopItemClicked;
 	
-	//ItemUI用ListView统一管理，调用OnSet保证Widget加入到ListView中立刻加载Icon
+	//当ListView由空位要显示Widget时，会从对象池取出一个Widget（如果没有会调用CreateWidget）进行显示，此时调用这个函数
+	//也就是要显示的Widget要调用的函数，适合用于初始化。
+	//在本UI框架中，ShopWidget从AssMan中取出了所有PA并AddItem到了ListView，等价于ListItemObject
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	
 	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}

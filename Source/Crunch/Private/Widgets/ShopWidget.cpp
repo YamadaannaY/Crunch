@@ -10,12 +10,13 @@ void UShopWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	//打开Shop后聚焦
 	SetIsFocusable(true);
 
 	//调用ShopItemType的加载
 	LoadShopItem();
 
-	//创建一个新实例Widget时触发，由于池化机制，这个函数不会被频繁调用，适合用于初始化
+	//创建一个新实例Widget时触发的委托回调，进行初始化，这个初始化是对于这个格子而言，数据更新不会调用此初始化
 	ShopItemList->OnEntryWidgetGenerated().AddUObject(this,&ThisClass::ShopItemWidgetGenerated);
 
 	//获取组件
@@ -37,6 +38,7 @@ void UShopWidget::ShopItemLoadFinished()
 
 	for (const UPA_ShopItem* ShopItem : ShopItems)
 	{
+		//将这个PA加入Item数组中，作为Widget的数据。实际上的EntryWidget是一个简单的只有空Image的Widget，其显示由PA决定
 		ShopItemList->AddItem(const_cast<UPA_ShopItem*>(ShopItem));		
 	}
 }

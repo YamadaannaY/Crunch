@@ -10,7 +10,8 @@ struct FOnAttributeChangeData;
 class ULevelGauge;
 struct FGameplayAbilitySpec;
 class UAbilitySystemComponent;
-//存储了GAWidget的数据结构体,用一个DT存储
+
+//存储了GAWidget所需数据的结构体,用一个DT统一存储
 USTRUCT(BlueprintType)
 struct FAbilityWidgetData :public FTableRowBase
 {
@@ -47,10 +48,10 @@ class UAbilityGauge : public UUserWidget,public IUserObjectListEntry
 	GENERATED_BODY()
 	
 public:
-	//Gauge构建时调用函数，将Counter隐藏，同时绑定对Cost/Cooldown回调，处理的是整体逻辑
+	//构建时调用函数，将Counter隐藏，同时绑定对Cost/Cooldown回调，处理的是整体逻辑
 	virtual void NativeConstruct() override;
 	
-	//在UserWidget被ListView绑定为某个Item或复用后重新绑定新Item时调用，这里处理了对UI的细节逻辑
+	//获取Item池中的数据，利用数据处理对UI的配置
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
 	//将Data中存储的Icon加载并赋予IconMaterialParaName
@@ -102,19 +103,31 @@ private:
 	//这个Gauge对应的GAClass
 	UPROPERTY()
 	UGameplayAbility* AbilityCDO;
+	
+	float CacheCooldownDuration;
+	float CacheCooldownTimeRemaining;
+
+	
+	bool bIsAbilityLearned=false;
+
+	//分别对应了完成和冷却两个计时器
+	FTimerHandle CooldownTimerHandle;
+	FTimerHandle CooldownTimerUpdateHandle;
+
+	UPROPERTY()
+	const UAbilitySystemComponent* OwnerASComp;
+	
+	const FGameplayAbilitySpec* CacheAbilitySpec;
+	
+	//Options用于对Text的AsNumber参数进行数位限制
+	FNumberFormattingOptions WholeNumberFormattingOptions;
+	FNumberFormattingOptions TwoDigitNumberFormattingOptions;
 
 	//当Cost/Cooldown被触发时调用
 	void AbilityCommitted(UGameplayAbility* Ability);
 
 	//冷却逻辑
 	void StartCooldown(float CooldownTimeRemaining,float CooldownDuration);
-	
-	float CacheCooldownDuration;
-	float CacheCooldownTimeRemaining;
-
-	//分别对应了完成和冷却两个计时器
-	FTimerHandle CooldownTimerHandle;
-	FTimerHandle CooldownTimerUpdateHandle;
 
 	//当Cooldown整体完成后Timer回调
 	void CooldownFinished();
@@ -122,15 +135,9 @@ private:
 	//Cooldown冷却逻辑
 	void UpdateCooldown();
 
-	UPROPERTY()
-	const UAbilitySystemComponent* OwnerASComp;
-	
-	const FGameplayAbilitySpec* CacheAbilitySpec;
-
 	//通过此Gauge中存储的AbilityCDO对应的Class获取Spec
 	const FGameplayAbilitySpec* GetAbilitySpec();
 
-	bool bIsAbilityLearned=false;
 
 	//SpecDirtied广播的回调
 	void AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec);
@@ -143,9 +150,5 @@ private:
 
 	//调用UpdateCanCast判断Mana值是否足以释放技能
 	void ManaUpdated(const FOnAttributeChangeData& Data);
-	
-	//Options用于对Text的AsNumber参数进行数位限制
-	FNumberFormattingOptions WholeNumberFormattingOptions;
-	FNumberFormattingOptions TwoDigitNumberFormattingOptions;
 };
 

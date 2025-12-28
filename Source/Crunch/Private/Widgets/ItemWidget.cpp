@@ -9,7 +9,7 @@ void UItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//处理鼠标焦点
+	//允许聚焦，注意不是设置为聚焦
 	SetIsFocusable(true);
 }
 
@@ -43,10 +43,11 @@ FReply UItemWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const F
 {
 	FReply SuperReply=Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 
-	//将当前Widget设置为焦点（鼠标可操作区域）
+	//将当前Widget设置为焦点（鼠标可操作区域），Handled()表示点击事件处理完毕，不再处理这个输入，防止误触其他操作
 	
 	if (InMouseEvent.IsMouseButtonDown(EKeys::RightMouseButton))
 	{
+		//将当前焦点转移到这个Item上
 		return FReply::Handled().SetUserFocus(TakeWidget());
 	}
 

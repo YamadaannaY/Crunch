@@ -10,6 +10,7 @@
 /**
  * 
  */
+
 UCLASS()
 class ULevelGauge : public UUserWidget
 {
@@ -29,7 +30,7 @@ private:
 	FNumberFormattingOptions NumberFormattingOptions;
 
 	UPROPERTY()
-	const UAbilitySystemComponent* OwnerASC;
+	UAbilitySystemComponent* OwnerASC;
 
 	//基于经验值变化改变GaugeText和PercentMaterial变化
 	void UpdateGauge(const FOnAttributeChangeData& Data);

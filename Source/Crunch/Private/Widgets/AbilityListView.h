@@ -11,7 +11,7 @@ enum class ECAbilityInputID : uint8;
  * 
  */
 UCLASS()
-class CRUNCH_API UAbilityListView : public UListView
+class UAbilityListView : public UListView
 {
 	GENERATED_BODY()
 public:

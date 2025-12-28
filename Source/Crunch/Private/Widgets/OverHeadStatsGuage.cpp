@@ -12,4 +12,3 @@ void UOverHeadStatsGauge::ConfigureWithASC(class UAbilitySystemComponent* Abilit
 		ManaBar->SetAndBoundToGameplayAttribute(AbilitySystemComponent,UCAttributeSet::GetManaAttribute(),UCAttributeSet::GetMaxManaAttribute());
 	}
 }
-

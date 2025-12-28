@@ -16,10 +16,10 @@ class UOverHeadStatsGauge : public UUserWidget
 
 public:
 	//为OverHeadBar调用SetAndBoundToGameplayAttribute，更新Percent和Text
-	void ConfigureWithASC(class UAbilitySystemComponent* AbilitySystemComponent);
+	void ConfigureWithASC(UAbilitySystemComponent* AbilitySystemComponent);
 private:
 	UPROPERTY(meta=(BindWidget))
-	class UValueGauge* HealthBar;
+	UValueGauge* HealthBar;
 	
 	UPROPERTY(meta=(BindWidget))
 	UValueGauge* ManaBar;

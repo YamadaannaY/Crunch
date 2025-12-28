@@ -32,7 +32,7 @@ void UStatsGauge::NativeConstruct()
 		bool bFound;
 		
 		//为GaugeText赋值
-		float AttributeVal=OwnerASC->GetGameplayAttributeValue(Attribute,bFound);
+		const float AttributeVal=OwnerASC->GetGameplayAttributeValue(Attribute,bFound);
 		SetValue(AttributeVal);
 
 		//监听对应属性的变化

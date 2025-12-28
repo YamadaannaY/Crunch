@@ -53,10 +53,10 @@ void UAbilityGauge::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 
-	//在ListItem中AddItem的对象就是SubClassOfGA，获取其CDO
+	//获取Item池中的GAClass
 	AbilityCDO=Cast<UGameplayAbility>(ListItemObject);
 
-	//获取这个CDO配置的GE对应的数值
+	//获取这个GA配置的GE对应的数值
 	const float CooldownDuration=UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
 	const float Cost=UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
 
@@ -77,10 +77,9 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
 
 void UAbilityGauge::AbilityCommitted(UGameplayAbility* Ability)
 {
-	//确认调用GA类默认对象就是这个Gauge存储的GA的CDO 使用CDO的原因：在ListItem中传入的是GASubClassof，即一个默认类对象而非实例
 	if (Ability->GetClass()->GetDefaultObject() ==AbilityCDO)
 	{
-		//这两个值用局部变量定义，因为需要多次调用此函数，每次都是初始化为0
+		//这两个值用局部变量定义，因为需要多次调用此函数，每次都是初始化为0开始
 		float CooldownTimeRemaining=0.0f;
 		float CooldownDuration=0.0f;
 
@@ -157,8 +156,8 @@ void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)
 
 	UpdateCanCast();
 
-	float NewCooldownDuration=UCAbilitySystemStatics::GetCoolDownDurationFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
-	float NewCost=UCAbilitySystemStatics::GetManaCostFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
+	const float NewCooldownDuration=UCAbilitySystemStatics::GetCoolDownDurationFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
+	const float NewCost=UCAbilitySystemStatics::GetManaCostFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
 
 	CooldownDurationText->SetText(FText::AsNumber(NewCooldownDuration));
 	CostText->SetText(FText::AsNumber(NewCost));
@@ -182,7 +181,7 @@ void UAbilityGauge::UpdateCanCast()
 
 void UAbilityGauge::UpgradePointUpdated(const FOnAttributeChangeData& Data)
 {
-	bool HasUpgradePoint=Data.NewValue>0;
+	const bool HasUpgradePoint=Data.NewValue>0;
 
 	const FGameplayAbilitySpec* AbilitySpec=GetAbilitySpec();
 

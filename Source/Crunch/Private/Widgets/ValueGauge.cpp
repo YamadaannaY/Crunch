@@ -28,8 +28,9 @@ void UValueGauge::SetAndBoundToGameplayAttribute(UAbilitySystemComponent* Abilit
 		bool bFound;
 		
 		//在指定ASC中寻找两个Value，如果找到进行一次初始化，随后正式开始追踪UI变化
-		float Value=AbilitySystemComponent->GetGameplayAttributeValue(Attribute,bFound);
-		float MaxValue=AbilitySystemComponent->GetGameplayAttributeValue(MaxAttribute,bFound);
+		const  float Value=AbilitySystemComponent->GetGameplayAttributeValue(Attribute,bFound);
+		const float MaxValue=AbilitySystemComponent->GetGameplayAttributeValue(MaxAttribute,bFound);
+		
 		if(bFound)
 		{
 			
@@ -48,7 +49,7 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 	CacheValue=NewValue;
 	CacheMaxValue=NewMaxValue;
 
-	//NewMaxValue作为分母不能为0
+	//NewMaxValue作为分母不能为0 (并非不能？？？)
 	if (NewMaxValue==0)
 	{
 		UE_LOG(LogTemp,Warning,TEXT("ValueGauge:%s,NewMaxValue can`t be 0"),*GetName());
@@ -56,12 +57,12 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 	}
 
 	//改变Bar的Percent
-	float NewPercent=NewValue/NewMaxValue;
+	const float NewPercent=NewValue/NewMaxValue;
 	ProgressBar->SetPercent(NewPercent);
 
 	//ValueText的设置，设置没有小数点，并且规定了Text的格式，传入值
-	FNumberFormattingOptions FormatOps=FNumberFormattingOptions().SetMaximumFractionalDigits(0);
-	FText NewText = FText::Format(
+	const FNumberFormattingOptions FormatOps=FNumberFormattingOptions().SetMaximumFractionalDigits(0);
+	const FText NewText = FText::Format(
 	FTextFormat::FromString("{0}/{1}"),
 	FText::AsNumber(NewValue, &FormatOps),
 	FText::AsNumber(NewMaxValue, &FormatOps)
