@@ -29,6 +29,8 @@ public:
 
 	//对应的SlotNum
 	FORCEINLINE int GetSlotNumber() const {return SlotNumber;}
+
+	void SetSlotNumber(int NewSlotNumber);
 private:
 	void UpdateStackCount();
 

@@ -80,8 +80,8 @@ public:
 	void ApplyGasModifications(UAbilitySystemComponent* AbilitySystemComponent);
 
 	//更新Slot
-private:
 	void SetSlot(int NewSlot);
+private:
 	FInventoryItemHandle Handle;
 
 	UPROPERTY()
