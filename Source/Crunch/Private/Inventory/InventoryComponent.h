@@ -16,6 +16,7 @@ class UPA_ShopItem;
 class UAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangeDelegate, const FInventoryItemHandle&,int);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -24,7 +25,7 @@ class CRUNCH_API UInventoryComponent : public UActorComponent
 
 public:
 	FOnItemAddedDelegate OnItemAddedDelegate;
-	
+	FOnItemStackCountChangeDelegate OnItemStackCountChangeDelegate;
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
@@ -39,17 +40,29 @@ public:
 	void ItemSlotChange(const FInventoryItemHandle Handle,int NewSlotNumber);
 
 	UInventoryItem* GetInventoryItemByHandle(const FInventoryItemHandle Handle) const ;
+
+	//调用判断仓库是否已经存满，即不可以存放当前Item 
+	bool IsFullFor(const UPA_ShopItem* Item) const ;
+
+	//判断生成的Item数量是否已经大于仓库容量
+	bool IsAllSlotOccupied() const;
+
+	//遍历Map查询当前Item所属Slot，判断Stack是否还可以存储，如果可以返回InventoryItem,增加其Count
+	UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const ;
+
 protected:
 	//获取ASC
 	virtual void BeginPlay() override;
 
 private:
+	//仓库容量
 	UPROPERTY(EditDefaultsOnly,Category="Inventory")
 	int Capacity=6;
 	
 	UPROPERTY()
 	UAbilitySystemComponent* OwnerASC;
 
+	//HandleID和Item的映射存储
 	UPROPERTY()
 	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
 
@@ -66,4 +79,9 @@ private:
 	//在客户端也生成一个与服务端相同的InventoryItem
 	UFUNCTION(Client,Reliable)
 	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item);
+
+	//在客户端也进行StackCount广播委托修改Widget的StackText值
+	UFUNCTION(Client,Reliable)
+	void Client_ItemStackCountChangeAdded(FInventoryItemHandle Handle,int NewCount);
+		
 };

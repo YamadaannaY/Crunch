@@ -6,12 +6,12 @@
 #include "GAS/CAbilitySystemComponent.h"
 #include "UObject/Object.h"
 #include "GameplayEffectTypes.h"
+#include "PA_ShopItem.h"
 #include "InventoryItem.generated.h"
 
 /*
  *与其只在服务端构建Item然后发送给客户端，不如直接在两端分别创建，然后以一个Handle进行管理，每个Handle分配一个独特的ID
  *当Purchase在服务端进行完毕后，服务端向客户端发送这个ID，客户端根据ID找到Handle对应的Item进行相同的操作
- *
  *对应关系：PA_ShopItem+ItemHandle=InventoryItem
  */
 
@@ -66,6 +66,17 @@ class CRUNCH_API UInventoryItem : public UObject
 	GENERATED_BODY()
 public:
 	UInventoryItem();
+
+	//增加StackCount,成功添加返回true
+	bool AddStackCount();
+
+	//return true if StackCount<=0
+	bool ReduceStackCount();
+
+	bool SetStackCount(int NewStackCount);
+	
+	bool IsStackFull() const ;
+	bool IsForItem(const UPA_ShopItem* Item) const; 
 	
 	//为新创建的InventoryItem赋值
 	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem);

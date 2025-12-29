@@ -30,9 +30,12 @@ public:
 	//对应的SlotNum
 	FORCEINLINE int GetSlotNumber() const {return SlotNumber;}
 
+	//更新SlotNumber
 	void SetSlotNumber(int NewSlotNumber);
-private:
+
+	//根据InventoryItem的Stack值更新StackText
 	void UpdateStackCount();
+private:
 
 	//格子为空时显示的Texture
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
@@ -58,5 +61,6 @@ private:
 	UPROPERTY()
 	const UInventoryItem* InventoryItem;
 
+	//对应Slot的序号
 	int SlotNumber;
 };

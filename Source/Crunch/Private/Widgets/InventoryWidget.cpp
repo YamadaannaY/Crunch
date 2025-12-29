@@ -16,7 +16,7 @@ void UInventoryWidget::NativeConstruct()
 		{
 			//在Component中准备好的委托，购买Item后调用的GrantItem中广播，执行对Item的操作
 			InventoryComponent->OnItemAddedDelegate.AddUObject(this,&ThisClass::ItemAdded);
-
+			InventoryComponent->OnItemStackCountChangeDelegate.AddUObject(this,&ThisClass::ItemStackCountChanged);
 			const int Capacity = InventoryComponent->GetCapacity();
 
 			//初始化的时候删除子Widget(调试期间添加的ItemWidget)
@@ -57,6 +57,16 @@ void UInventoryWidget::ItemAdded(const UInventoryItem* InventoryItem)
 			//将SlotNumber传递给Item更新
 			InventoryComponent->ItemSlotChange(InventoryItem->GetHandle(),NextAvailableSlot->GetSlotNumber());
 		}
+	}
+}
+
+void UInventoryWidget::ItemStackCountChanged(const FInventoryItemHandle& Handle, int NewCount)
+{
+	UInventoryItemWidget** FoundWidget=PopulatedItemEntryWidgets.Find(Handle);
+
+	if (FoundWidget)
+	{
+		(*FoundWidget)->UpdateStackCount();
 	}
 }
 

@@ -33,8 +33,11 @@ private:
 	UPROPERTY()
 	TMap<FInventoryItemHandle,UInventoryItemWidget*> PopulatedItemEntryWidgets;
 
-	
+	//当一个Item被购买后Grant时广播调用的委托，将Item作参数更新Slot
 	void ItemAdded(const UInventoryItem* InventoryItem);
+
+	//当一个Item可以StackCount时广播委托的回调函数
+	void ItemStackCountChanged(const FInventoryItemHandle& Handle , int NewCount);
 
 	UInventoryItemWidget* GetNextAvailableSlot() const ;
 };
