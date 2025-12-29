@@ -110,7 +110,8 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 {
 	if (!ItemToPurchase) return ;
 
-	if (GetGold()<=ItemToPurchase->GetPrice()) return ;
+	if (GetGold()<ItemToPurchase->GetPrice()) return ;
+	if (InventoryMap.Num()>=GetCapacity()) return ;
 
 	//这个函数会触发PostGameplayEffectExecute,常用于逻辑修改，这里进行Add，修改Gold值
 	OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());

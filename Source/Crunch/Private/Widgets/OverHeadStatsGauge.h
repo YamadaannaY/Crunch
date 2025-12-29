@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "OverHeadStatsGauge.generated.h"
 
+class UValueGauge;
+class UAbilitySystemComponent;
+
 /**
  * 
  */

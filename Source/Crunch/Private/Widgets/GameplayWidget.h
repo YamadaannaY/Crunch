@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameplayWidget.generated.h"
 
+class UInventoryWidget;
 class UAbilitySystemComponent;
 class UShopWidget;
 class UGameplayAbility;
@@ -62,6 +63,9 @@ private:
 
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	UWidgetAnimation* ShopPopupAnimation;
+
+	UPROPERTY(meta=(BindWidget))
+	UInventoryWidget* InventoryWidget;
 	
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);

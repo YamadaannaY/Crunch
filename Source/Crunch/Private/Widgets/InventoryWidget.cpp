@@ -19,7 +19,7 @@ void UInventoryWidget::NativeConstruct()
 
 			const int Capacity = InventoryComponent->GetCapacity();
 
-			//初始化
+			//初始化的时候删除子Widget(调试期间添加的ItemWidget)
 			ItemList->ClearChildren();
 
 			//遍历仓库容量次数
