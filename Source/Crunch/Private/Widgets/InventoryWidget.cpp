@@ -35,6 +35,7 @@ void UInventoryWidget::NativeConstruct()
 
 					//Item成功添加到Inventory，添加到ItemWidgets数组中存储
 					ItemWidgets.Add(NewEmptyWidget);
+					NewEmptyWidget->OnInventoryItemDropped.AddUObject(this,&ThisClass::HandleItemDragDrop);
 				}
 			}
 		}
@@ -81,4 +82,29 @@ UInventoryItemWidget* UInventoryWidget::GetNextAvailableSlot() const
 	}
 
 	return nullptr;
+}
+
+void UInventoryWidget::HandleItemDragDrop(UInventoryItemWidget* DestinationWidget, UInventoryItemWidget* SourceWidget)
+{
+	const UInventoryItem* SrcItem=SourceWidget->GetInventoryItem();
+	const UInventoryItem* DstItem=DestinationWidget->GetInventoryItem();
+
+	DestinationWidget->UpdateInventoryItem(SrcItem);
+	SourceWidget->UpdateInventoryItem(DstItem);
+
+	PopulatedItemEntryWidgets[DestinationWidget->GetItemHandle()]=DestinationWidget;
+
+	if (InventoryComponent)
+	{
+		InventoryComponent->ItemSlotChange(DestinationWidget->GetItemHandle(),DestinationWidget->GetSlotNumber());
+	}
+
+	if (!SourceWidget->IsEmpty())
+	{
+		PopulatedItemEntryWidgets[SourceWidget->GetItemHandle()]=SourceWidget;
+		if (InventoryComponent)
+		{
+			InventoryComponent->ItemSlotChange(SourceWidget->GetItemHandle(),SourceWidget->GetSlotNumber());
+		}
+	}
 }

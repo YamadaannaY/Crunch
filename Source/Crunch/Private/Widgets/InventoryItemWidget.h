@@ -8,6 +8,9 @@
 #include "InventoryItemWidget.generated.h"
 
 class UInventoryItem;
+class UInventoryItemWidget;
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInventoryItemDropped,UInventoryItemWidget*,UInventoryItemWidget*)
+
 /**
  * 
  */
@@ -16,6 +19,8 @@ class CRUNCH_API UInventoryItemWidget : public UItemWidget
 {
 	GENERATED_BODY()
 public:
+	FOnInventoryItemDropped OnInventoryItemDropped;
+	
 	virtual void NativeConstruct() override;
 
 	//在Inventory中传入Item，调用这个函数接收，进行文本赋值和Icon显示
@@ -35,6 +40,12 @@ public:
 
 	//根据InventoryItem的Stack值更新StackText
 	void UpdateStackCount();
+
+	UTexture2D* GetIconTexture() const;
+
+	FORCEINLINE const UInventoryItem* GetInventoryItem() const {return InventoryItem;}
+
+	FInventoryItemHandle GetItemHandle() const;
 private:
 
 	//格子为空时显示的Texture
@@ -63,4 +74,16 @@ private:
 
 	//对应Slot的序号
 	int SlotNumber;
+
+	/********************** Drag Drop *******************/
+
+private:
+    //开始阶段，在DetectDrag并且移动鼠标进行拖拽时调用，创建Op对象并作为OutOp，创建后调用SetItem将此UI作为DragItem
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+
+	//Drag结束时调用，在松开鼠标按键时对应的Widget位置上调用，用来实现交换Item的具体逻辑
+	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
+
+	UPROPERTY(EditDefaultsOnly,Category="DragDrop")
+	TSubclassOf<class UInventoryItemDragDropOp> DragDropOpClass;
 };

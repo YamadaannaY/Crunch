@@ -70,7 +70,7 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 	
 	//CueParam
 	FGameplayCueParameters BlastingCueParams;
-	BlastingCueParams.Location=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,0).ImpactPoint;
+	BlastingCueParams.Location=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,1).ImpactPoint;
 
 	//这是一个参数存储变量，起到桥接的作用
 	BlastingCueParams.RawMagnitude=TargetAreaRadius;

@@ -40,4 +40,6 @@ private:
 	void ItemStackCountChanged(const FInventoryItemHandle& Handle , int NewCount);
 
 	UInventoryItemWidget* GetNextAvailableSlot() const ;
+
+	void HandleItemDragDrop(UInventoryItemWidget* DestinationWidget,UInventoryItemWidget* SourceWidget);
 };
