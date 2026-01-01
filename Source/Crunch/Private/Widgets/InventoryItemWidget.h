@@ -9,7 +9,9 @@
 
 class UInventoryItem;
 class UInventoryItemWidget;
+
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInventoryItemDropped,UInventoryItemWidget*,UInventoryItemWidget*)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnButtonClick,const FInventoryItemHandle&)
 
 /**
  * 
@@ -20,6 +22,13 @@ class CRUNCH_API UInventoryItemWidget : public UItemWidget
 	GENERATED_BODY()
 public:
 	FOnInventoryItemDropped OnInventoryItemDropped;
+	FOnButtonClick OnLeftButtonClick;
+	FOnButtonClick OnRightButtonClick;
+
+	//当左右键点击时触发的函数回调
+	
+	virtual void RightButtonClicked() override;
+	virtual void LeftButtonClicked() override;
 	
 	virtual void NativeConstruct() override;
 

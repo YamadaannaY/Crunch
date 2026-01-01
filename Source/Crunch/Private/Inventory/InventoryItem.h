@@ -70,7 +70,7 @@ public:
 	//增加StackCount,成功添加返回true
 	bool AddStackCount();
 
-	//return true if StackCount<=0
+	//return true if StackCount>0
 	bool ReduceStackCount();
 
 	bool SetStackCount(int NewStackCount);
@@ -84,11 +84,18 @@ public:
 	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
 	FORCEINLINE FInventoryItemHandle GetHandle() const {return Handle;}
 	FORCEINLINE int GetStackCount() const {return StackCount;}
+
+	//GrantedAbility激活
+	bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
+
+	//ConsumeEffect应用
+	void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
 	
 	bool IsValid() const;
 
 	//为ASC应用GE
-	void ApplyGasModifications(UAbilitySystemComponent* AbilitySystemComponent);
+	void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+	void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
 
 	//更新Slot
 	void SetSlot(int NewSlot);

@@ -16,6 +16,7 @@ void UInventoryWidget::NativeConstruct()
 		{
 			//在Component中准备好的委托，购买Item后调用的GrantItem中广播，执行对Item的操作
 			InventoryComponent->OnItemAddedDelegate.AddUObject(this,&ThisClass::ItemAdded);
+			InventoryComponent->OnItemRemoveDelegate.AddUObject(this,&ThisClass::ItemRemoved);
 			InventoryComponent->OnItemStackCountChangeDelegate.AddUObject(this,&ThisClass::ItemStackCountChanged);
 			const int Capacity = InventoryComponent->GetCapacity();
 
@@ -36,6 +37,7 @@ void UInventoryWidget::NativeConstruct()
 					//Item成功添加到Inventory，添加到ItemWidgets数组中存储
 					ItemWidgets.Add(NewEmptyWidget);
 					NewEmptyWidget->OnInventoryItemDropped.AddUObject(this,&ThisClass::HandleItemDragDrop);
+					NewEmptyWidget->OnLeftButtonClick.AddUObject(InventoryComponent,&UInventoryComponent::TryActivateItem);
 				}
 			}
 		}
@@ -106,5 +108,15 @@ void UInventoryWidget::HandleItemDragDrop(UInventoryItemWidget* DestinationWidge
 		{
 			InventoryComponent->ItemSlotChange(SourceWidget->GetItemHandle(),SourceWidget->GetSlotNumber());
 		}
+	}
+}
+
+void UInventoryWidget::ItemRemoved(const FInventoryItemHandle& ItemHandle)
+{
+	UInventoryItemWidget** FoundWidget=PopulatedItemEntryWidgets.Find(ItemHandle);
+	if (FoundWidget && *FoundWidget)
+	{
+		(*FoundWidget)->EmptySlot();
+		PopulatedItemEntryWidgets.Remove(ItemHandle);
 	}
 }

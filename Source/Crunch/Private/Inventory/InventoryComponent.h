@@ -16,6 +16,7 @@ class UPA_ShopItem;
 class UAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoveDelegate, const FInventoryItemHandle&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangeDelegate, const FInventoryItemHandle&,int);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -25,7 +26,12 @@ class CRUNCH_API UInventoryComponent : public UActorComponent
 
 public:
 	FOnItemAddedDelegate OnItemAddedDelegate;
+	FOnItemRemoveDelegate OnItemRemoveDelegate;
 	FOnItemStackCountChangeDelegate OnItemStackCountChangeDelegate;
+
+	//调用后在服务端和客户端尝试激活Item，应用GE或者赋予GA
+	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
+
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
@@ -72,14 +78,22 @@ private:
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
 
-	//服务端购买操作实现后调用,为买到的ShopItem建立InventoryItem以及对应的ItemHandle,存储在Map中
+	UFUNCTION(Server, Reliable,WithValidation)
+	void Server_ActivateItem(FInventoryItemHandle ItemHandle);
+
 	void GrantItem(const UPA_ShopItem* NewItem);
+	void ConsumeItem(UInventoryItem* Item);
+	void RemoveItem(UInventoryItem* Item);
 
 private:
 	//在客户端也生成一个与服务端相同的InventoryItem
 	UFUNCTION(Client,Reliable)
 	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item);
 
+	//当Item激活后消耗Stack，Stack为0时调用用于Remove
+	UFUNCTION(Client,Reliable)
+	void Client_ItemRemoved(FInventoryItemHandle ItemHandle);
+		
 	//在客户端也进行StackCount广播委托修改Widget的StackText值
 	UFUNCTION(Client,Reliable)
 	void Client_ItemStackCountChangeAdded(FInventoryItemHandle Handle,int NewCount);

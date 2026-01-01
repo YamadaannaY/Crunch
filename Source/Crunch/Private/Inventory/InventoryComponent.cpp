@@ -8,6 +8,15 @@
 #include "GAS/CHeroAttributeSet.h"
 
 
+void UInventoryComponent::TryActivateItem(const FInventoryItemHandle& ItemHandle)
+{
+	UInventoryItem* InventoryItem=GetInventoryItemByHandle(ItemHandle);
+	if (!InventoryItem) return ;
+
+	//服务端应用Item
+	Server_ActivateItem(ItemHandle);
+}
+
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent() :OwnerASC(nullptr)
 {
@@ -93,6 +102,28 @@ void UInventoryComponent::BeginPlay()
 	OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 }
 
+void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandle ItemHandle)
+{
+	//获取Item
+	UInventoryItem* InventoryItem=GetInventoryItemByHandle(ItemHandle);
+	if (!InventoryItem) return ;
+
+	//如果有ASC中有GA，尝试执行。     获取ShopItem
+	InventoryItem->TryActivateGrantedAbility(OwnerASC);
+	const UPA_ShopItem* Item=InventoryItem->GetShopItem();
+
+	//判断是否是可以Consume的Item，即有主动消耗的效果
+	if (Item->GetIsConsumable())
+	{
+		ConsumeItem(InventoryItem);
+	}
+}
+
+bool UInventoryComponent::Server_ActivateItem_Validate(FInventoryItemHandle ItemHandle)
+{
+	return true;
+}
+
 void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 {
 	if (!GetOwner()->HasAuthority()) return;
@@ -125,13 +156,57 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 		Client_ItemAdded(NewHandle,NewItem);
 
 		//应用ItemGE
-		InventoryItem->ApplyGasModifications(OwnerASC);
+		InventoryItem->ApplyGASModifications(OwnerASC);
 		
 	}
 }
 
+void UInventoryComponent::ConsumeItem(UInventoryItem* Item)
+{
+	if (!GetOwner()->HasAuthority()) return;
+	if (!Item) return;
+
+	//调用GE
+	Item->ApplyConsumeEffect(OwnerASC);
+
+	//自减一次，如果此时StackCount<0,将Item移除
+	if (!Item->ReduceStackCount())
+	{
+		RemoveItem(Item);
+	}
+	else
+	{
+		//更新自减后的ItemStack
+		OnItemStackCountChangeDelegate.Broadcast(Item->GetHandle(),Item->GetStackCount());
+		Client_ItemStackCountChangeAdded(Item->GetHandle(),Item->GetStackCount());
+	}
+}
+
+void UInventoryComponent::RemoveItem(UInventoryItem* Item)
+{
+	if (!GetOwner()->HasAuthority()) return ;
+	
+	Item->RemoveGASModifications(OwnerASC);
+	OnItemRemoveDelegate.Broadcast(Item->GetHandle());
+	InventoryMap.Remove(Item->GetHandle());
+	Client_ItemRemoved(Item->GetHandle());
+}
+
+void UInventoryComponent::Client_ItemRemoved_Implementation(FInventoryItemHandle ItemHandle)
+{
+	if (GetOwner()->HasAuthority()) return;
+
+	UInventoryItem* InventoryItem= GetInventoryItemByHandle(ItemHandle);
+
+	if (!InventoryItem) return ;
+
+	//不用处理ASC相关
+	OnItemRemoveDelegate.Broadcast(ItemHandle);
+	InventoryMap.Remove(ItemHandle);
+}
+
 void UInventoryComponent::Client_ItemStackCountChangeAdded_Implementation(FInventoryItemHandle Handle,
-	int NewCount)
+                                                                          int NewCount)
 {
 	if (GetOwner()->HasAuthority()) return;
 

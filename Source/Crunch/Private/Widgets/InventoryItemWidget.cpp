@@ -8,6 +8,22 @@
 #include "Components/TextBlock.h"
 #include "Inventory/PA_ShopItem.h"
 
+void UInventoryItemWidget::RightButtonClicked()
+{
+	if (!IsEmpty())
+	{
+		OnRightButtonClick.Broadcast(GetItemHandle());
+	}
+}
+
+void UInventoryItemWidget::LeftButtonClicked()
+{
+	if (!IsEmpty())
+	{
+		OnLeftButtonClick.Broadcast(GetItemHandle());
+	}
+}
+
 void UInventoryItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

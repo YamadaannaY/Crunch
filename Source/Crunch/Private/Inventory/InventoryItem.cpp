@@ -97,7 +97,7 @@ void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_S
 	ShopItem=NewShopItem;
 }
 
-void UInventoryItem::ApplyGasModifications(UAbilitySystemComponent* AbilitySystemComponent)
+void UInventoryItem::ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
 {
 	if (!GetShopItem() || !AbilitySystemComponent) return ;
 
@@ -128,9 +128,45 @@ void UInventoryItem::ApplyGasModifications(UAbilitySystemComponent* AbilitySyste
 	}
 }
 
+void UInventoryItem::RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!AbilitySystemComponent) return ;
+
+	if (ApplyEquippedEffectHandle.IsValid())
+	{
+		AbilitySystemComponent->RemoveActiveGameplayEffect(ApplyEquippedEffectHandle);
+	}
+	if (GrantedAbilitySpecHandle.IsValid())
+	{
+		//这个方法会允许当前正在执行此GA时让这个GA执行完毕再删除
+		AbilitySystemComponent->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+	}
+}
+
 void UInventoryItem::SetSlot(int NewSlot)
 {
 	Slot=NewSlot;
+}
+
+bool UInventoryItem::TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!GrantedAbilitySpecHandle.IsValid()) return false;
+
+	if (AbilitySystemComponent && AbilitySystemComponent->TryActivateAbility(GrantedAbilitySpecHandle))
+	{
+		return true;
+	}
+	return false;
+}
+
+void UInventoryItem::ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent)
+{
+	if (!ShopItem) return ;
+
+	TSubclassOf<UGameplayEffect> ConsumeEffect=GetShopItem()->GetConsumeEffect();
+	if (!ConsumeEffect) return ;
+
+	AbilitySystemComponent->BP_ApplyGameplayEffectToSelf(ConsumeEffect,1,AbilitySystemComponent->MakeEffectContext());
 }
 
 bool UInventoryItem::IsValid() const
