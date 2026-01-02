@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/ItemWidget.h"
+#include "Widgets/TreeNodeInterface.h"
 #include "Blueprint/IUserObjectListEntry.h"
+#include "Inventory/PA_ShopItem.h"
 #include "ShopItemWidget.generated.h"
 
 class UShopItemWidget;
@@ -17,10 +19,16 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnShopItemSelected,const UShopItemWidget*);
  * 商店中的ItemUI
  */
 UCLASS()
-class UShopItemWidget : public UItemWidget ,public IUserObjectListEntry
+class UShopItemWidget : public UItemWidget ,public IUserObjectListEntry ,public ITreeNodeInterface
 {
 	GENERATED_BODY()
 public:
+	//重写接口函数，用于绘制样条线
+	virtual UUserWidget* GetWidget() const override;
+	virtual TArray<const ITreeNodeInterface*> GetInputs() const override;
+	virtual TArray<const ITreeNodeInterface*> GetOutputs() const override;
+	virtual const UObject* GetItemObject() const override;
+	
 	FOnItemPurchaseIssused OnItemPurchaseIssued;
 	FOnShopItemSelected OnShopItemClicked;
 	
@@ -32,10 +40,18 @@ public:
 	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
 private:
 
+	void CopyFromOther(const UShopItemWidget* OtherWidget);
+	void InitWithShopItem(const UPA_ShopItem* NewShopItem);
+
+	TArray<const ITreeNodeInterface*> ItemsToInterfaces(const TArray<const UPA_ShopItem*>& Items) const ;
+	
 	//在ItemWidget基类的Icon基础上添加PA作为Item信息
 	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
 
+	UPROPERTY()
+	const class UListView* ParentListView;
+	
 	//Override
 
 	//右键触发PurchaseIssued委托，广播一个ShopItem,其中存储了Price
