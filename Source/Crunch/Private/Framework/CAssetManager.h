@@ -25,7 +25,11 @@ public:
 	//获得当前商店内所有被加载的Item
 	bool GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) const ;
 
+	//获取Item可以合成的所有Item
+	const FItemCollection* GetCombinationForItem(const UPA_ShopItem* Item) const ;
 
+	//获取Item合成需要的Item
+	const FItemCollection* GetIngredientForItem(const UPA_ShopItem* Item) const ;
 private:
 	//接受LoadAsset委托的回调
 	void ShopItemLoadFinished(FStreamableDelegate Callback);
@@ -41,5 +45,5 @@ private:
 	//Item合成表，Key指向了可以合成的Value
 	UPROPERTY()
 	TMap<const UPA_ShopItem*,FItemCollection> CombinationMap;
-
+	
 };

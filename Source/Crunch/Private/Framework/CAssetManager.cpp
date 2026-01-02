@@ -36,6 +36,16 @@ bool UCAssetManager::GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) co
 	return bLoaded;
 }
 
+const FItemCollection* UCAssetManager::GetCombinationForItem(const UPA_ShopItem* Item) const
+{
+	return CombinationMap.Find(Item);
+}
+
+const FItemCollection* UCAssetManager::GetIngredientForItem(const UPA_ShopItem* Item) const
+{
+	return IngredientMap.Find(Item);
+}
+
 void UCAssetManager::ShopItemLoadFinished(FStreamableDelegate Callback)
 {
 	//为调用者提供的异步回调函数

@@ -7,6 +7,6 @@ FGenericDamageEffectDef::FGenericDamageEffectDef():DamageEffect{nullptr},PushVel
 {
 }
 
-FHeroBaseStats::FHeroBaseStats():Class(nullptr),Strength(0),Intelligence(0),StrengthGrowthRate(0),IntelligenceGrowthRate(0),BaseMaxHealth(0),BaseMaxMana(0),BaseAttackDamage(0),BaseArmor(0),BaseMoveSpeed(0)
+FHeroBaseStats::FHeroBaseStats():Class(nullptr),Strength(0),Intelligence(0),StrengthGrowthRate(0),IntelligenceGrowthRate(0),BaseMaxHealth(0),BaseMaxMana(0),BaseAttackDamage(0),BaseArmor(0),BaseMoveSpeed(0),BaseGold(0)
 {
 }

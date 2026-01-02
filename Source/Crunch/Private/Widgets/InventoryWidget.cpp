@@ -4,6 +4,8 @@
 #include "InventoryWidget.h"
 #include  "Components/WrapBox.h"
 #include  "Components/WrapBoxSlot.h"
+#include "InventoryContextMenu.h"
+#include "Blueprint/SlateBlueprintLibrary.h"
 #include "Inventory/InventoryComponent.h"
 
 void UInventoryWidget::NativeConstruct()
@@ -38,10 +40,82 @@ void UInventoryWidget::NativeConstruct()
 					ItemWidgets.Add(NewEmptyWidget);
 					NewEmptyWidget->OnInventoryItemDropped.AddUObject(this,&ThisClass::HandleItemDragDrop);
 					NewEmptyWidget->OnLeftButtonClick.AddUObject(InventoryComponent,&UInventoryComponent::TryActivateItem);
+					NewEmptyWidget->OnRightButtonClick.AddUObject(this,&ThisClass::ToggleContextMenu);
 				}
 			}
+			SpawnContextMenu();
 		}
 	}
+}
+
+void UInventoryWidget::SpawnContextMenu()
+{
+	if (!ContextMenuWidgetClass) return;
+
+	ContextMenuWidget=CreateWidget<UInventoryContextMenu>(this,ContextMenuWidgetClass);
+	if (ContextMenuWidget)
+	{
+		//绑定回调，添加到视口。初始化时不可见。
+		ContextMenuWidget->GetSellButtonClickedEvent().AddDynamic(this,&ThisClass::SellFocusedItem);
+		ContextMenuWidget->GetUseButtonClickedEvent().AddDynamic(this,&ThisClass::UseFocusedItem);
+		ContextMenuWidget->AddToViewport(1);
+		SetContextMenuVisible(false);
+	}
+}
+
+void UInventoryWidget::SellFocusedItem()
+{
+	//调用SellItem
+	InventoryComponent->SellItem(CurrentFocusedItemHandle);
+	SetContextMenuVisible(false);
+}
+
+void UInventoryWidget::UseFocusedItem()
+{
+	//调用ActivateItem
+	InventoryComponent->TryActivateItem(CurrentFocusedItemHandle);
+	SetContextMenuVisible(false);
+}
+
+void UInventoryWidget::SetContextMenuVisible(bool bContextMenuVisible)
+{
+	if (ContextMenuWidget)
+	{
+		ContextMenuWidget->SetVisibility(bContextMenuVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
+	}
+}
+
+void UInventoryWidget::ToggleContextMenu(const FInventoryItemHandle& ItemHandle)
+{
+	if (CurrentFocusedItemHandle==ItemHandle)
+	{
+		//二次点击清空
+		ClearContextMenu();
+		return;
+	}
+
+	//分配当前Handle
+	CurrentFocusedItemHandle=ItemHandle;
+	
+	UInventoryItemWidget** ItemWidgetPtrPtr=PopulatedItemEntryWidgets.Find(ItemHandle);
+	if (!ItemWidgetPtrPtr) return;
+
+	UInventoryItemWidget* ItemWidget=*ItemWidgetPtrPtr;
+	if (!ItemWidget) return;
+
+	//分配Menu位置
+	SetContextMenuVisible(true);
+	FVector2D ItemAbsPos=ItemWidget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D{1.f,0.5f});
+	FVector2D ItemWidgetPixelPos,ItemWidgetViewportPos;
+	USlateBlueprintLibrary::AbsoluteToViewport(this,ItemAbsPos,ItemWidgetPixelPos,ItemWidgetViewportPos);
+	ContextMenuWidget->SetPositionInViewport(ItemWidgetPixelPos);
+}
+
+void UInventoryWidget::ClearContextMenu()
+{
+	//清空+重置
+	ContextMenuWidget->SetVisibility(ESlateVisibility::Hidden);
+	CurrentFocusedItemHandle=FInventoryItemHandle::InvalidHandle();
 }
 
 void UInventoryWidget::ItemAdded(const UInventoryItem* InventoryItem)

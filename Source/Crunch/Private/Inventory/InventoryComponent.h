@@ -32,6 +32,8 @@ public:
 	//调用后在服务端和客户端尝试激活Item，应用GE或者赋予GA
 	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
 
+	void SellItem(const FInventoryItemHandle& ItemHandle);
+	
 	// Sets default values for this component's properties
 	UInventoryComponent();
 
@@ -56,6 +58,10 @@ public:
 	//遍历Map查询当前Item所属Slot，判断Stack是否还可以存储，如果可以返回InventoryItem,增加其Count
 	UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const ;
 
+	//判断当前PA对应的Item所需合成的所有子Item是否都可以在Inventory中被找到
+	bool FoundIngredientForItem(const UPA_ShopItem* Item,TArray<UInventoryItem*>& OutIngredients) const;
+
+	UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const ;
 protected:
 	//获取ASC
 	virtual void BeginPlay() override;
@@ -74,17 +80,23 @@ private:
 
 	/******************* Server **********************/
 
-	//购买逻辑应该在服务端执行
+	//购买，出售逻辑应该在服务端执行，修改属性值，自动同步到客户端
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
 
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_ActivateItem(FInventoryItemHandle ItemHandle);
 
+	UFUNCTION(Server, Reliable,WithValidation)
+	void Server_SellItem(FInventoryItemHandle ItemHandle);
+	
 	void GrantItem(const UPA_ShopItem* NewItem);
 	void ConsumeItem(UInventoryItem* Item);
 	void RemoveItem(UInventoryItem* Item);
 
+	//判断当前生成的Item是否满足合成条件
+	void CheckItemCombination(const UInventoryItem* NewItem);
+	
 private:
 	//在客户端也生成一个与服务端相同的InventoryItem
 	UFUNCTION(Client,Reliable)
