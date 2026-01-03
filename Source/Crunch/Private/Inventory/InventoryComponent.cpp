@@ -100,8 +100,8 @@ UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem
 	return nullptr;
 }
 
-bool UInventoryComponent::FoundIngredientForItem(const UPA_ShopItem* Item,
-	TArray<UInventoryItem*>& OutIngredients) const
+bool UInventoryComponent::FindIngredientForItem(const UPA_ShopItem* Item,
+	TArray<UInventoryItem*>& OutIngredients,const TArray<const UPA_ShopItem*>& IngredientToIgnore) const
 {
 	//获取合成需要的Item
 	const FItemCollection* Ingredients=UCAssetManager::Get().GetIngredientForItem(Item);
@@ -112,6 +112,10 @@ bool UInventoryComponent::FoundIngredientForItem(const UPA_ShopItem* Item,
 	bool bAllFound=true;
 	for (const UPA_ShopItem* Ingredient : Ingredients->GetItems())
 	{
+		if (IngredientToIgnore.Contains(Ingredient))
+		{
+			continue;
+		}
 		//遍历获取InventoryItem
 		UInventoryItem* FoundItem=TryGetItemForShopItem(Ingredient);
 		if (!FoundItem)
@@ -203,6 +207,8 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 	//占用Stack满或者没有这个Item，需要占用新Slot
 	else
 	{
+		if (TryItemCombination(NewItem)) return;
+		
 		//创建InventoryItem,对应分配一个ID
 		UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
 		FInventoryItemHandle NewHandle=FInventoryItemHandle::CreateHandle();
@@ -222,9 +228,6 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
 		//应用ItemGE
 		InventoryItem->ApplyGASModifications(OwnerASC);
-
-		//显然合成只有在新Slot被占据的时候才会发生，进行检查
-		CheckItemCombination(InventoryItem);
 	}
 }
 
@@ -259,13 +262,13 @@ void UInventoryComponent::RemoveItem(UInventoryItem* Item)
 	Client_ItemRemoved(Item->GetHandle());
 }
 
-void UInventoryComponent::CheckItemCombination(const UInventoryItem* NewItem)
+bool UInventoryComponent::TryItemCombination(const UPA_ShopItem* NewItem)
 {
-	if (!GetOwner()->HasAuthority()) return ;
+	if (!GetOwner()->HasAuthority()) return false ;
 
 	//找到新生成Item可以合成的所有Item集合
-	const FItemCollection* CombinationItems=UCAssetManager::Get().GetCombinationForItem(NewItem->GetShopItem());
-	if (!CombinationItems) return ;
+	const FItemCollection* CombinationItems=UCAssetManager::Get().GetCombinationForItem(NewItem);
+	if (!CombinationItems) return false ;
 
 	//遍历可合成Item的PA
 	for (const UPA_ShopItem* CombinationItem:CombinationItems->GetItems())
@@ -273,7 +276,7 @@ void UInventoryComponent::CheckItemCombination(const UInventoryItem* NewItem)
 		TArray<UInventoryItem*> Ingredients;
 
 		//判断是否可以合成
-		if (!FoundIngredientForItem(CombinationItem,Ingredients)) continue;
+		if (!FindIngredientForItem(CombinationItem,Ingredients,TArray<const UPA_ShopItem*>{NewItem})) continue;
 
 		//说明可以合成，所有子Item都已经在Inventory中被找到并且存储在了Ingredients中
 		for (UInventoryItem* Ingredient : Ingredients)
@@ -281,8 +284,9 @@ void UInventoryComponent::CheckItemCombination(const UInventoryItem* NewItem)
 			RemoveItem(Ingredient);
 		}
 		GrantItem(CombinationItem);
-		return ;
+		return true ;
 	}
+	return false;
 }
 
 void UInventoryComponent::Client_ItemRemoved_Implementation(FInventoryItemHandle ItemHandle)
@@ -338,12 +342,16 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 	if (!ItemToPurchase) return ;
 
 	if (GetGold()<ItemToPurchase->GetPrice()) return ;
-	if (IsFullFor(ItemToPurchase)) return ;
 
-	//这个函数会触发PostGameplayEffectExecute,常用于逻辑修改，这里进行Add，修改Gold值
-	OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
-
-	UE_LOG(LogTemp,Warning,TEXT("Bought Item:%s"),*(ItemToPurchase->GetName()));
-
-	GrantItem(ItemToPurchase);
+	if (!IsFullFor(ItemToPurchase))
+	{
+		//这个函数会触发PostGameplayEffectExecute,常用于逻辑修改，这里进行Add，修改Gold值
+		OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
+		GrantItem(ItemToPurchase);
+		return ;
+	}
+	if (TryItemCombination(ItemToPurchase))
+	{
+		OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
+	}
 }

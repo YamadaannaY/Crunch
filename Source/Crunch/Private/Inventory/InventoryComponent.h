@@ -59,7 +59,7 @@ public:
 	UInventoryItem* GetAvailableStackForItem(const UPA_ShopItem* Item) const ;
 
 	//判断当前PA对应的Item所需合成的所有子Item是否都可以在Inventory中被找到
-	bool FoundIngredientForItem(const UPA_ShopItem* Item,TArray<UInventoryItem*>& OutIngredients) const;
+	bool FindIngredientForItem(const UPA_ShopItem* Item,TArray<UInventoryItem*>& OutIngredients,const TArray<const UPA_ShopItem*>& IngredientToIgnore=TArray<const UPA_ShopItem*>()) const;
 
 	UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const ;
 protected:
@@ -95,7 +95,7 @@ private:
 	void RemoveItem(UInventoryItem* Item);
 
 	//判断当前生成的Item是否满足合成条件
-	void CheckItemCombination(const UInventoryItem* NewItem);
+	bool TryItemCombination(const UPA_ShopItem* NewItem);
 	
 private:
 	//在客户端也生成一个与服务端相同的InventoryItem
