@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ShopItemWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Inventory/InventoryComponent.h"
 #include "ShopWidget.generated.h"
 
+class UItemTreeWidget;
 class UShopItemWidget;
 class UPA_ShopItem;
 class UTileView;
@@ -26,6 +28,9 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	UTileView* ShopItemList;
 
+	UPROPERTY(meta=(BindWidget))
+	UItemTreeWidget* CombinationTree;
+
 	void LoadShopItem();
 	void ShopItemLoadFinished();
 	void ShopItemWidgetGenerated(UUserWidget& NewWidget);
@@ -37,4 +42,6 @@ private:
 	//利用组件处理Purchase逻辑
 	UPROPERTY()
 	UInventoryComponent* InventoryComponent;
+
+	void ShowItemCombination(const UShopItemWidget* ItemWidget);
 };

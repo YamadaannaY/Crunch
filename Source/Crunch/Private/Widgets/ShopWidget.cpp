@@ -2,6 +2,8 @@
 
 
 #include "Widgets/ShopWidget.h"
+
+#include "ItemTreeWidget.h"
 #include "ShopItemWidget.h"
 #include "Framework/CAssetManager.h"
 #include "Components/TileView.h"
@@ -55,8 +57,16 @@ void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
 		{
 			ItemWidget->OnItemPurchaseIssued.AddUObject(InventoryComponent,&UInventoryComponent::TryPurchase);
 		}
-		
+		ItemWidget->OnShopItemClicked.AddUObject(this,&ThisClass::ShowItemCombination);
 		ItemsMap.Add(ItemWidget->GetShopItem(),ItemWidget);
+	}
+}
+
+void UShopWidget::ShowItemCombination(const UShopItemWidget* ItemWidget)
+{
+	if (CombinationTree)
+	{
+		CombinationTree->DrawFromNode(ItemWidget);
 	}
 }
 

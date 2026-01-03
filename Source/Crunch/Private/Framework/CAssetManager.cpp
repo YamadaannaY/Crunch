@@ -92,11 +92,10 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
 
 	if (Combinations)
 	{
-		if (!Combinations->Contains(CombinationItem))   CombinationMap.Add(CombinationItem);
+		if (!Combinations->Contains(CombinationItem))   Combinations->AddItem(CombinationItem);
 	}
 	else
 	{
 		CombinationMap.Add(Ingredient,FItemCollection{TArray<const UPA_ShopItem*>{CombinationItem}});
 	}
 }
-
