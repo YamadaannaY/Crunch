@@ -74,6 +74,8 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		{
 			EnhancedInputComp->BindAction(InputActionPair.Value,ETriggerEvent::Triggered,this,&ThisClass::HandleAbilityInput,InputActionPair.Key);
 		}
+
+		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
 	}
 }
 
@@ -135,6 +137,13 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 		//相同的Event发送给服务端，因为SendGE的逻辑必须在权威端执行
 		Server_SendGameplayEventTSelf(UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
 	}
+}
+
+void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& InputActionValue)
+{
+	//在IA设置中定义了Scaler
+	int Value=FMath::RoundToInt(InputActionValue.Get<float>());
+	InventoryComponent->TryActivateItemInSlot(Value-1);
 }
 
 FVector ACPlayerCharacter::GetLookRightDir() const

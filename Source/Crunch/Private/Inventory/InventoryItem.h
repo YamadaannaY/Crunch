@@ -109,7 +109,8 @@ public:
 
 	//更新Slot
 	void SetSlot(int NewSlot);
-
+	int GetItemSlot() const {return Slot;}
+	
 	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const {return GrantedAbilitySpecHandle;}
 	void SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle NewHandle);
 private:

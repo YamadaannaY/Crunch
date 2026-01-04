@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "Character/CCharacter.h"
 #include "GAS/CGameplayAbilitiesType.h"
 #include "CPlayerCharacter.generated.h"
@@ -54,7 +55,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputAction* LearnAbilityLearnLeaderAction;
-
+	
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	UInputAction* UseInventoryITemAction;
+	
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputAction; 
 	
@@ -66,7 +70,8 @@ private:
 	void LearnAbilityLeaderDown(const FInputActionValue& InputActionValue);
 	void LearnAbilityLeaderUp(const FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
-
+	void UseInventoryItem(const FInputActionValue& InputActionValue);
+	
 	void SetInputEnabledFromPlayerController(bool bEnabled);
 
 	FVector GetLookRightDir() const ;
