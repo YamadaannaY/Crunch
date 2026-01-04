@@ -56,7 +56,8 @@ public:
 
 	FInventoryItemHandle GetItemHandle() const;
 private:
-
+	void UpdateCanCast(bool bCanCast);
+	
 	//格子为空时显示的Texture
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	UTexture2D* EmptyTexture;
@@ -84,6 +85,9 @@ private:
 	//对应Slot的序号
 	int SlotNumber;
 
+	void BindCanCastAbilityDelegate();
+	void UnBindCanCastAbilityDelegate();
+	
 	/********************** Drag Drop *******************/
 
 private:

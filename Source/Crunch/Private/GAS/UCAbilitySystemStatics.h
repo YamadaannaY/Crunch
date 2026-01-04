@@ -38,6 +38,7 @@ public:
 	static bool IsAbilityAtMaxLevel(const FGameplayAbilitySpec& Spec);
 
 	static bool CheckAbilityCost(const FGameplayAbilitySpec& AbilitySpec,const UAbilitySystemComponent& ASC);
+	static bool CheckAbilityCost(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent& ASC);
 	static float GetManaCostFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC,int AbilityLevel);
 	static float GetCoolDownDurationFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC,int AbilityLevel);
 	static float GetCoolDownRemainingFor(const UGameplayAbility* AbilityCDO,const UAbilitySystemComponent&ASC);

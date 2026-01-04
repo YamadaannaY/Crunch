@@ -7,7 +7,6 @@
 #include "Components/Image.h"
 #include "Inventory/InventoryItem.h"
 #include "Components/TextBlock.h"
-#include "Crunch/DebugHelper.h"
 #include "Inventory/PA_ShopItem.h"
 
 void UInventoryItemWidget::RightButtonClicked()
@@ -36,10 +35,9 @@ void UInventoryItemWidget::NativeConstruct()
 void UInventoryItemWidget::EmptySlot()
 {
 	ClearCooldown();
-	
+	UnBindCanCastAbilityDelegate();
 	InventoryItem=nullptr;
 	SetIcon(EmptyTexture);
-
 	SetToolTip(nullptr);
 
 	StackCountText->SetVisibility(ESlateVisibility::Hidden);
@@ -50,6 +48,8 @@ void UInventoryItemWidget::EmptySlot()
 
 void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 {
+	UnBindCanCastAbilityDelegate();
+	
 	InventoryItem=Item;
 	
 	if (!InventoryItem || !InventoryItem->IsValid() || InventoryItem->GetStackCount()<=0)
@@ -82,6 +82,7 @@ void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 
 	if (InventoryItem->IsGrantingAnyAbility())
 	{
+		UpdateCanCast(InventoryItem->CanCastAbility());
 		float AbilityCooldownRemaining=InventoryItem->GetAbilityCooldownTimeRemaining();
 		float AbilityCooldownDuration=InventoryItem->GetAbilityCooldownDuration();
 
@@ -96,9 +97,11 @@ void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 
 		CooldownDurationText->SetVisibility(AbilityCooldownDuration==0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 		CooldownCountText->SetText(FText::AsNumber(AbilityCooldownDuration));
+		BindCanCastAbilityDelegate();
 	}
 	else
 	{
+		UpdateCanCast(true);
 		ManaCostText->SetVisibility(ESlateVisibility::Hidden);
 		CooldownDurationText->SetVisibility(ESlateVisibility::Hidden);
 		CooldownCountText->SetVisibility(ESlateVisibility::Hidden);
@@ -140,6 +143,28 @@ FInventoryItemHandle UInventoryItemWidget::GetItemHandle() const
 		return InventoryItem->GetHandle();
 	}
 	return FInventoryItemHandle::InvalidHandle();
+}
+
+void UInventoryItemWidget::UpdateCanCast(bool bCanCast)
+{
+	GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(CanCastDynamicMaterialParaName, bCanCast ?1 : 0);
+}
+
+void UInventoryItemWidget::BindCanCastAbilityDelegate()
+{
+	if (InventoryItem)
+	{
+		//利用委托将Item与GAS解耦
+		const_cast<UInventoryItem*>(InventoryItem)->OnAbilityCanCastUpdated.AddUObject(this,&ThisClass::UpdateCanCast);
+	}
+}
+
+void UInventoryItemWidget::UnBindCanCastAbilityDelegate()
+{
+	if (InventoryItem)
+	{
+		const_cast<UInventoryItem*>(InventoryItem)->OnAbilityCanCastUpdated.RemoveAll(this);
+	}
 }
 
 void UInventoryItemWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
@@ -220,6 +245,5 @@ void UInventoryItemWidget::SetIcon(UTexture2D* IconTexture)
 		GetItemIcon()->GetDynamicMaterial()->SetTextureParameterValue(IconTextureDynamicMaterialParaName,IconTexture);
 		return ;
 	}
-
 	Super::SetIcon(IconTexture);
 }

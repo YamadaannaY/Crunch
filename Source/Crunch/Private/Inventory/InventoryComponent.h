@@ -104,7 +104,7 @@ private:
 private:
 	//在客户端也生成一个与服务端相同的InventoryItem
 	UFUNCTION(Client,Reliable)
-	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item);
+	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item,FGameplayAbilitySpecHandle GrantedAbilitySpecHandle);
 
 	//当Item激活后消耗Stack，Stack为0时调用用于Remove
 	UFUNCTION(Client,Reliable)

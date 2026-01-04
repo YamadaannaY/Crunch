@@ -18,6 +18,8 @@
 
 class UPA_ShopItem;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilityCanCastUpdateDelegate,bool)
+
 USTRUCT()
 struct FInventoryItemHandle
 {
@@ -67,6 +69,7 @@ class CRUNCH_API UInventoryItem : public UObject
 public:
 	UInventoryItem();
 
+	FOnAbilityCanCastUpdateDelegate OnAbilityCanCastUpdated;
 	//增加StackCount,成功添加返回true
 	bool AddStackCount();
 
@@ -81,6 +84,7 @@ public:
 	float GetAbilityCooldownTimeRemaining() const;
 	float GetAbilityCooldownDuration() const ;
 	float GetManaCost() const ;
+	bool CanCastAbility() const ;
 	
 	//为新创建的InventoryItem赋值
 	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem,UAbilitySystemComponent* ASC);
@@ -105,9 +109,14 @@ public:
 
 	//更新Slot
 	void SetSlot(int NewSlot);
+
+	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const {return GrantedAbilitySpecHandle;}
+	void SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle NewHandle);
 private:
 	void ApplyGASModifications();
 
+	void ManaUpdated(const FOnAttributeChangeData& ChangeData) const ;
+	
 	FInventoryItemHandle Handle;
 	
 	UPROPERTY()

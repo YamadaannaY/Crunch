@@ -2,6 +2,7 @@
 
 #include "InventoryItem.h"
 #include "PA_ShopItem.h"
+#include "GAS/CAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
 
 FInventoryItemHandle::FInventoryItemHandle() :HandleId(GetInvalidId())
@@ -116,12 +117,38 @@ float UInventoryItem::GetManaCost() const
 	return UCAbilitySystemStatics::GetManaCostFor(GetShopItem()->GetGrantedAbilityCDO(),*OwnerASC,1);
 }
 
+bool UInventoryItem::CanCastAbility() const
+{
+	if (!IsGrantingAnyAbility() || !OwnerASC)
+	{
+		return false;
+	}
+
+	FGameplayAbilitySpec* Spec=OwnerASC->FindAbilitySpecFromHandle(GrantedAbilitySpecHandle);
+
+	if (Spec)
+	{
+		return UCAbilitySystemStatics::CheckAbilityCost(*Spec,*OwnerASC);
+	}
+
+	return UCAbilitySystemStatics::CheckAbilityCost(GetShopItem()->GetGrantedAbilityCDO(),*OwnerASC);
+}
+
 void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_ShopItem* NewShopItem,UAbilitySystemComponent* ASC)
 {
 	Handle=NewHandle;
 	ShopItem=NewShopItem;
 	OwnerASC=ASC;
+	if (OwnerASC)
+	{
+		OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&UInventoryItem::ManaUpdated);
+	}
 	ApplyGASModifications();
+}
+
+void UInventoryItem::SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle NewHandle)
+{
+	GrantedAbilitySpecHandle=NewHandle;
 }
 
 void UInventoryItem::ApplyGASModifications()
@@ -150,16 +177,27 @@ void UInventoryItem::RemoveGASModifications()
 {
 	if (!OwnerASC) return ;
 
-	if (ApplyEquippedEffectHandle.IsValid())
+	OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).RemoveAll(this);
+
+	if (OwnerASC->GetOwner()->HasAuthority())
 	{
-		OwnerASC->RemoveActiveGameplayEffect(ApplyEquippedEffectHandle);
-	}
-	if (GrantedAbilitySpecHandle.IsValid())
-	{
-		//这个方法会允许当前正在执行此GA时让这个GA执行完毕再删除
-		OwnerASC->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+		if (ApplyEquippedEffectHandle.IsValid())
+		{
+			OwnerASC->RemoveActiveGameplayEffect(ApplyEquippedEffectHandle);
+		}
+		if (GrantedAbilitySpecHandle.IsValid())
+		{
+			//这个方法会允许当前正在执行此GA时让这个GA执行完毕再删除
+			OwnerASC->SetRemoveAbilityOnEnd(GrantedAbilitySpecHandle);
+		}
 	}
 }
+
+void UInventoryItem::ManaUpdated(const FOnAttributeChangeData& ChangeData) const
+{
+	OnAbilityCanCastUpdated.Broadcast(CanCastAbility());
+}
+
 
 bool UInventoryItem::IsGrantingAnyAbility() const 
 {

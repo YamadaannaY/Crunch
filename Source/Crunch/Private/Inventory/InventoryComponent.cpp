@@ -5,7 +5,6 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "PA_ShopItem.h"
-#include "Crunch/DebugHelper.h"
 #include "Framework/CAssetManager.h"
 #include "GAS/CHeroAttributeSet.h"
 
@@ -257,8 +256,10 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
 		UE_LOG(LogTemp,Warning,TEXT("Server Adding Shop Item:%s,with id :%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),NewHandle.GetHandleId());
 
+		FGameplayAbilitySpecHandle GrantedAbilitySpecHandle=InventoryItem->GetGrantedAbilitySpecHandle();
+
 		//在客户端也进行相同的Item生成操作
-		Client_ItemAdded(NewHandle,NewItem);
+		Client_ItemAdded(NewHandle,NewItem,GrantedAbilitySpecHandle);
 	}
 }
 
@@ -327,6 +328,9 @@ void UInventoryComponent::Client_ItemRemoved_Implementation(FInventoryItemHandle
 	UInventoryItem* InventoryItem= GetInventoryItemByHandle(ItemHandle);
 
 	if (!InventoryItem) return ;
+	
+	//用于处理ManaUpdate委托，不会GAS触发部分
+	InventoryItem->RemoveGASModifications();
 
 	//不用处理ASC相关
 	OnItemRemoveDelegate.Broadcast(ItemHandle);
@@ -349,13 +353,14 @@ void UInventoryComponent::Client_ItemStackCountChangeAdded_Implementation(FInven
 	}
 }
 
-void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignHandle, const UPA_ShopItem* Item)
+void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle AssignHandle, const UPA_ShopItem* Item,FGameplayAbilitySpecHandle GrantedAbilitySpecHandle)
 {
 	if (GetOwner()->HasAuthority()) return;
 
 	UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
 
 	InventoryItem->InitItem(AssignHandle,Item,OwnerASC);
+	InventoryItem->SetGrantedAbilitySpecHandle(GrantedAbilitySpecHandle);
 	InventoryMap.Add(AssignHandle,InventoryItem);
 	
 	OnItemAddedDelegate.Broadcast(InventoryItem);
