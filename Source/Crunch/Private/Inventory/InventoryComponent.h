@@ -18,6 +18,7 @@ class UAbilitySystemComponent;
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemAddedDelegate, const UInventoryItem*);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoveDelegate, const FInventoryItemHandle&);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangeDelegate, const FInventoryItemHandle&,int);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemAbilityCommitted, const FInventoryItemHandle&, float /*CooldownDuration*/, float /*CooldownTimeRemaining*/);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
@@ -27,8 +28,9 @@ class CRUNCH_API UInventoryComponent : public UActorComponent
 public:
 	FOnItemAddedDelegate OnItemAddedDelegate;
 	FOnItemRemoveDelegate OnItemRemoveDelegate;
+	FOnItemAbilityCommitted OnItemAbilityCommitted;
 	FOnItemStackCountChangeDelegate OnItemStackCountChangeDelegate;
-
+	
 	//调用后在服务端和客户端尝试激活Item，应用GE或者赋予GA
 	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
 
@@ -77,6 +79,8 @@ private:
 	//HandleID和Item的映射存储
 	UPROPERTY()
 	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
+
+	void AbilityCommitted(class UGameplayAbility* CommittedAbility);
 
 	/******************* Server **********************/
 

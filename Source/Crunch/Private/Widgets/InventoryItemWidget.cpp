@@ -7,6 +7,7 @@
 #include "Components/Image.h"
 #include "Inventory/InventoryItem.h"
 #include "Components/TextBlock.h"
+#include "Crunch/DebugHelper.h"
 #include "Inventory/PA_ShopItem.h"
 
 void UInventoryItemWidget::RightButtonClicked()
@@ -22,24 +23,13 @@ void UInventoryItemWidget::LeftButtonClicked()
 	if (!IsEmpty())
 	{
 		OnLeftButtonClick.Broadcast(GetItemHandle());
-		if (InventoryItem->IsGrantingAnyAbility())
-		{
-			float AbilityCooldownRemaining=InventoryItem->GetAbilityCooldownTimeRemaining();
-			float AbilityCooldownDuration=InventoryItem->GetAbilityCooldownDuration();
-			
-			UE_LOG(LogTemp,Warning,TEXT("remaining:%f,duration:%f"),AbilityCooldownRemaining,AbilityCooldownDuration);
-			if (AbilityCooldownRemaining>0.f)
-			{
-				StartCoolDown(AbilityCooldownDuration,AbilityCooldownRemaining);
-			}
-		}
 	}
 }
 
 void UInventoryItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
 	EmptySlot();
 }
 

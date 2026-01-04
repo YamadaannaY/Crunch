@@ -101,6 +101,7 @@ public:
 	void RemoveGASModifications();
 
 	bool IsGrantingAnyAbility() const ;
+	bool IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const;
 
 	//更新Slot
 	void SetSlot(int NewSlot);

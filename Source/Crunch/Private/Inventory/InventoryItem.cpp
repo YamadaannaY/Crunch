@@ -171,6 +171,14 @@ bool UInventoryItem::IsGrantingAnyAbility() const
 	return ShopItem->GetGrantedAbility() !=nullptr;
 }
 
+bool UInventoryItem::IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const
+{
+	if (!ShopItem) return false;
+
+	TSubclassOf<UGameplayAbility> GrantedAbility=GetShopItem()->GetGrantedAbility();
+	return GrantedAbility==AbilityClass;
+}
+
 void UInventoryItem::SetSlot(int NewSlot)
 {
 	Slot=NewSlot;

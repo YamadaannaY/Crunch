@@ -5,6 +5,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "PA_ShopItem.h"
+#include "Crunch/DebugHelper.h"
 #include "Framework/CAssetManager.h"
 #include "GAS/CHeroAttributeSet.h"
 
@@ -150,6 +151,37 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
+	if (OwnerASC)
+	{
+		OwnerASC->AbilityCommittedCallbacks.AddUObject(this,&UInventoryComponent::AbilityCommitted);
+	}
+}
+
+void UInventoryComponent::AbilityCommitted(class UGameplayAbility* CommittedAbility)
+{
+	if (!CommittedAbility)
+		return;
+
+	float CooldownTimeRemaining = 0.f;
+	float CooldownDuration = 0.f;
+
+	CommittedAbility->GetCooldownTimeRemainingAndDuration(
+		CommittedAbility->GetCurrentAbilitySpecHandle(),
+		CommittedAbility->GetCurrentActorInfo(),
+		CooldownTimeRemaining,
+		CooldownDuration
+	);
+
+	for (TPair<FInventoryItemHandle, UInventoryItem*>& ItemPair : InventoryMap)
+	{
+		if (!ItemPair.Value)
+			continue;
+
+		if (ItemPair.Value->IsGrantingAbility(CommittedAbility->GetClass()))
+		{
+			OnItemAbilityCommitted.Broadcast(ItemPair.Key, CooldownDuration, CooldownTimeRemaining);
+		}
+	}
 }
 
 void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandle ItemHandle)

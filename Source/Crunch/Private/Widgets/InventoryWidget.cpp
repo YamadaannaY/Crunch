@@ -6,6 +6,7 @@
 #include  "Components/WrapBoxSlot.h"
 #include "InventoryContextMenu.h"
 #include "Blueprint/SlateBlueprintLibrary.h"
+#include "Crunch/DebugHelper.h"
 #include "Inventory/InventoryComponent.h"
 
 void UInventoryWidget::NativeConstruct()
@@ -20,6 +21,7 @@ void UInventoryWidget::NativeConstruct()
 			InventoryComponent->OnItemAddedDelegate.AddUObject(this,&ThisClass::ItemAdded);
 			InventoryComponent->OnItemRemoveDelegate.AddUObject(this,&ThisClass::ItemRemoved);
 			InventoryComponent->OnItemStackCountChangeDelegate.AddUObject(this,&ThisClass::ItemStackCountChanged);
+			InventoryComponent->OnItemAbilityCommitted.AddUObject(this,&ThisClass::ItemAbilityCommitted);
 			const int Capacity = InventoryComponent->GetCapacity();
 
 			//初始化的时候删除子Widget(调试期间添加的ItemWidget)
@@ -192,5 +194,16 @@ void UInventoryWidget::ItemRemoved(const FInventoryItemHandle& ItemHandle)
 	{
 		(*FoundWidget)->EmptySlot();
 		PopulatedItemEntryWidgets.Remove(ItemHandle);
+	}
+}
+
+void UInventoryWidget::ItemAbilityCommitted(const FInventoryItemHandle& ItemHandle, float CooldownDuration,
+	float CooldownTimeRemaining)
+{
+	Debug::Print("2");
+	UInventoryItemWidget** FoundWidget = PopulatedItemEntryWidgets.Find(ItemHandle);
+	if (FoundWidget && *FoundWidget)
+	{
+		(*FoundWidget)->StartCoolDown(CooldownDuration, CooldownTimeRemaining);
 	}
 }
