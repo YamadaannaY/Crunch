@@ -23,7 +23,7 @@ class UShopItemWidget : public UItemWidget ,public IUserObjectListEntry ,public 
 {
 	GENERATED_BODY()
 public:
-	//重写接口函数，用于绘制样条线
+	//重写接口函数，用于绘制样条线,存储所有Ingredient和Combination的ItemInterface
 	virtual UUserWidget* GetWidget() const override;
 	virtual TArray<const ITreeNodeInterface*> GetInputs() const override;
 	virtual TArray<const ITreeNodeInterface*> GetOutputs() const override;

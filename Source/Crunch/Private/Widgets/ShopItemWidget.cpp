@@ -73,6 +73,7 @@ void UShopItemWidget::InitWithShopItem(const UPA_ShopItem* NewShopItem)
 TArray<const ITreeNodeInterface*> UShopItemWidget::ItemsToInterfaces(const TArray<const UPA_ShopItem*>& Items) const
 {
 	TArray<const ITreeNodeInterface*> RetInterfaces;
+
 	if (!ParentListView) return RetInterfaces;
 
 	for (const UPA_ShopItem* Item : Items)

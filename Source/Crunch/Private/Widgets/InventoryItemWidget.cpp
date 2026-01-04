@@ -4,6 +4,7 @@
 #include "InventoryItemWidget.h"
 #include  "Widgets/InventoryItemDragDropOp.h"
 #include "ItemToolTip.h"
+#include "Components/Image.h"
 #include "Inventory/InventoryItem.h"
 #include "Components/TextBlock.h"
 #include "Inventory/PA_ShopItem.h"
@@ -21,6 +22,17 @@ void UInventoryItemWidget::LeftButtonClicked()
 	if (!IsEmpty())
 	{
 		OnLeftButtonClick.Broadcast(GetItemHandle());
+		if (InventoryItem->IsGrantingAnyAbility())
+		{
+			float AbilityCooldownRemaining=InventoryItem->GetAbilityCooldownTimeRemaining();
+			float AbilityCooldownDuration=InventoryItem->GetAbilityCooldownDuration();
+			
+			UE_LOG(LogTemp,Warning,TEXT("remaining:%f,duration:%f"),AbilityCooldownRemaining,AbilityCooldownDuration);
+			if (AbilityCooldownRemaining>0.f)
+			{
+				StartCoolDown(AbilityCooldownDuration,AbilityCooldownRemaining);
+			}
+		}
 	}
 }
 
@@ -33,6 +45,8 @@ void UInventoryItemWidget::NativeConstruct()
 
 void UInventoryItemWidget::EmptySlot()
 {
+	ClearCooldown();
+	
 	InventoryItem=nullptr;
 	SetIcon(EmptyTexture);
 
@@ -72,6 +86,32 @@ void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 	else
 	{
 		StackCountText->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	ClearCooldown();
+
+	if (InventoryItem->IsGrantingAnyAbility())
+	{
+		float AbilityCooldownRemaining=InventoryItem->GetAbilityCooldownTimeRemaining();
+		float AbilityCooldownDuration=InventoryItem->GetAbilityCooldownDuration();
+
+		UE_LOG(LogTemp,Warning,TEXT("remaining:%f,duration:%f"),AbilityCooldownRemaining,AbilityCooldownDuration);
+		if (AbilityCooldownRemaining>0.f)
+		{
+			StartCoolDown(AbilityCooldownDuration,AbilityCooldownRemaining);
+		}
+		float  AbilityCost=InventoryItem->GetManaCost();
+		ManaCostText->SetVisibility(AbilityCost==0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+		ManaCostText->SetText(FText::AsNumber(AbilityCost));
+
+		CooldownDurationText->SetVisibility(AbilityCooldownDuration==0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
+		CooldownCountText->SetText(FText::AsNumber(AbilityCooldownDuration));
+	}
+	else
+	{
+		ManaCostText->SetVisibility(ESlateVisibility::Hidden);
+		CooldownDurationText->SetVisibility(ESlateVisibility::Hidden);
+		CooldownCountText->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
 
@@ -143,4 +183,53 @@ bool UInventoryItemWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 		}
 	}
 	return Super::NativeOnDrop(InGeometry,InDragDropEvent,InOperation);
+}
+
+void UInventoryItemWidget::StartCoolDown(float CooldownDuration, float TimeRemaining)
+{
+	CooldownTimeRemaining=TimeRemaining;
+	CooldownTimeDuration=CooldownDuration;
+	GetWorld()->GetTimerManager().SetTimer(CooldownDurationTimerHandle,this,&UInventoryItemWidget::CooldownFinished,CooldownTimeRemaining);
+	GetWorld()->GetTimerManager().SetTimer(CooldownUpdateTimerHandle,this,&ThisClass::UpdateCooldown,CooldownUpdateInterval,true);
+
+	CooldownCountText->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UInventoryItemWidget::CooldownFinished()
+{
+	GetWorld()->GetTimerManager().ClearTimer(CooldownUpdateTimerHandle);
+	CooldownCountText->SetVisibility(ESlateVisibility::Hidden);
+
+	if (GetItemIcon())
+	{
+		GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(CooldownAmtDynamicMaterialParaName,1.f);
+	}
+}
+
+void UInventoryItemWidget::UpdateCooldown()
+{
+	CooldownTimeRemaining-=CooldownUpdateInterval;
+	const float CooldownAmt=1.f-CooldownTimeRemaining/CooldownTimeDuration;
+	CooldownDisplayFormattingOptions.MaximumFractionalDigits=CooldownTimeRemaining>1.f ? 0 : 2;
+	CooldownCountText->SetText(FText::AsNumber(CooldownTimeRemaining,&CooldownDisplayFormattingOptions));
+	if (GetItemIcon())
+	{
+		GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(CooldownAmtDynamicMaterialParaName,CooldownAmt);
+	}
+}
+
+void UInventoryItemWidget::ClearCooldown()
+{
+	CooldownFinished();
+}
+
+void UInventoryItemWidget::SetIcon(UTexture2D* IconTexture)
+{
+	if (GetItemIcon())
+	{
+		GetItemIcon()->GetDynamicMaterial()->SetTextureParameterValue(IconTextureDynamicMaterialParaName,IconTexture);
+		return ;
+	}
+
+	Super::SetIcon(IconTexture);
 }

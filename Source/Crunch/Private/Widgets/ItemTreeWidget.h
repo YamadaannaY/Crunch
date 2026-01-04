@@ -16,10 +16,10 @@ class CRUNCH_API UItemTreeWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	//
+	//以某一个NodeInterface为中心点以进行SplineDraw
 	void DrawFromNode(const ITreeNodeInterface* NodeInterface);
 private:
-	//
+	//递归调用函数以进行某一个TreeNode的所有对应方向的StreamSpline描绘
 	void DrawStream(bool bUpperStream,const ITreeNodeInterface* StartingNodeInterface,UUserWidget* StartingNodeWidget,UCanvasPanelSlot* StartingNodeSlot,int StartingNodeDepth,float& NextLeafXPosition,TArray<UCanvasPanelSlot*>& OutStreamSlots);
 
 	void ClearTree();

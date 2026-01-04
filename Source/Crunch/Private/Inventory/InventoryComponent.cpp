@@ -158,8 +158,10 @@ void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandl
 	UInventoryItem* InventoryItem=GetInventoryItemByHandle(ItemHandle);
 	if (!InventoryItem) return ;
 
-	//如果有ASC中有GA，尝试执行。     获取ShopItem
-	InventoryItem->TryActivateGrantedAbility(OwnerASC);
+	//如果ASC中有GA，尝试执行，获取ShopItem
+	InventoryItem->TryActivateGrantedAbility();
+	
+	
 	const UPA_ShopItem* Item=InventoryItem->GetShopItem();
 
 	//判断是否是可以Consume的Item，即有主动消耗的效果
@@ -213,7 +215,7 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 		UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
 		FInventoryItemHandle NewHandle=FInventoryItemHandle::CreateHandle();
 
-		InventoryItem->InitItem(NewHandle,NewItem);
+		InventoryItem->InitItem(NewHandle,NewItem,OwnerASC);
 
 		//存到哈希表中
 		InventoryMap.Add(NewHandle,InventoryItem);
@@ -225,9 +227,6 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
 		//在客户端也进行相同的Item生成操作
 		Client_ItemAdded(NewHandle,NewItem);
-
-		//应用ItemGE
-		InventoryItem->ApplyGASModifications(OwnerASC);
 	}
 }
 
@@ -237,7 +236,7 @@ void UInventoryComponent::ConsumeItem(UInventoryItem* Item)
 	if (!Item) return;
 
 	//调用GE
-	Item->ApplyConsumeEffect(OwnerASC);
+	Item->ApplyConsumeEffect();
 
 	//自减一次，如果此时StackCount<0,将Item移除
 	if (!Item->ReduceStackCount())
@@ -256,7 +255,7 @@ void UInventoryComponent::RemoveItem(UInventoryItem* Item)
 {
 	if (!GetOwner()->HasAuthority()) return ;
 	
-	Item->RemoveGASModifications(OwnerASC);
+	Item->RemoveGASModifications();
 	OnItemRemoveDelegate.Broadcast(Item->GetHandle());
 	InventoryMap.Remove(Item->GetHandle());
 	Client_ItemRemoved(Item->GetHandle());
@@ -324,7 +323,7 @@ void UInventoryComponent::Client_ItemAdded_Implementation(FInventoryItemHandle A
 
 	UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
 
-	InventoryItem->InitItem(AssignHandle,Item);
+	InventoryItem->InitItem(AssignHandle,Item,OwnerASC);
 	InventoryMap.Add(AssignHandle,InventoryItem);
 	
 	OnItemAddedDelegate.Broadcast(InventoryItem);

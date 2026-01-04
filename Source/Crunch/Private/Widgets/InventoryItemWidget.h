@@ -95,4 +95,35 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="DragDrop")
 	TSubclassOf<class UInventoryItemDragDropOp> DragDropOpClass;
+
+	/********************* GAS *************************/
+public:
+	void StartCoolDown(float CooldownDuration,float TimeRemaining);
+
+private:
+	UPROPERTY(EditDefaultsOnly,category="Cooldown")
+	float CooldownUpdateInterval=0.1f;
+
+	void CooldownFinished();
+	void UpdateCooldown();
+	void ClearCooldown();
+
+	FTimerHandle CooldownDurationTimerHandle;
+	FTimerHandle CooldownUpdateTimerHandle;
+
+	float CooldownTimeRemaining=0.f;
+	float CooldownTimeDuration=0.f;
+
+	UPROPERTY(EditDefaultsOnly,Category="Cooldown")
+	FName CooldownAmtDynamicMaterialParaName="Percent";
+
+	UPROPERTY(EditDefaultsOnly,Category="Cooldown")
+	FName IconTextureDynamicMaterialParaName="Icon";
+
+	UPROPERTY(EditDefaultsOnly,Category="Cooldown")
+	FName CanCastDynamicMaterialParaName="CanCast";
+
+	virtual void SetIcon(UTexture2D* IconTexture) override;
+
+	FNumberFormattingOptions CooldownDisplayFormattingOptions;
 };

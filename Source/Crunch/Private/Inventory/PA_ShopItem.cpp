@@ -3,6 +3,8 @@
 
 #include "PA_ShopItem.h"
 
+#include "Abilities/GameplayAbility.h"
+
 FItemCollection::FItemCollection()
 {
 }
@@ -41,4 +43,13 @@ FPrimaryAssetType UPA_ShopItem::GetShopItemAssetType()
 UTexture2D* UPA_ShopItem::GetIcon() const
 {
 	return Icon.LoadSynchronous();
+}
+
+UGameplayAbility* UPA_ShopItem::GetGrantedAbilityCDO() const
+{
+	if (GrantAbility)
+	{
+		return Cast<UGameplayAbility>(GrantAbility->GetDefaultObject());
+	}
+	return nullptr;
 }

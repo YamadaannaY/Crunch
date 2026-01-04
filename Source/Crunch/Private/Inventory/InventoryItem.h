@@ -76,32 +76,39 @@ public:
 	bool SetStackCount(int NewStackCount);
 	
 	bool IsStackFull() const ;
-	bool IsForItem(const UPA_ShopItem* Item) const; 
+	bool IsForItem(const UPA_ShopItem* Item) const;
+
+	float GetAbilityCooldownTimeRemaining() const;
+	float GetAbilityCooldownDuration() const ;
+	float GetManaCost() const ;
 	
 	//为新创建的InventoryItem赋值
-	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem);
+	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem,UAbilitySystemComponent* ASC);
 
 	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
 	FORCEINLINE FInventoryItemHandle GetHandle() const {return Handle;}
 	FORCEINLINE int GetStackCount() const {return StackCount;}
 
 	//GrantedAbility激活
-	bool TryActivateGrantedAbility(UAbilitySystemComponent* AbilitySystemComponent);
+	bool TryActivateGrantedAbility();
 
 	//ConsumeEffect应用
-	void ApplyConsumeEffect(UAbilitySystemComponent* AbilitySystemComponent);
+	void ApplyConsumeEffect();
 	
 	bool IsValid() const;
 
 	//为ASC应用GE
-	void ApplyGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
-	void RemoveGASModifications(UAbilitySystemComponent* AbilitySystemComponent);
+	void RemoveGASModifications();
+
+	bool IsGrantingAnyAbility() const ;
 
 	//更新Slot
 	void SetSlot(int NewSlot);
 private:
-	FInventoryItemHandle Handle;
+	void ApplyGASModifications();
 
+	FInventoryItemHandle Handle;
+	
 	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
 
@@ -116,4 +123,7 @@ private:
 
 	//如果这个Item为角色赋予了GA，则为这个GA创建Handle进行保留
 	FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;
+
+	UPROPERTY()
+	UAbilitySystemComponent* OwnerASC;
 };

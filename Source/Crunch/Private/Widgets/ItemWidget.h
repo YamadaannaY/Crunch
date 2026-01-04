@@ -26,6 +26,8 @@ public:
 
 protected:
 	UItemToolTip* SetToolTipWidget(const UPA_ShopItem* Item);
+
+	UImage* GetItemIcon() const {return ItemIcon;}
 private:	
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
