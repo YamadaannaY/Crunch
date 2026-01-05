@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameplayWidget.generated.h"
 
+class USkeletalMeshRenderWidget;
 class UInventoryWidget;
 class UAbilitySystemComponent;
 class UShopWidget;
@@ -66,6 +67,11 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UInventoryWidget* InventoryWidget;
+
+	//RenderActorView
+	UPROPERTY(meta=(BindWidget))
+	USkeletalMeshRenderWidget* HeadShotWidget;
+
 	
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
