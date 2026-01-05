@@ -45,5 +45,5 @@ void ARenderActor::BeginPlay()
 	CaptureComponent->ShowOnlyActorComponents(this);
 
 	//将RenderActor拉远不影响到地图内容
-	SetActorLocation(FVector{0.f,100000.f,0.f});
+	SetActorLocation(FVector{0.f,0.f,100000.f});
 }
