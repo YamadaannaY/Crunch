@@ -72,6 +72,8 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	USkeletalMeshRenderWidget* HeadShotWidget;
 
+	UPROPERTY(meta=(BindWidget))
+	class UMatchStatWidget* MatchStatWidget;
 	
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);

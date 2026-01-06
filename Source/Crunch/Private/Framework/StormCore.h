@@ -25,6 +25,9 @@ public:
 	AStormCore();
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	//获取Core相对于两个Gaol之间距离的位置，折算为Progress
+	float GetProgress() const ;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -95,6 +98,7 @@ private:
 	AActor* CoreToCapture;
 
 	float CoreCaptureSpeed;
+	float TravelLength=0.f;
 	
 	UFUNCTION()
 	void OnRep_CoreToCapture();

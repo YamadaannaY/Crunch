@@ -35,11 +35,28 @@ void AStormCore::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Out
 	DOREPLIFETIME_CONDITION_NOTIFY(AStormCore,CoreToCapture,COND_None,REPNOTIFY_Always)
 }
 
+float AStormCore::GetProgress() const
+{
+	FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
+	FVector VectorFromTeamOne=GetActorLocation()- TeamTwoGoalLoc;
+	VectorFromTeamOne.Z=0.f;
+
+	//获得TeamOne相对于总Length的比例
+	return VectorFromTeamOne.Size()/TravelLength;
+}
+
 // Called when the game starts or when spawned
 void AStormCore::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	FVector TeamOneGoalLoc=TeamOneGoal->GetActorLocation();
+	FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
+
+	FVector GoalOffset=TeamOneGoalLoc-TeamTwoGoalLoc;
+	GoalOffset.Z=0;
+
+	//两个TeamGoal之间距离的绝对值
+	TravelLength=GoalOffset.Length();
 }
 
 void AStormCore::PossessedBy(AController* NewController)
