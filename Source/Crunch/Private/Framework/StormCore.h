@@ -10,15 +10,21 @@
 class UCameraComponent;
 class USphereComponent;
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGoalReachedDelegate,AActor*,int);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTeamInfluenceCountUpdatedDelegate,int,int );
+
 UCLASS()
 class CRUNCH_API AStormCore : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
+	FOnGoalReachedDelegate OnGoalReachedDelegate;
+	FOnTeamInfluenceCountUpdatedDelegate OnTeamInfluenceCountUpdatedDelegate;
 	// Sets default values for this character's properties
 	AStormCore();
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,20 +55,51 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly,Category="Detection")
 	UCameraComponent* ViewCam;
+
+	UPROPERTY(EditDefaultsOnly,Category="Montage")
+	UAnimMontage* ExpandMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="Montage")
+	UAnimMontage* CaptureMontage;
 	
 	UFUNCTION()
 	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	UFUNCTION()
 	void InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	//更新Weight值
 	void UpdateTeamWeight();
+	//更新Goal的移动方向和速度
 	void UpdateGoal();
-
+	
+	//到达最终目标位置后，StormCore扩张对TeamCore进行捕捉
+	void CaptureCore();
+	
+	//捕捉完成后收缩
+	
+	void ExpandFinished();
+	
 	UPROPERTY(EditAnywhere,Category="Team")
 	AActor* TeamOneGoal;
 
 	UPROPERTY(EditAnywhere,Category="Team")
 	AActor* TeamTwoGoal;
+	
+	UPROPERTY(EditAnywhere,Category="Team")
+	AActor* TeamOneCore;
+
+	UPROPERTY(EditAnywhere,Category="Team")
+	AActor* TeamTwoCore;
+
+	UPROPERTY(ReplicatedUsing=OnRep_CoreToCapture)
+	AActor* CoreToCapture;
+
+	float CoreCaptureSpeed;
+	
+	UFUNCTION()
+	void OnRep_CoreToCapture();
+
+	void GoalReached(int WiningTeam);
 	
 	int TeamOneInfluencerCount=0;
 	int TeamTwoInfluencerCount=0;
