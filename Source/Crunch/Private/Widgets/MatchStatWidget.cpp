@@ -12,6 +12,7 @@ void UMatchStatWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	//工作原理是遍历当前世界（World）中所有活动的 Actor，返回它找到的第一个匹配指定类型的实例
 	StormCore=Cast<AStormCore>(UGameplayStatics::GetActorOfClass(this,AStormCore::StaticClass()));
 	if (StormCore)
 	{

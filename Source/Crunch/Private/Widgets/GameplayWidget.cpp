@@ -3,9 +3,12 @@
 
 #include "Widgets/GameplayWidget.h"
 #include "AbilitySystemBlueprintLibrary.h"
+#include "GameplayMenu.h"
 #include "ShopWidget.h"
 #include "ValueGauge.h"
+#include "Components/WidgetSwitcher.h"
 #include "Widgets/AbilityListView.h"
+#include "Components/CanvasPanel.h"
 #include "GAS/CAbilitySystemComponent.h"
 
 void UGameplayWidget::NativeConstruct()
@@ -18,6 +21,16 @@ void UGameplayWidget::NativeConstruct()
 	{
 		HealthBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent,UCAttributeSet::GetHealthAttribute(),UCAttributeSet::GetMaxHealthAttribute());
 		ManaBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent,UCAttributeSet::GetManaAttribute(),UCAttributeSet::GetMaxManaAttribute());
+	}
+
+	//初始化
+	SetShowMouseCursor(false);
+	SetFocusToGameOnly();
+
+	//绑定ResumeButton的回调，切换Panel
+	if (GameplayMenu)
+	{
+		GameplayMenu->GetResumeButtonClickedEventDelegate().AddDynamic(this,&ThisClass::ToggleGameplayMenu);
 	}
 }
 
@@ -45,6 +58,37 @@ void UGameplayWidget::ToggleShop()
 		SetShowMouseCursor(false);
 		SetFocusToGameOnly();
 	}
+}
+
+void UGameplayWidget::ToggleGameplayMenu()
+{
+	//如果是Menu，则切换到GameplayWidget
+	if (MainSwitcher->GetActiveWidget()==GameplayMenuRootPanel)
+	{
+		MainSwitcher->SetActiveWidget(GameplayWidgetRootPanel);
+		SetOwningPawnInputEnabled(true);
+		SetShowMouseCursor(false);
+		SetFocusToGameOnly();
+	}
+	else
+	{
+		//切换到MenuPanel即MenuWidget
+		ShowGameplayMenu();
+	}
+}
+
+void UGameplayWidget::ShowGameplayMenu()
+{
+	//Menu
+	MainSwitcher->SetActiveWidget(GameplayMenuRootPanel);
+	SetOwningPawnInputEnabled(false);
+	SetShowMouseCursor(true);
+	SetFocusToGameAndUI();
+}
+
+void UGameplayWidget::SetGameplayMenuTitle(const FString& NewTitle)
+{
+	GameplayMenu->SetTitleText(NewTitle);
 }
 
 void UGameplayWidget::PlayShopPopupAnimation(bool bPlayForward)

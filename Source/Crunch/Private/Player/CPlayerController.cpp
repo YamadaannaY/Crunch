@@ -4,7 +4,6 @@
 #include "CPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "Crunch/DebugHelper.h"
 #include "Widgets/GameplayWidget.h"
 #include "net/UnrealNetwork.h"
 
@@ -71,6 +70,7 @@ void ACPlayerController::SetupInputComponent()
 	if (EnhancedInputComp)
 	{
 		EnhancedInputComp->BindAction(ShopToggleInputAction,ETriggerEvent::Triggered,this,&ThisClass::ToggleShop);
+		EnhancedInputComp->BindAction(ToggleGameplayMenuAction,ETriggerEvent::Triggered,this,&ThisClass::ToggleGameplayMenu);
 	}
 }
 
@@ -94,5 +94,14 @@ void ACPlayerController::ToggleShop()
 	if (GameplayWidget)
 	{
 		GameplayWidget->ToggleShop();
+	}
+}
+
+void ACPlayerController::ToggleGameplayMenu()
+{
+	if (GameplayWidget)
+	{
+		//绑定IA，切换至GameplayMenu
+		GameplayWidget->ToggleGameplayMenu();
 	}
 }

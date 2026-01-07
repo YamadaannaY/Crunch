@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GameplayWidget.generated.h"
 
+class UCanvasPanel;
+class UWidgetSwitcher;
 class USkeletalMeshRenderWidget;
 class UInventoryWidget;
 class UAbilitySystemComponent;
@@ -30,6 +32,11 @@ public:
 	void ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities);
 
 	void ToggleShop();
+	
+	UFUNCTION()
+	void ToggleGameplayMenu();
+	void ShowGameplayMenu();
+	void SetGameplayMenuTitle(const FString& NewTitle);
 private:
 	UPROPERTY(meta=(BindWidget))
 	class UValueGauge* HealthBar;
@@ -74,7 +81,19 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	class UMatchStatWidget* MatchStatWidget;
+
+	UPROPERTY(meta=(BindWidget))
+	class UGameplayMenu* GameplayMenu;
 	
+	UPROPERTY(meta=(BindWidget))
+	UWidgetSwitcher* MainSwitcher;
+
+	UPROPERTY(meta=(BindWidget))
+	UCanvasPanel* GameplayWidgetRootPanel;
+
+	UPROPERTY(meta=(BindWidget))
+	UCanvasPanel* GameplayMenuRootPanel;
+
 	void PlayShopPopupAnimation(bool bPlayForward);
 	void SetOwningPawnInputEnabled(bool bPawnInputEnabled);
 	void SetShowMouseCursor(bool bShow);
