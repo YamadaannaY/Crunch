@@ -74,6 +74,36 @@ void ACPlayerController::SetupInputComponent()
 	}
 }
 
+void ACPlayerController::MatchFinished(AActor* ViewTarget, int WinningTeam)
+{
+	//在GameMode中调用，因此需要具有权威端
+	if (!HasAuthority()) return ;
+
+	//服务端禁用输入
+	CPlayerCharacter->DisableInput(this);
+
+	//显示UI并修改Title
+	Client_MatchFinished(ViewTarget,WinningTeam);
+}
+
+void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinningTeam)
+{
+	//将玩家镜头过渡到另一个Actor上
+	SetViewTargetWithBlend(ViewTarget,MatchFinishedViewBlendTimeDuration);
+	
+	FString WinLoseMsg="You Win !";
+	if (GetGenericTeamId().GetId()!=WinningTeam)
+	{
+		WinLoseMsg="You Lose ...." ;
+	}
+	
+	GameplayWidget->SetGameplayMenuTitle(WinLoseMsg);
+	FTimerHandle ShowWinLoseStateTimerHandle;
+
+	//在镜头过渡完毕后调用，显示Menu
+	GetWorldTimerManager().SetTimer(ShowWinLoseStateTimerHandle,this,&ThisClass::ShowWinLoseState,MatchFinishedViewBlendTimeDuration);
+}
+
 void ACPlayerController::SpawnGameplayWidget()
 {
 	if (!IsLocalPlayerController()) return;
@@ -101,7 +131,16 @@ void ACPlayerController::ToggleGameplayMenu()
 {
 	if (GameplayWidget)
 	{
-		//绑定IA，切换至GameplayMenu
+		//绑定IA，切换GameplayMenu
 		GameplayWidget->ToggleGameplayMenu();
+	}
+}
+
+void ACPlayerController::ShowWinLoseState()
+{
+	if (GameplayWidget)
+	{
+		//直接显示Menu
+		GameplayWidget->ShowGameplayMenu();
 	}
 }

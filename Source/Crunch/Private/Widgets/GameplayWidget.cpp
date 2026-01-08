@@ -109,7 +109,7 @@ void UGameplayWidget::SetOwningPawnInputEnabled(bool bPawnInputEnabled)
 	{
 		GetOwningPlayerPawn()->EnableInput(GetOwningPlayer());
 	}
-	else
+	else 
 	{
 		GetOwningPlayerPawn()->DisableInput(GetOwningPlayer());
 	}
@@ -123,6 +123,7 @@ void UGameplayWidget::SetShowMouseCursor(bool bShow)
 void UGameplayWidget::SetFocusToGameAndUI()
 {
 	FInputModeGameAndUI GameAndUIInputMode;
+	//不因为ouse down而隐藏鼠标
 	GameAndUIInputMode.SetHideCursorDuringCapture(false);
 	GetOwningPlayer()->SetInputMode(GameAndUIInputMode);
 }

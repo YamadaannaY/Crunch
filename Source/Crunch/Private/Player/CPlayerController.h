@@ -30,8 +30,16 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void SetupInputComponent() override;
-private:
 
+	//游戏结束调用的逻辑
+	void MatchFinished(AActor* ViewTarget,int WinningTeam);
+private:
+	//在客户端
+	UFUNCTION(Client,Reliable)
+	void Client_MatchFinished(AActor* ViewTarget,int WinningTeam);
+	
+	UPROPERTY(EditDefaultsOnly,Category="View")
+	float MatchFinishedViewBlendTimeDuration=2.f;
 	//在本地Player的视口内渲染UI
 	void SpawnGameplayWidget();
 	
@@ -60,6 +68,10 @@ private:
 	UFUNCTION()
 	void ToggleShop();
 
+	//作为IA绑定的回调，每次输入在Menu和GameplayWidget之间切换
 	UFUNCTION()
 	void ToggleGameplayMenu();
+
+	//直接将Switcher切换到Menu
+	void ShowWinLoseState();
 };
