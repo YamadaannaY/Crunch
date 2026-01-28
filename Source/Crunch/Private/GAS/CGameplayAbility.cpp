@@ -21,7 +21,7 @@ bool UCGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Hand
 {
 	FGameplayAbilitySpec* AbilitySpec=ActorInfo->AbilitySystemComponent->FindAbilitySpecFromHandle(Handle);
 
-	//没有GA或者GA是0级不能激活
+	//为GA添加激活条件，没有GA或者GA是0级不能激活
 	if (AbilitySpec && AbilitySpec->Level<=0) return false;
 
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
@@ -151,4 +151,23 @@ void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult Hit
 	EffectSpecHandle.Data->SetContext(EffectContext);
 		
 	ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(),CurrentActorInfo,CurrentActivationInfo,EffectSpecHandle,UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor()));
+}
+
+void UCGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)
+{
+	UAnimInstance* OwnerAnimInstance=GetOwnerAnimInstance();
+	if (OwnerAnimInstance && !OwnerAnimInstance->Montage_IsPlaying(MontageToPlay))
+	{
+		OwnerAnimInstance->Montage_Play(MontageToPlay);
+	}
+}
+
+void UCGameplayAbility::StopMontageAfterCurrentSection(UAnimMontage* MontageToStop)
+{
+	UAnimInstance* OwnerAnimInst=GetOwnerAnimInstance();
+	if (OwnerAnimInst)
+	{
+		FName CurrentSectionName=OwnerAnimInst->Montage_GetCurrentSection(MontageToStop);
+		OwnerAnimInst->Montage_SetNextSection(CurrentSectionName,NAME_None,MontageToStop);
+	}
 }

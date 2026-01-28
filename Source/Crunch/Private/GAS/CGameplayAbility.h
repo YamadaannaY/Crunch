@@ -18,7 +18,8 @@ public:
 	UCGameplayAbility();
 
 	// Returns true if this ability can be activated right now. Has no side effects
-	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override; 
+	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
+
 protected:
 	//通过MeshComp获得AnimInstance
 	UAnimInstance* GetOwnerAnimInstance() const;
@@ -44,7 +45,9 @@ protected:
 	void PushTarget(const FGameplayAbilityTargetDataHandle& TargetDataHandle,const FVector& PushVel);
 	
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
-	
+
+	void PlayMontageLocally(UAnimMontage* MontageToPlay);
+	void StopMontageAfterCurrentSection(UAnimMontage* MontageToStop);
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Debug")
 	bool bShouldDrawDebug=false;
