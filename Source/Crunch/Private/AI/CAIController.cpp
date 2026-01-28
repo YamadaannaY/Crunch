@@ -39,7 +39,8 @@ void ACAIController::OnPossess(APawn* InPawn)
 	if (PawnTeamInterface)
 	{
 		SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
-		//fresh Senses
+
+		//refresh Senses
 		ClearAndDisabledAllSenses();
 		EnableAllSenses();
 	}
@@ -118,7 +119,7 @@ void ACAIController::SetCurrenTarget(AActor* NewTarget)
 
 AActor* ACAIController::GetNextPerceivedActor() const
 {
-	//存储所有感知到的敌对Actor并返回第一个，如果没有返回null，此时Targte为None
+	//存储所有感知到的敌对Actor并返回第一个，如果没有返回null，此时Target为None
 	if (PerceptionComponent)
 	{
 		TArray<AActor*> Actors;
@@ -160,7 +161,7 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 
 void ACAIController::ClearAndDisabledAllSenses()
 {
-	//清空当前AI的一切记忆，让所有感知到期。   但是下一帧还是会重新感知到。这里会触发Updated
+	//清空当前AI的一切记忆并让所有感知到期。 这个函数是一次性的，下一帧还是会重新感知到。
 	AIPerceptionComponent->AgeStimuli(TNumericLimits<float>::Max());
 
 	//关闭所有感知

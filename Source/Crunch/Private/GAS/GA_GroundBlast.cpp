@@ -60,11 +60,11 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 		return ;
 	}
 
-	//对其他对象施加GE需要在服务端执行
+	//对Target对象施加GE需要在服务端执行，而Target对象的获取是在客户端通过PrimaryPC的ViewTarget进行判断，
+	//获取对象，存储到TargetData中
 	if(K2_HasAuthority())
 	{
 		BP_ApplyGameplayEffectToTarget(Handle,DamageEffectDef.DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
-
 		PushTarget(Handle,DamageEffectDef.PushVelocity);
 	}
 	
@@ -74,14 +74,15 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 
 	//这是一个参数存储变量，起到桥接的作用
 	BlastingCueParams.RawMagnitude=TargetAreaRadius;
-	
+
+	//只要Cue在服务端被触发，就会广播给所有客户端
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(BlastGameplayCueTag,BlastingCueParams);
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag(),BlastingCueParams);
 
 	UAnimInstance* OwnerAnim=GetOwnerAnimInstance();
 	if (OwnerAnim)
 	{
-		//此时播放一个完整的CastMontage，补上后续的手臂下落Montage
+		//此时播放一个完整的CastMontage，补上后续的手臂下落Montage。
 		OwnerAnim->Montage_Play(CastMontage);
 	}
 	

@@ -29,11 +29,11 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 	
 	const FHeroBaseStats* BaseStats=nullptr;
 
-	//遍历DT，找到当前ASC拥有者的属性行，将其赋予BaseStats
+	//遍历DT，找到当前ASC拥有者BP类的属性行，将其赋予BaseStats
 	for (const TPair<FName,uint8*>& DataPair : BaseStatsDataTable->GetRowMap())
 	{
 		BaseStats=BaseStatsDataTable->FindRow<FHeroBaseStats>(DataPair.Key,"");
-
+		//获得具体蓝图生成类
 		if (BaseStats && BaseStats->Class==GetOwner()->GetClass())
 		{
 			break;
@@ -81,19 +81,6 @@ void UCAbilitySystemComponent::ServerSideInit()
 	GiveInitialAbilities();
 }
 
-void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGameplayAbilitySpecHandle Handle,
-	int Level)
-{
-	FGameplayAbilitySpec* Spec=FindAbilitySpecFromHandle(Handle);
-	if (Spec)
-	{
-		Spec->Level=Level;
-		
-		//广播SpecDirtied
-		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
-	}
-}
-
 void UCAbilitySystemComponent::ApplyInitialEffects()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
@@ -102,8 +89,8 @@ void UCAbilitySystemComponent::ApplyInitialEffects()
 	
 	for (const TSubclassOf<UGameplayEffect>& Effect : AbilitySystemGeneric->GetInitialEffects())
 	{
-		//应用自身直接用默认的EffectContext
-		AuthApplyGameplayEffect(Effect);
+		//服务端应用GE
+		AuthApplyGameplayEffectToSelf(Effect);
 	}
 }
 
@@ -111,25 +98,28 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
 
+	//GA等级从0开始，可以升级
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: Abilities)
 	{
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,0,(int32)AbilityPair.Key,nullptr));
 	}
-	
+
+	//基础GA固定等级为1
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: BasicAbilities)
 	{
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,1,(int32)AbilityPair.Key,nullptr));
 	}
 
 	if (!AbilitySystemGeneric) return;
-	
+
+	//被动GA不需要触发，ID为-1
 	for (const TSubclassOf<UGameplayAbility>& PassiveAbility :AbilitySystemGeneric->GetPassiveAbilities())
 	{
 		GiveAbility(FGameplayAbilitySpec(PassiveAbility,1,-1,nullptr));
 	}
 }
 
-void UCAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffect> GameplayEffect, int Level)
+void UCAbilitySystemComponent::AuthApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect> GameplayEffect, int Level)
 {
 	if (GetOwner() && GetOwner()->HasAuthority())
 	{
@@ -138,11 +128,11 @@ void UCAbilitySystemComponent::AuthApplyGameplayEffect(TSubclassOf<UGameplayEffe
 	}
 }
 
-void UCAbilitySystemComponent::ApplyFullStatsEffect()
+void UCAbilitySystemComponent::ApplyFullStatsEffectSelf()
 {
 	if (!AbilitySystemGeneric) return;
 	
-	AuthApplyGameplayEffect(AbilitySystemGeneric->GetFullStateEffect());
+	AuthApplyGameplayEffectToSelf(AbilitySystemGeneric->GetFullStateEffect());
 }
 
 const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& UCAbilitySystemComponent::GetAbilities() const
@@ -187,6 +177,19 @@ void UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Implementation(ECAbil
 	Client_AbilitySpecLevelUpdated(AbilitySpec->Handle,AbilitySpec->Level);
 }
 
+void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGameplayAbilitySpecHandle Handle,
+	int Level)
+{
+	FGameplayAbilitySpec* Spec=FindAbilitySpecFromHandle(Handle);
+	if (Spec)
+	{
+		Spec->Level=Level;
+		
+		//广播Spec回调
+		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
+	}
+}
+
 bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInputID InputID)
 {
 	return true;
@@ -194,15 +197,16 @@ bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInp
 
 void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)
 {
+	//由于构造函数在两端都调用，所以判断只在服务端进行
 	if (!GetOwner() || !GetOwner()->HasAuthority() ) return ;
 
 	bool bFound=false;
 	float MaxHealth=GetGameplayAttributeValue(UCAttributeSet::GetMaxHealthAttribute(),bFound);
+
 	if (bFound && ChangeData.NewValue>=MaxHealth)
 	{
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetHealthFullStatTag()))
 		{
-			//do local only
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetHealthFullStatTag());
 		}
 	}
@@ -216,18 +220,17 @@ void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Chang
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag()))
 		{
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
-
-
+			
 			if (AbilitySystemGeneric && AbilitySystemGeneric->GetDeathEffect())
 			{
-				AuthApplyGameplayEffect(AbilitySystemGeneric->GetDeathEffect());
+				//添加DeadTag
+				AuthApplyGameplayEffectToSelf(AbilitySystemGeneric->GetDeathEffect());
 
 				FGameplayEventData DeadAbilityEventData;
 				if (ChangeData.GEModData)
 				{
 					DeadAbilityEventData.ContextHandle=ChangeData.GEModData->EffectSpec.GetContext();
 				}
-
 				UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwner(),UCAbilitySystemStatics::GetDeadStatTag(),DeadAbilityEventData);
 			}
 		}
@@ -241,11 +244,11 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 
 	bool bFound=false;
 	float MaxMana=GetGameplayAttributeValue(UCAttributeSet::GetMaxManaAttribute(),bFound);
+	
 	if (bFound && ChangeData.NewValue>=MaxMana)
 	{
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetManaFullStatTag()))
 		{
-			//do local only
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetManaFullStatTag());
 		}
 	}

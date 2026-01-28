@@ -19,7 +19,7 @@ public:
 	void SetTargetAreaRadius(float NewRadius);
 	FORCEINLINE void SetTargetTraceRange(float NewRange) {TargetTraceRange=NewRange;};
 
-	//Overlap范围检测，获取要作用的所有目标对象并广播Confirm
+	//只在客户端调用的函数，接受Confirm输入后执行Overlap范围检测，获取要作用的所有目标对象并广播Confirm
 	virtual void ConfirmTargetingAndContinue() override;
 
 	//用于设置此GA影响目标群体

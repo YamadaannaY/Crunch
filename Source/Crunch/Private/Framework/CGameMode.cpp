@@ -26,7 +26,7 @@
 		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
 	}
 	
-	//为当前生成的Controller指定生成点
+	//为当前生成的Controller对应的Pawn指定一个PlayerStart生成点
 	NewPlayerController->StartSpot = FindNextStartSpotTeam(TeamId);
 	
 	return NewPlayerController;

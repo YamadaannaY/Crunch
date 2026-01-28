@@ -131,18 +131,23 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	if (InputID==ECAbilityInputID::BasicAttacks)
 	{
 		//Press在UpperCut监听Event，不会影响正常Attack
+
+		FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
 		
 		//SetUpInput只在客户端执行，所以这里只有客户端的ASC知道发生了什么，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
-		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
-		//相同的Event发送给服务端，因为SendGE的逻辑必须在权威端执行
-		Server_SendGameplayEventTSelf(UCAbilitySystemStatics::GetBasicAttackInputPressedTag(),FGameplayEventData());
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag,FGameplayEventData());
+
+		//相同的Event发送给服务端，因为GE必须在权威端应用
+		Server_SendGameplayEventToSelf(BasicAttackTag,FGameplayEventData());
 	}
 }
 
 void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& InputActionValue)
 {
-	//在IA设置中定义了Scaler
+	//在IA设置中定义了Scaler,这里获得Input对应的Int值（1-6）
 	int Value=FMath::RoundToInt(InputActionValue.Get<float>());
+
+	//激活对应Slot的Item
 	InventoryComponent->TryActivateItemInSlot(Value-1);
 }
 

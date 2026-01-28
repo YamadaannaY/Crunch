@@ -8,7 +8,7 @@
 
 
 /**
- *  BTTask 实现BT通过InputID触发对应GA
+ *  BTTask 实现BT通过InputID为AI触发GA
  */
 UCLASS()
 class UBTTask_SentInputToAbilitySystem : public UBTTaskNode

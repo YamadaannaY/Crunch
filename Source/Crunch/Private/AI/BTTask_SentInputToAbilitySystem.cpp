@@ -9,12 +9,11 @@
 
 EBTNodeResult::Type UBTTask_SentInputToAbilitySystem::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	//获得Controller
+	//获得AIC
 	const AAIController* OwnerAIC = OwnerComp.GetAIOwner();
-	
 	if (OwnerAIC == nullptr) return EBTNodeResult::Failed;
 
-	//获得Controller控制下Pawn的ASC，触发对应ID的GA
+	//获得AIPawn的ASC，触发对应ID的GA
 	if (OwnerAIC)
 	{
 		UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerAIC->GetPawn());

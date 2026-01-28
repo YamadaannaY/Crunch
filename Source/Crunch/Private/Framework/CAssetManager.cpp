@@ -76,11 +76,9 @@ void UCAssetManager::BuildItemMaps()
 
 				//将子Item加载到Items
 				Items.Add(IngredientItem);
-
 				
 				AddToCombinationMap(IngredientItem,Item);
 			}
-			
 			IngredientMap.Add(Item,FItemCollection{Items});
 		}
 	}

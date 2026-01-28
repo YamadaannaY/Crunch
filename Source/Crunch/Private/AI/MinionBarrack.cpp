@@ -30,7 +30,7 @@ AMinion* AMinionBarrack::GetNextAvailableMinion() const
 {
 	for (AMinion* Minion : MinionPool)
 	{
-		//InActiveStat
+		//没有DeadTag视为激活
 		if (!Minion->IsActive())
 		{
 			return Minion;
@@ -53,7 +53,7 @@ void AMinionBarrack::SpawnNewGroup()
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
 		
-		//找到死亡状态的Minion
+		//找到DeadTag下的Minion
 		AMinion* NextAvailableMinion=GetNextAvailableMinion();
 		if (!NextAvailableMinion) break;
 
@@ -63,7 +63,7 @@ void AMinionBarrack::SpawnNewGroup()
 		--i;
 	}
 
-	//意味着当前所有Minion都没有死亡，这种情况下新生成Minion To Do：设置上限？）
+	//意味着当前所有没有DeadTag下的，这种情况下新生成Minion To Do：设置上限？）
 	SpawnNewMinion(i);
 }
 
@@ -77,11 +77,12 @@ void AMinionBarrack::SpawnNewMinion(int Amt)
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
 
-		//延迟生成Actor，因为Actor生成依赖ID来选择Skin，所以要延迟生成，先设置好ID
+		//延迟生成Actor，因为Actor生成依赖ID来选择Skin，所以要延迟生成，先分配好ID再FinishSpawn
 		AMinion* NewMinion=GetWorld()->SpawnActorDeferred<AMinion>(MinionClass,SpawnTransform,this,nullptr,ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 		NewMinion->SetGenericTeamId(BarrackTeamId);
 		NewMinion->FinishSpawning(SpawnTransform);
 
+		//AI的目的地
 		NewMinion->SetGoal(Goal);
 
 		//新的Minion要被加到池中

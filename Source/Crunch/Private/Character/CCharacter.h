@@ -33,7 +33,7 @@ public:
 	//这个函数用在客户端上，判断由客户端控制的玩家角色，因为在客户端上只有一个Controller，即玩家拥有的Controller，从而判断真正的玩家是哪一个
 	bool IsLocallyControlledByPlayer();
 
-	//用于AIController控制CCharacter时也能进行ServerInit
+	//处理AIC的ServerInit,PlayerController在Controller类中调用
 	virtual void PossessedBy(AController* NewController) override;
 
 	//用于复制所有需要给客户端的值
@@ -57,7 +57,7 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	//将GameplayEvent发送的行为也传递给服务端，在服务端执行权威逻辑，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_SendGameplayEventTSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
+	void Server_SendGameplayEventToSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
 
 protected:
 	//在服务端实现对GA和属性集数值的修改
@@ -102,10 +102,10 @@ private:
 	//配置Gauge可视组件，将Component转为配置好的GaugeWidget类，并为其绑定委托
 	void ConfigureOverHeadStatusWidget();
 
-	//Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
+	//客户端调用，Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
 	void UpdateHeadGaugeVisibility();
 
-	//Death状态下调用，判断是否显示OverHeadWidget
+	//Death状态下在客户端调用，判断是否显示OverHeadWidget
 	void SetStatusGaugeEnabled(bool bEnabled);
 
 	/************************** Death and Respawn ********************************/

@@ -42,7 +42,7 @@ public:
 	//监听委托的回调函数，判断完Item有效性后调用Server_Purchase
 	void TryPurchase(const UPA_ShopItem* ItemToPurchase);
 
-	//获取GoldAttribute值
+	//获取当前GoldAttribute值
 	float GetGold() const;
 
 	FORCEINLINE int GetCapacity() const { return Capacity; }
@@ -51,10 +51,10 @@ public:
 
 	UInventoryItem* GetInventoryItemByHandle(const FInventoryItemHandle Handle) const ;
 
-	//调用判断仓库是否已经存满，即不可以存放当前Item 
+	//判断仓库是否已经存满（包括Slot容量判断在内），即不可以存放当前Item 
 	bool IsFullFor(const UPA_ShopItem* Item) const ;
 
-	//判断生成的Item数量是否已经大于仓库容量
+	//判断Slot是否都已经存在Item占用
 	bool IsAllSlotOccupied() const;
 
 	//遍历Map查询当前Item所属Slot，判断Stack是否还可以存储，如果可以返回InventoryItem,增加其Count
@@ -65,7 +65,9 @@ public:
 
 	UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const ;
 
+	//利用Slot槽位下标配合键盘对应数字键位输入触发IA，激活对应的Item
 	void TryActivateItemInSlot(int SlotNumber);
+	
 protected:
 	//获取ASC
 	virtual void BeginPlay() override;
@@ -82,7 +84,8 @@ private:
 	UPROPERTY()
 	TMap<FInventoryItemHandle, UInventoryItem*> InventoryMap;
 
-	void AbilityCommitted(class UGameplayAbility* CommittedAbility);
+	//获取激活GA的信息，更新UI
+	void AbilityCommitted(UGameplayAbility* CommittedAbility);
 
 	/******************* Server **********************/
 
@@ -95,9 +98,14 @@ private:
 
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_SellItem(FInventoryItemHandle ItemHandle);
-	
+
+	//购买Item中调用，处理ItemCount和客户端UI的修改
 	void GrantItem(const UPA_ShopItem* NewItem);
+
+	//激活Item后如果Item是可消耗品则调用
 	void ConsumeItem(UInventoryItem* Item);
+
+	//RPC调用，在SellItem或者Consume使得Stack为0时调用，将其从Slot中移除，包含客户端调用逻辑
 	void RemoveItem(UInventoryItem* Item);
 
 	//判断当前生成的Item是否满足合成条件

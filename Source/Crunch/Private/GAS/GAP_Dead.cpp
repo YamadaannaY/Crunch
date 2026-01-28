@@ -10,6 +10,7 @@
 
 UGAP_Dead::UGAP_Dead()
 {
+	//PassiveGA只执行GE之类的，只在Server调用即可
 	NetExecutionPolicy=EGameplayAbilityNetExecutionPolicy::ServerOnly;
 	
 	FAbilityTriggerData TriggerData;
@@ -75,11 +76,11 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 			TotalGoldReward-=KillerGoldReward;
 		}
 
-		//平均分配
-		float ExperiencePerTarget=TotalExperienceReward/RewardTargets.Num();
-		float GoldPerTarget=TotalGoldReward/RewardTargets.Num();
+		//对助攻者，进行平均分配
+		const float ExperiencePerTarget=TotalExperienceReward/RewardTargets.Num();
+		const float GoldPerTarget=TotalGoldReward/RewardTargets.Num();
 
-		FGameplayEffectSpecHandle EffectSpec=MakeOutgoingGameplayEffectSpec(RewardEffect);
+		const FGameplayEffectSpecHandle EffectSpec=MakeOutgoingGameplayEffectSpec(RewardEffect);
 		EffectSpec.Data->SetSetByCallerMagnitude(UCAbilitySystemStatics::GetExperienceAttributeTag(),ExperiencePerTarget);
 		EffectSpec.Data->SetSetByCallerMagnitude(UCAbilitySystemStatics::GetGoldAttributeTag(),GoldPerTarget);
 

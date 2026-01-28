@@ -15,7 +15,7 @@ class ACPlayerController : public APlayerController ,public IGenericTeamAgentInt
 {
 	GENERATED_BODY()
 public:
-	//只在服务端执行，此时执行ServerInit
+	//只在服务端执行，此时对Character执行ServerInit
 	virtual void OnPossess(APawn* NewPawn) override;
 	
 	//只在客户端和监听服务器执行，调用ClientInit

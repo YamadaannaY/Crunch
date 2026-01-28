@@ -15,7 +15,6 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Crunch/Crunch.h"
-#include "Crunch/DebugHelper.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 // Sets default values
@@ -107,14 +106,13 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 }
 
 //将SendEvent也发送给服务端
-void ACCharacter::Server_SendGameplayEventTSelf_Implementation(const FGameplayTag EventTag,
+void ACCharacter::Server_SendGameplayEventToSelf_Implementation(const FGameplayTag EventTag,
 	const FGameplayEventData& EventData)
 {
-	//Actor=this
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,EventTag,EventData);
 }
 
-bool ACCharacter::Server_SendGameplayEventTSelf_Validate(const FGameplayTag EventTag,
+bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag EventTag,
 	const FGameplayEventData& EventData)
 {
 	return true;
@@ -133,6 +131,7 @@ void ACCharacter::BindGASChangeDelegates()
 {
 	if (CAbilitySystemComponent)
 	{
+		//应用GE附带的GrantedTag被添加到目标ASC的时候是默认Replicate的，所以函数也会在客户端被调用，执行相应的逻辑
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
@@ -285,7 +284,7 @@ void ACCharacter::SetRagDollEnabled(bool bEnabled)
 		GetMesh()->SetSimulatePhysics(false);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		
-		//解除RagDoll后将其重新绑定到RootComponent并且恢复到原先设定好的变换
+		//解除RagDoll后将其重新绑定到RootComponent并且恢复到原先设定好的变换位置
 		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
@@ -311,6 +310,7 @@ void ACCharacter::StartDeathSequence()
 	}
 	PlayDeathAnimation();
 	SetStatusGaugeEnabled(false);
+
 	//取消这个限制，使得目标因为LaunchCombo最后一段带有击飞效果的攻击死亡时能够正常被击飞
 	/*GetCharacterMovement()->SetMovementMode(MOVE_None);*/
 	
@@ -326,7 +326,7 @@ void ACCharacter::Respawn()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	/*GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
 	
-	//用于让DeathMontage BlendOut
+	//用于让DeathMontage执行BlendOut
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
 
@@ -345,7 +345,7 @@ void ACCharacter::Respawn()
 	//回满状态
 	if (CAbilitySystemComponent)
 	{
-		CAbilitySystemComponent->ApplyFullStatsEffect();
+		CAbilitySystemComponent->ApplyFullStatsEffectSelf();
 	}
 }
 

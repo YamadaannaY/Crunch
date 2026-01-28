@@ -11,7 +11,7 @@
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 
 
-UGA_Combo::UGA_Combo()
+UGA_Combo::UGA_Combo() : ComboMontage(nullptr)
 {
 	//为了在GA内不重复触发GA
 	AbilityTags.AddTag(UCAbilitySystemStatics::GetBasicAttackAbilityTag());
@@ -28,7 +28,8 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		K2_EndAbility();
 		return ;
 	}
-	
+
+	//允许本地执行Montage
 	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
 	{
 		//Task服务端执行并在这个角色所在所有客户端调用，PredictionKey检测能力是否可预测，如果是不等待服务端直接执行
@@ -72,17 +73,17 @@ FGameplayTag UGA_Combo::GetComboTargetEventTag()
 	return FGameplayTag::RequestGameplayTag("ability.combo.damage");
 }
 
+void UGA_Combo::HandleInputPress(float TimeWaited)
+{
+	SetupWaitComboInputPress();
+	TryCommitCombo();
+}
+
 void UGA_Combo::SetupWaitComboInputPress()
 {
 	UAbilityTask_WaitInputPress* WaitInputPress=UAbilityTask_WaitInputPress::WaitInputPress(this);
 	WaitInputPress->OnPress.AddDynamic(this,&ThisClass::HandleInputPress);
 	WaitInputPress->ReadyForActivation();
-}
-
-void UGA_Combo::HandleInputPress(float TimeWaited)
-{
-	SetupWaitComboInputPress();
-	TryCommitCombo();
 }
 
 void UGA_Combo::TryCommitCombo()

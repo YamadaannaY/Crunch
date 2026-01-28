@@ -21,16 +21,17 @@ public:
 
 	//添加Item
 	void AddItem(const UPA_ShopItem* NewItem,bool bAddUnique=false);
+	
 	//判断是否已经含有Item，结合bAddUnique使用
-	bool Contains(const UPA_ShopItem* Item) const ;
+	bool Contains(const UPA_ShopItem* Item) const;
+	
 	//获取Items
-	const TArray<const UPA_ShopItem*>& GetItems() const ;
+	const TArray<const UPA_ShopItem*>& GetItems() const;
 	
 private:
 	//Items集合体
 	UPROPERTY()
 	TArray<const UPA_ShopItem*> Items;
-	
 };
 
 /**
@@ -48,7 +49,6 @@ public:
     //所有的UPA_ShopItem资产都属于ShopItem大类
 	static FPrimaryAssetType GetShopItemAssetType();
 
-	UTexture2D* GetIcon() const ;
 	FText GetItemName() const {return ItemName;}
 	FText GteItemDescription() const {return ItemDescription;}
 	float GetPrice() const {return Price;}
@@ -59,8 +59,12 @@ public:
 	TSubclassOf<UGameplayEffect> GetEquippedEffect() const {return EquippedEffect;}
 	TSubclassOf<UGameplayEffect> GetConsumeEffect() const {return ConsumeEffect;}
 	TSubclassOf<UGameplayAbility> GetGrantedAbility() const {return GrantAbility;}
-	UGameplayAbility* GetGrantedAbilityCDO() const;
 	const TArray<TSoftObjectPtr<UPA_ShopItem>>& GetIngredients() const {return IngredientItems;}
+	
+	//加载Icon
+	UTexture2D* GetIcon() const ;
+	//获取GrantAbility的GetDefaultObject
+	UGameplayAbility* GetGrantedAbilityCDO() const;
 	
 private:
 	UPROPERTY(EditDefaultsOnly,Category="ShopItem")

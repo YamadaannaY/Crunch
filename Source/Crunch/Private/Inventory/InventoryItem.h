@@ -70,15 +70,20 @@ public:
 	UInventoryItem();
 
 	FOnAbilityCanCastUpdateDelegate OnAbilityCanCastUpdated;
+	
 	//增加StackCount,成功添加返回true
 	bool AddStackCount();
 
 	//return true if StackCount>0
 	bool ReduceStackCount();
 
+	//修改StackCount为NewCount
 	bool SetStackCount(int NewStackCount);
 	
+	//判断当前Item的StackCount是否达到MaxCount（5）
 	bool IsStackFull() const ;
+	
+	//判断传参ShopItem是否等于当前InventoryItem对应的ShopItem
 	bool IsForItem(const UPA_ShopItem* Item) const;
 
 	float GetAbilityCooldownTimeRemaining() const;
@@ -93,7 +98,7 @@ public:
 	FORCEINLINE FInventoryItemHandle GetHandle() const {return Handle;}
 	FORCEINLINE int GetStackCount() const {return StackCount;}
 
-	//GrantedAbility激活
+	//GrantedAbility激活的服务端RPC函数上调用
 	bool TryActivateGrantedAbility();
 
 	//ConsumeEffect应用

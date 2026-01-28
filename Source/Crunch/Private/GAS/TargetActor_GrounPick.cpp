@@ -64,7 +64,8 @@ void ATargetActor_GroundPick::ConfirmTargetingAndContinue()
 	FGameplayAbilityTargetData_SingleTargetHit* HitLocation=new FGameplayAbilityTargetData_SingleTargetHit;
 	HitLocation->HitResult.ImpactPoint=GetActorLocation();
 	TargetData.Add(HitLocation);
-	
+
+	//触发ValidData广播，服务器和客户端的回调函数都会被触发。
 	TargetDataReadyDelegate.Broadcast(TargetData);
 }
 

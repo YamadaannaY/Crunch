@@ -8,28 +8,33 @@
 #include "Framework/CAssetManager.h"
 #include "GAS/CHeroAttributeSet.h"
 
+UInventoryComponent::UInventoryComponent() :OwnerASC(nullptr)
+{
+	PrimaryComponentTick.bCanEverTick = true;
+}
 
 void UInventoryComponent::TryActivateItem(const FInventoryItemHandle& ItemHandle)
 {
 	UInventoryItem* InventoryItem=GetInventoryItemByHandle(ItemHandle);
 	if (!InventoryItem) return ;
 
-	//服务端应用Item
+	//服务端激活Item附带的GA、GE
 	Server_ActivateItem(ItemHandle);
+}
+
+UInventoryItem* UInventoryComponent::GetInventoryItemByHandle(const FInventoryItemHandle Handle) const
+{
+	UInventoryItem* const* FoundItem=InventoryMap.Find(Handle);
+	if (FoundItem)
+	{
+		return *FoundItem;
+	}
+	return nullptr;
 }
 
 void UInventoryComponent::SellItem(const FInventoryItemHandle& ItemHandle)
 {
 	Server_SellItem(ItemHandle);
-}
-
-// Sets default values for this component's properties
-UInventoryComponent::UInventoryComponent() :OwnerASC(nullptr)
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-	// ...
 }
 
 void UInventoryComponent::TryPurchase(const UPA_ShopItem* ItemToPurchase)
@@ -48,6 +53,7 @@ float UInventoryComponent::GetGold() const
 
 		if (bFound) return Gold;
 	}
+	
 	return 0.f;
 }
 
@@ -55,18 +61,9 @@ void UInventoryComponent::ItemSlotChange(const FInventoryItemHandle Handle, int 
 {
 	if(UInventoryItem* FoundItem=GetInventoryItemByHandle(Handle))
 	{
+		//分配Slot，这个Slot用于用键盘直接使用Item
 		FoundItem->SetSlot(NewSlotNumber);
 	}
-}
-
-UInventoryItem* UInventoryComponent::GetInventoryItemByHandle(const FInventoryItemHandle Handle) const
-{
-	UInventoryItem* const* FoundItem=InventoryMap.Find(Handle);
-	if (FoundItem)
-	{
-		return *FoundItem;
-	}
-	return nullptr;
 }
 
 bool UInventoryComponent::IsFullFor(const UPA_ShopItem* Item) const
@@ -88,8 +85,10 @@ bool UInventoryComponent::IsAllSlotOccupied() const
 
 UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem* Item) const
 {
+	//是否是可叠加存储的Item
 	if (!Item->GetIsStackable()) return nullptr;
 
+	//遍历Map，找到当前形参PA对应的InventoryItem，再判断Stack是否存满
 	for (const TPair<FInventoryItemHandle,UInventoryItem*>& ItemPair: InventoryMap)
 	{
 		if (ItemPair.Value && ItemPair.Value->IsForItem(Item) && !ItemPair.Value->IsStackFull())
@@ -103,26 +102,33 @@ UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem
 bool UInventoryComponent::FindIngredientForItem(const UPA_ShopItem* Item,
 	TArray<UInventoryItem*>& OutIngredients,const TArray<const UPA_ShopItem*>& IngredientToIgnore) const
 {
-	//获取合成需要的Item
+	//获取合成需要的所有原料Item的PA集合
 	const FItemCollection* Ingredients=UCAssetManager::Get().GetIngredientForItem(Item);
 	if (!Ingredients)
 	{
 		return false;
 	}
+	
 	bool bAllFound=true;
+	
+	//将PA集合解析成数组遍历
 	for (const UPA_ShopItem* Ingredient : Ingredients->GetItems())
 	{
+		//如果是需要忽略的原料ItemPA
 		if (IngredientToIgnore.Contains(Ingredient))
 		{
 			continue;
 		}
-		//遍历获取InventoryItem
+		
+		//将所有原料ItemPA解析为具体的InventoryItem并查找Inventory的匹配项
 		UInventoryItem* FoundItem=TryGetItemForShopItem(Ingredient);
 		if (!FoundItem)
 		{
+			//判断当前Inventory中没有找到所有原料Item
 			bAllFound=false;
 			break;
 		}
+		
 		//全部找到后进行存储
 		OutIngredients.Add(FoundItem);
 	}
@@ -133,7 +139,7 @@ UInventoryItem* UInventoryComponent::TryGetItemForShopItem(const UPA_ShopItem* I
 {
 	if (!Item) return nullptr;
 
-	//遍历InventoryMap，利用PA找到对应的InventoryItem
+	//遍历InventoryMap，利用PA查找对应的InventoryItem，如果找到则返回
 	for (const TPair<FInventoryItemHandle,UInventoryItem*>& ItemHandlePair: InventoryMap)
 	{
 		if (ItemHandlePair.Value && ItemHandlePair.Value->GetShopItem()==Item)
@@ -146,7 +152,7 @@ UInventoryItem* UInventoryComponent::TryGetItemForShopItem(const UPA_ShopItem* I
 
 void UInventoryComponent::TryActivateItemInSlot(int SlotNumber)
 {
-	for (TPair<FInventoryItemHandle,UInventoryItem*>& ItemPair: InventoryMap)
+	for (const TPair<FInventoryItemHandle,UInventoryItem*>& ItemPair: InventoryMap)
 	{
 		if (ItemPair.Value->GetItemSlot()==SlotNumber)
 		{
@@ -155,8 +161,6 @@ void UInventoryComponent::TryActivateItemInSlot(int SlotNumber)
 	}
 }
 
-
-// Called when the game starts
 void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -167,14 +171,15 @@ void UInventoryComponent::BeginPlay()
 	}
 }
 
-void UInventoryComponent::AbilityCommitted(class UGameplayAbility* CommittedAbility)
+void UInventoryComponent::AbilityCommitted(UGameplayAbility* CommittedAbility)
 {
 	if (!CommittedAbility)
 		return;
-
+	
 	float CooldownTimeRemaining = 0.f;
 	float CooldownDuration = 0.f;
 
+	//GA获取对应CooldownGE的剩余时间和总持续时间
 	CommittedAbility->GetCooldownTimeRemainingAndDuration(
 		CommittedAbility->GetCurrentAbilitySpecHandle(),
 		CommittedAbility->GetCurrentActorInfo(),
@@ -188,7 +193,8 @@ void UInventoryComponent::AbilityCommitted(class UGameplayAbility* CommittedAbil
 			continue;
 
 		if (ItemPair.Value->IsGrantingAbility(CommittedAbility->GetClass()))
-		{
+		{ 
+			//找到激活GA对应的Widget信息
 			OnItemAbilityCommitted.Broadcast(ItemPair.Key, CooldownDuration, CooldownTimeRemaining);
 		}
 	}
@@ -203,7 +209,6 @@ void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandl
 	//如果ASC中有GA，尝试执行，获取ShopItem
 	InventoryItem->TryActivateGrantedAbility();
 	
-	
 	const UPA_ShopItem* Item=InventoryItem->GetShopItem();
 
 	//判断是否是可以Consume的Item，即有主动消耗的效果
@@ -212,7 +217,6 @@ void UInventoryComponent::Server_ActivateItem_Implementation(FInventoryItemHandl
 		ConsumeItem(InventoryItem);
 	}
 }
-
 bool UInventoryComponent::Server_ActivateItem_Validate(FInventoryItemHandle ItemHandle)
 {
 	return true;
@@ -231,7 +235,6 @@ void UInventoryComponent::Server_SellItem_Implementation(FInventoryItemHandle It
 	//这里执行的逻辑是全部卖掉
 	RemoveItem(InventoryItem);
 }
-
 bool UInventoryComponent::Server_SellItem_Validate(FInventoryItemHandle ItemHandle)
 {
 	return true;
@@ -264,7 +267,7 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 
 		//当库存Item创建成功后广播这个Item
 		OnItemAddedDelegate.Broadcast(InventoryItem);
-
+	
 		UE_LOG(LogTemp,Warning,TEXT("Server Adding Shop Item:%s,with id :%d"),*(InventoryItem->GetShopItem()->GetItemName().ToString()),NewHandle.GetHandleId());
 
 		FGameplayAbilitySpecHandle GrantedAbilitySpecHandle=InventoryItem->GetGrantedAbilitySpecHandle();
@@ -327,6 +330,7 @@ bool UInventoryComponent::TryItemCombination(const UPA_ShopItem* NewItem)
 			RemoveItem(Ingredient);
 		}
 		GrantItem(CombinationItem);
+
 		return true ;
 	}
 	return false;

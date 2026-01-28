@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/CPlayerController.h"
 #include "CPlayerCharacter.h"
@@ -18,8 +17,6 @@ void ACPlayerController::OnPossess(APawn* NewPawn)
 	if (CPlayerCharacter)
 	{
 		CPlayerCharacter->ServerSideInit();
-		
-		//为Character分配ID
 		CPlayerCharacter->SetGenericTeamId(TeamID);
 	}
 }
@@ -33,7 +30,8 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
 	if (CPlayerCharacter)
 	{
 		CPlayerCharacter->ClientSideInit();
-		//在客户端渲染即可，使用复制的值进行UI动态
+		
+		//在客户端渲染。也因此Widget相关所有函数都是只在客户端执行的
 		SpawnGameplayWidget();
 	}
 }
@@ -88,7 +86,7 @@ void ACPlayerController::MatchFinished(AActor* ViewTarget, int WinningTeam)
 
 void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinningTeam)
 {
-	//将玩家镜头过渡到另一个Actor上
+	//将玩家镜头过渡到另一个Actor的View上
 	SetViewTargetWithBlend(ViewTarget,MatchFinishedViewBlendTimeDuration);
 	
 	FString WinLoseMsg="You Win !";

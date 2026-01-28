@@ -19,8 +19,8 @@ class CRUNCH_API ACAIController : public AAIController
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	ACAIController();
+	
 	//只在服务端执行
 	virtual void OnPossess(APawn* InPawn) override;
 	
