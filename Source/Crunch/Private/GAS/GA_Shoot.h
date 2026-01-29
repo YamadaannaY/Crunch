@@ -20,6 +20,18 @@ class UGA_Shoot : public UCGameplayAbility
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Anim")
 	UAnimMontage* ShootMontage;
+
+	UPROPERTY(EditDefaultsOnly,Category="Shoot")
+	float ShootProjectileSpeed=2000.f;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Shoot")
+	float ShootProjectileRange=3000.f;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Shoot")
+	TSubclassOf<class AProjectileActor> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly,Category="Shoot")
+	TSubclassOf<UGameplayEffect> ProjectileEffect;	
 	
 	static FGameplayTag GetShootTag();
 	

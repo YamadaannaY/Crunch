@@ -8,10 +8,14 @@
 #include "UCAbilitySystemStatics.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Crunch/DebugHelper.h"
+#include "GAS/ProjectileActor.h"
+#include "GameplayTagsManager.h"
+
 
 UGA_Shoot::UGA_Shoot() : ShootMontage(nullptr)
 {
 	ActivationOwnedTags.AddTag(UCAbilitySystemStatics::GetAimStatTag());
+	ActivationOwnedTags.AddTag(UCAbilitySystemStatics::GetCrosshairTag());
 }
 
 void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -78,5 +82,31 @@ void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 
 void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
 {
-	Debug::Print("shooting projectile");
+	if (K2_HasAuthority())
+	{
+		AActor* OwnerAvatarActor=GetAvatarActorFromActorInfo();
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner=OwnerAvatarActor;
+		SpawnParams.SpawnCollisionHandlingOverride=ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		FVector SocketLocation=OwnerAvatarActor->GetActorLocation();
+		USkeletalMeshComponent* MeshComp=GetOwningComponentFromActorInfo();
+		if (MeshComp)
+		{
+			TArray<FName> OutNames;
+			UGameplayTagsManager::Get().SplitGameplayTagFName(PayLoad.EventTag,OutNames);
+			if (OutNames.Num()>0)
+			{
+				FName SocketName=OutNames.Last();
+				SocketLocation=MeshComp->GetSocketLocation(SocketName);
+			}
+		}
+
+		AProjectileActor* Projectile=GetWorld()->SpawnActor<AProjectileActor>(ProjectileClass,SocketLocation,OwnerAvatarActor->GetActorRotation(),SpawnParams);
+		if (Projectile)
+		{
+			Projectile->ShootProjectile(ShootProjectileSpeed,ShootProjectileRange,nullptr,GetOwnerTeamId(),MakeOutgoingGameplayEffectSpec(ProjectileEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo)));
+		}
+	}
 }

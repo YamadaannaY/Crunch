@@ -48,6 +48,8 @@ protected:
 
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);
 	void StopMontageAfterCurrentSection(UAnimMontage* MontageToStop);
+
+	FGenericTeamId GetOwnerTeamId() const;
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Debug")
 	bool bShouldDrawDebug=false;
