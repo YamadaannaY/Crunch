@@ -16,11 +16,13 @@ class CRUNCH_API UCGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 public:
 	UCGameplayAbility();
-
-	// Returns true if this ability can be activated right now. Has no side effects
+	
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
 protected:
+	//获取瞄准方向范围内具有的目标
+	AActor* GetAimTarget(float AimDistance,ETeamAttitude::Type TeamAttitude) const ;
+	
 	//通过MeshComp获得AnimInstance
 	UAnimInstance* GetOwnerAnimInstance() const;
 
@@ -46,10 +48,17 @@ protected:
 	
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
 
+	//AnimInstance播放montage，在客户端环境播放
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);
+
+	//在当前Section播放完毕后暂停Montage
 	void StopMontageAfterCurrentSection(UAnimMontage* MontageToStop);
 
+	//获得AvaActor的Id
 	FGenericTeamId GetOwnerTeamId() const;
+
+	//判断TeamAttitude关系
+	bool IsActorTeamAttitudeIs(const AActor* OtherActor,ETeamAttitude::Type TeamAttitude) const ;
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Debug")
 	bool bShouldDrawDebug=false;

@@ -43,5 +43,7 @@ private:
 
 	UFUNCTION()
 	void ShootProjectile(FGameplayEventData PayLoad);
-	
+
+	//获取AimTarget
+	AActor* GetAimTargetIfValid() const;
 };

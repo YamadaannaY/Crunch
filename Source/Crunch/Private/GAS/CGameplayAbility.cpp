@@ -10,7 +10,7 @@
 #include "Character/CCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
 
-UCGameplayAbility::UCGameplayAbility()
+UCGameplayAbility::UCGameplayAbility(): AvatarCharacter(nullptr)
 {
 	ActivationBlockedTags.AddTag(UCAbilitySystemStatics::GetStunStatTag());
 }
@@ -25,6 +25,44 @@ bool UCGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Hand
 	if (AbilitySpec && AbilitySpec->Level<=0) return false;
 
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
+}
+
+AActor* UCGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
+{
+	AActor* OwnerAvatarActor=GetAvatarActorFromActorInfo();
+	if (OwnerAvatarActor)
+	{
+		//此函数被重写为以Camera的Loc和Rot参数，让Aim基于Camera进行LineTrace
+		FVector Location;
+		FRotator Rotation;
+		OwnerAvatarActor->GetActorEyesViewPoint(Location,Rotation);
+
+		const FVector AimEnd=Location + Rotation.Vector()* AimDistance;
+
+		FCollisionQueryParams CollisionQueryParams;
+		CollisionQueryParams.AddIgnoredActor(OwnerAvatarActor);
+
+		FCollisionObjectQueryParams CollisionObjectQueryParams;
+		CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+
+		if (ShouldDrawDebug())
+		{
+			DrawDebugLine(GetWorld(),Location,AimEnd,FColor::Red,false,2.f,0U,3.f);
+		}
+		
+		TArray<FHitResult> HitResults;
+		if (GetWorld()->LineTraceMultiByObjectType(HitResults,Location,AimEnd,CollisionObjectQueryParams,CollisionQueryParams))
+		{
+			for (FHitResult& HitResult : HitResults)
+			{
+				if (IsActorTeamAttitudeIs(HitResult.GetActor(),TeamAttitude))
+				{
+					return HitResult.GetActor();
+				}
+			}
+		}
+	}
+	return nullptr;
 }
 
 UAnimInstance* UCGameplayAbility::GetOwnerAnimInstance() const
@@ -181,4 +219,14 @@ FGenericTeamId UCGameplayAbility::GetOwnerTeamId() const
 	}
 
 	return FGenericTeamId::NoTeam;
+}
+
+bool UCGameplayAbility::IsActorTeamAttitudeIs(const AActor* OtherActor, ETeamAttitude::Type TeamAttitude) const
+{
+	IGenericTeamAgentInterface* OwnerTeamAgentInterface=Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+	if (OwnerTeamAgentInterface)
+	{
+		return OwnerTeamAgentInterface->GetTeamAttitudeTowards(*OtherActor)==TeamAttitude;
+	}
+	return false;
 }

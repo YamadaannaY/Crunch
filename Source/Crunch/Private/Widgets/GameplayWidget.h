@@ -83,6 +83,9 @@ private:
 	class UMatchStatWidget* MatchStatWidget;
 
 	UPROPERTY(meta=(BindWidget))
+	class UCrosshairWidget* CrosshairWidget;
+
+	UPROPERTY(meta=(BindWidget))
 	class UGameplayMenu* GameplayMenu;
 	
 	UPROPERTY(meta=(BindWidget))
