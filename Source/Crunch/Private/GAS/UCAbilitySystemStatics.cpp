@@ -113,7 +113,17 @@ float UCAbilitySystemStatics::GetStaticCostForAbility(const UGameplayAbility* Ab
 	return FMath::Abs(Cost);
 }
 
+bool UCAbilitySystemStatics::IsActorDead(const AActor* ActorToCheck)
+{
+	return ActorHasTag(ActorToCheck,GetDeadStatTag());	
+}
+
 bool UCAbilitySystemStatics::IsHero(const AActor* ActorToCheck)
+{
+	return ActorHasTag(ActorToCheck,GetHeroRoleTag());
+}
+
+bool UCAbilitySystemStatics::ActorHasTag(const AActor* ActorToCheck, const FGameplayTag& Tag)
 {
 	//不直接获取的原因是这里的Actor是常量，但是蓝图库中那个函数返回的不是常量
 	const IAbilitySystemInterface* ActorISA=Cast<IAbilitySystemInterface>(ActorToCheck);
@@ -124,7 +134,7 @@ bool UCAbilitySystemStatics::IsHero(const AActor* ActorToCheck)
 
 		if (ActorASC)
 		{
-			return ActorASC->HasMatchingGameplayTag(GetHeroRoleTag());
+			return ActorASC->HasMatchingGameplayTag(Tag);
 		}
 	}
 	return false;

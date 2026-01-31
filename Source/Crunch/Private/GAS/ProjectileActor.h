@@ -9,7 +9,7 @@
 #include "ProjectileActor.generated.h"
 
 UCLASS()
-class CRUNCH_API AProjectileActor : public AActor
+class CRUNCH_API AProjectileActor : public AActor,public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -20,11 +20,12 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamId);
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamId) override;
 
-	virtual FGenericTeamId GetGenericTeamId() const {return TeamId;}
-protected:
-	virtual void BeginPlay() override;
+	virtual FGenericTeamId GetGenericTeamId() const override {return TeamId;}
+
+	//只在碰撞发生的一端被调用，由于设计上Shoot的碰撞建立在Tick修改客户端服务器上Projectile的位置实现，所以两端都会在Overlap时调用此函数
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
 public:
 	virtual void Tick(float DeltaTime) override;
@@ -43,10 +44,18 @@ private:
 	UPROPERTY()
 	const AActor* Target;
 
-	FGameplayEffectSpecHandle HitEffectSpecHandle;
+	UPROPERTY(EditDefaultsOnly,Category="Gameplay Cue")
+	FGameplayTag HitGameplayCueTag;
+
+	FVector CacheTargetLocation;
 
 	FTimerHandle ShootTimeHandle;
 
+	FGameplayEffectSpecHandle HitEffectSpecHandle;
+
+private:
 	void TravelMaxDistanceReached();
+
+	void SendLocalGameplayCue(AActor* CueTargetActor,const FHitResult& HitResult);
 };
 

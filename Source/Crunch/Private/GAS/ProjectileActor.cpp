@@ -2,6 +2,11 @@
 
 
 #include "ProjectileActor.h"
+#include "GenericTeamAgentInterface.h"
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayCueManager.h"
 #include "net/UnrealNetwork.h"
 
 AProjectileActor::AProjectileActor()
@@ -17,6 +22,7 @@ void AProjectileActor::ShootProjectile(float InSpeed, float InMaxDistance, const
 	FGameplayEffectSpecHandle HitEffectHandle)
 {
 	Target=InTarget;
+	
 	ProjectileSpeed=InSpeed;
 
 	FRotator OwnerViewRot=GetActorRotation();
@@ -48,14 +54,36 @@ void AProjectileActor::SetGenericTeamId(const FGenericTeamId& NewTeamId)
 	TeamId=NewTeamId;
 }
 
-void AProjectileActor::BeginPlay()
+void AProjectileActor::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	Super::BeginPlay();
+	if (!OtherActor || OtherActor==GetOwner()) return ;
+
+	if (GetTeamAttitudeTowards(*OtherActor) != ETeamAttitude::Hostile) return ;
+	
+	UAbilitySystemComponent* OtherASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor);
+	if (OtherASC)
+	{
+		if (HasAuthority() && HitEffectSpecHandle.IsValid())
+		{
+			//为被击中者施加GE
+			OtherASC->ApplyGameplayEffectSpecToSelf(*HitEffectSpecHandle.Data.Get());
+			GetWorldTimerManager().ClearTimer(ShootTimeHandle);
+		}
+
+		FHitResult HitResult;
+		HitResult.ImpactPoint=GetActorLocation();
+		HitResult.ImpactNormal=GetActorForwardVector();
+
+		SendLocalGameplayCue(OtherActor,HitResult);
+		
+		Destroy();
+	}
 }
 
 void AProjectileActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	if (HasAuthority())
 	{
 		if (Target)
@@ -64,6 +92,7 @@ void AProjectileActor::Tick(float DeltaTime)
 			MoveDir=(Target->GetActorLocation()-GetActorLocation()).GetSafeNormal();
 		}
 	}
+	
 	//Server+Client修改方向
 	SetActorLocation(GetActorLocation() + MoveDir*ProjectileSpeed*DeltaTime);
 }
@@ -76,4 +105,13 @@ void AProjectileActor::TraveMaxDistanceReached()
 void AProjectileActor::TravelMaxDistanceReached()
 {
 	
+}
+
+void AProjectileActor::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult)
+{
+	FGameplayCueParameters CueParam;
+	CueParam.Location=HitResult.ImpactPoint;
+	CueParam.Normal=HitResult.ImpactNormal;
+
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(CueTargetActor,HitGameplayCueTag,EGameplayCueEvent::Executed,CueParam);
 }
