@@ -74,6 +74,11 @@ FGameplayTag UCAbilitySystemStatics::GetExperienceAttributeTag()
 	return FGameplayTag::RequestGameplayTag("attr.experience");
 }
 
+FGameplayTag UCAbilitySystemStatics::GetTargetUpdatedTag()
+{
+	return FGameplayTag::RequestGameplayTag("target.updated");
+}
+
 FGameplayTag UCAbilitySystemStatics::GetHeroRoleTag()
 {
 	return FGameplayTag::RequestGameplayTag("role.hero");

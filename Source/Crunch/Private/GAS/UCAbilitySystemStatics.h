@@ -30,6 +30,7 @@ public:
 	static FGameplayTag GetCameraShakeCueTag();
 	static FGameplayTag GetGoldAttributeTag();
 	static FGameplayTag GetExperienceAttributeTag();
+	static FGameplayTag GetTargetUpdatedTag();
 	static FGameplayTag GetHeroRoleTag();
 	static FGameplayTag GetCrosshairTag();
 	

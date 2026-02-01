@@ -8,6 +8,7 @@
 #include "GAP_Launch.h"
 #include "UCAbilitySystemStatics.h"
 #include "Character/CCharacter.h"
+#include "Crunch/DebugHelper.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UCGameplayAbility::UCGameplayAbility(): AvatarCharacter(nullptr)
@@ -189,6 +190,15 @@ void UCGameplayAbility::ApplyGameplayEffectToHitResultActor(const FHitResult Hit
 	EffectSpecHandle.Data->SetContext(EffectContext);
 		
 	ApplyGameplayEffectSpecToTarget(GetCurrentAbilitySpecHandle(),CurrentActorInfo,CurrentActivationInfo,EffectSpecHandle,UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActor(HitResult.GetActor()));
+}
+
+void UCGameplayAbility::SendLocalGameplayEvent(const FGameplayTag& EventTag, const FGameplayEventData& EventData)
+{
+	UAbilitySystemComponent* OwnerASC=GetAbilitySystemComponentFromActorInfo();
+	if (OwnerASC)
+	{
+		OwnerASC->HandleGameplayEvent(EventTag,&EventData);
+	}
 }
 
 void UCGameplayAbility::PlayMontageLocally(UAnimMontage* MontageToPlay)

@@ -52,6 +52,8 @@ void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 		AimTargetAbilitySystemComponent=nullptr;
 	}
 
+	SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),FGameplayEventData());
+
 	StopShooting(FGameplayEventData());
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
@@ -148,6 +150,7 @@ void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
 		}
 
 		AProjectileActor* Projectile=GetWorld()->SpawnActor<AProjectileActor>(ProjectileClass,SocketLocation,OwnerAvatarActor->GetActorRotation(),SpawnParams);
+		Projectile->SetGenericTeamId(GetOwnerTeamId());
 		if (Projectile)
 		{
 			Projectile->ShootProjectile(ShootProjectileSpeed,ShootProjectileRange,GetAimTargetIfValid(),GetOwnerTeamId(),MakeOutgoingGameplayEffectSpec(ProjectileEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo)));
@@ -166,7 +169,7 @@ AActor* UGA_Shoot::GetAimTargetIfValid() const
 
 void UGA_Shoot::FindAimTarget()
 {
-	if (!HasValidTarget()) return ;
+	if (HasValidTarget()) return ;
 
 	if (AimTargetAbilitySystemComponent)
 	{
@@ -174,7 +177,7 @@ void UGA_Shoot::FindAimTarget()
 		AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).RemoveAll(this);
 		AimTargetAbilitySystemComponent=nullptr;
 	}
-
+	
 	AimTarget=GetAimTarget(ShootProjectileRange,ETeamAttitude::Hostile);
 	if (AimTarget)
 	{
@@ -184,6 +187,10 @@ void UGA_Shoot::FindAimTarget()
 			AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::TargetDeadTagUpdated);
 		}
 	}
+
+	FGameplayEventData EventData;
+	EventData.Target=AimTarget;
+	SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),EventData);
 }
 
 void UGA_Shoot::TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount)

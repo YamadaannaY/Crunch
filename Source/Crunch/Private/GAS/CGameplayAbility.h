@@ -48,6 +48,8 @@ protected:
 	
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
 
+	void SendLocalGameplayEvent(const FGameplayTag& EventTag,const FGameplayEventData& EventData);
+
 	//AnimInstance播放montage，在客户端环境播放
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);
 
