@@ -80,6 +80,16 @@ const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& ACCharacter::GetAbi
 	return CAbilitySystemComponent->GetAbilities();
 }
 
+FVector ACCharacter::GetCaptureLocalPosition() const
+{
+	return HeadShotCaptureLocalPosition;
+}
+
+FRotator ACCharacter::GetCaptureLocalRotation() const
+{
+	return HeadShotCaptureLocalRotation;
+}
+
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();

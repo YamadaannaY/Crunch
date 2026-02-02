@@ -7,6 +7,7 @@
 #include  "AbilitySystemInterface.h"
 #include "GameplayTagContainer.h"
 #include "GenericTeamAgentInterface.h"
+#include "Widgets/RenderActorTargetInterface.h"
 #include "CCharacter.generated.h"
 
 struct FOnAttributeChangeData;
@@ -16,7 +17,7 @@ struct FGameplayEventData;
 struct FGameplayTag;
 
 UCLASS()
-class ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface
+class ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface,public IRenderActorTargetInterface
 {
 	GENERATED_BODY()
 
@@ -41,6 +42,16 @@ public:
 
 	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦，Character本身就可以获取位于ASC组件上的Abilities而不是通过Cast对ASC进行转换到CASC，这会导致CASC与Abilities强绑定
 	const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
+	
+	virtual FVector GetCaptureLocalPosition() const override;
+	virtual FRotator GetCaptureLocalRotation() const override;
+
+private:
+	UPROPERTY(EditDefaultsOnly,Category="Capture")
+	FVector HeadShotCaptureLocalPosition;
+
+	UPROPERTY(EditDefaultsOnly,Category="Capture")
+	FRotator HeadShotCaptureLocalRotation;
 
 protected:
 	//BeginPlay会被当前Actor所在所有客户端的镜像所调用，是显示OverHeadUI的完美时机

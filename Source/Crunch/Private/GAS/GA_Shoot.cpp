@@ -101,7 +101,6 @@ bool UGA_Shoot::HasValidTarget() const
 
 void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 {
-	Debug::Print("start shooting");
 	if (HasAuthority(&CurrentActivationInfo))
 	{
 		UAbilityTask_PlayMontageAndWait* PlayShootMontage=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,ShootMontage);
@@ -117,8 +116,6 @@ void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 
 void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 {
-	Debug::Print("stop shooting");
-
 	if (ShootMontage)
 	{
 		StopMontageAfterCurrentSection(ShootMontage);
@@ -205,7 +202,7 @@ bool UGA_Shoot::IsTargetInRange() const
 {
 	if (!AimTarget) return false;
 
-	float Dist=FVector::Distance(AimTarget->GetActorLocation(),GetAvatarActorFromActorInfo()->GetActorLocation());
+	const float Dist=FVector::Distance(AimTarget->GetActorLocation(),GetAvatarActorFromActorInfo()->GetActorLocation());
 
 	return Dist<=ShootProjectileRange;
 }

@@ -5,7 +5,6 @@
 #include "Components/SceneComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 
-// Sets default values
 ARenderActor::ARenderActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,7 +15,7 @@ ARenderActor::ARenderActor()
 	CaptureComponent=CreateDefaultSubobject<USceneCaptureComponent2D>("Capture Component");
 	CaptureComponent->SetupAttachment(RootComp);
 
-	//每帧渲染关闭
+	//每帧渲染关闭以节省性能
 	CaptureComponent->bCaptureEveryFrame = false;
 
 	//视角缩小到30度
@@ -33,12 +32,11 @@ void ARenderActor::UpdateRender()
 {
 	if (CaptureComponent)
 	{
-		//捕捉触发函数，捕获到指定的TextureTarget
+		//捕获指定的TextureTarget
 		CaptureComponent->CaptureScene();
 	}
 }
 
-// Called when the game starts or when spawned
 void ARenderActor::BeginPlay()
 {
 	Super::BeginPlay();
