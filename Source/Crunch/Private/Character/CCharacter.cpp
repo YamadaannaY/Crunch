@@ -352,7 +352,7 @@ void ACCharacter::Respawn()
 		}
 	}
 
-	//回满状态
+	//应用FullStatGE
 	if (CAbilitySystemComponent)
 	{
 		CAbilitySystemComponent->ApplyFullStatsEffectSelf();
@@ -382,7 +382,7 @@ void ACCharacter::OnRep_TeamID()
 	//override in AI class
 }
 
-void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled)
+void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled) const 
 {
 	if (!PerceptionStimuliSourceComponent) return ;
 

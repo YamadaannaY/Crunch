@@ -185,7 +185,7 @@ private:
 
 	//设置AI感知刺激源，如果true则将角色注册为AI可以感知的目标，如果false则取消注册，让AI无法感知。这个函数用于在角色Dead和ReSpawn中
 	//实现在角色拥有DeadTag的情况下让AI无法感知
-	void SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled);
+	void SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled) const ;
 
 	UPROPERTY()
 	class UAIPerceptionStimuliSourceComponent* PerceptionStimuliSourceComponent;
