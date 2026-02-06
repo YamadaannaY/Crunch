@@ -65,7 +65,7 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 	if(K2_HasAuthority())
 	{
 		BP_ApplyGameplayEffectToTarget(Handle,DamageEffectDef.DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
-		PushTarget(Handle,DamageEffectDef.PushVelocity);
+		PushTargets(Handle,DamageEffectDef.PushVelocity);
 	}
 	
 	//CueParam

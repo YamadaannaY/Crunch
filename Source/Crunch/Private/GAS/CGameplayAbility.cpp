@@ -2,13 +2,11 @@
 
 
 #include "CGameplayAbility.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "GAP_Launch.h"
 #include "UCAbilitySystemStatics.h"
 #include "Character/CCharacter.h"
-#include "Crunch/DebugHelper.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 UCGameplayAbility::UCGameplayAbility(): AvatarCharacter(nullptr)
@@ -172,7 +170,7 @@ void UCGameplayAbility::PushTargets(const TArray<AActor*>& Targets, const FVecto
 	}
 }
 
-void UCGameplayAbility::PushTarget(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& PushVel)
+void UCGameplayAbility::PushTargets(const FGameplayAbilityTargetDataHandle& TargetDataHandle, const FVector& PushVel)
 {
 	TArray<AActor*> Targets=UAbilitySystemBlueprintLibrary::GetAllActorsFromTargetData(TargetDataHandle);
 	PushTargets(Targets,PushVel);

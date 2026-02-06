@@ -44,7 +44,7 @@ protected:
 	void PushTargets(const TArray<AActor*>& Targets,const FVector PushVel);
 	
 	//对TargetData所有Actors
-	void PushTarget(const FGameplayAbilityTargetDataHandle& TargetDataHandle,const FVector& PushVel);
+	void PushTargets(const FGameplayAbilityTargetDataHandle& TargetDataHandle,const FVector& PushVel);
 	
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
 
