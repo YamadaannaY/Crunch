@@ -93,6 +93,9 @@ private:
 	UPROPERTY(EditAnywhere,Category="Animation")
 	float YawSpeedSmoothLerpSpeed=1.f;
 
+	UPROPERTY(EditAnywhere,Category="Animation")
+	float YawSpeedLerpToZeroSpeed=30.f;
+
 	//记录上一个Rotator
 	FRotator BodyPrevRot;
 

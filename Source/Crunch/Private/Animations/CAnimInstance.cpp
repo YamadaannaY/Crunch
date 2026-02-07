@@ -40,10 +40,19 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 		//更新PrevRot
 		BodyPrevRot=BodyRot;
+		
 		//通过差值与时间的差值获得旋转速度
 		YawSpeed=BodyRotDelta.Yaw/DeltaSeconds;
+
+		float YawLerpSpeed=YawSpeedSmoothLerpSpeed;
+
+		//在YawSpeed为0时迅速回到默认状态，以一个更高的LerpToZeroSpeed实现
+		if (YawSpeed ==0 )
+		{
+			YawLerpSpeed=YawSpeedLerpToZeroSpeed;
+		}
 		
-		SmoothYawSpeed=UKismetMathLibrary::FInterpTo(SmoothYawSpeed,YawSpeed,DeltaSeconds,YawSpeedSmoothLerpSpeed);
+		SmoothYawSpeed=UKismetMathLibrary::FInterpTo(SmoothYawSpeed,YawSpeed,DeltaSeconds,YawLerpSpeed);
 
 		//BaseAimRotation是Controller的实际朝向
 		FRotator ControlRot=OwnerCharacter->GetBaseAimRotation();
