@@ -2,6 +2,7 @@
 
 #pragma once
 #include "CoreMinimal.h"
+#include "GameplayAbilitySpecHandle.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "AbilityGauge.generated.h"
@@ -115,9 +116,9 @@ private:
 	FTimerHandle CooldownTimerUpdateHandle;
 
 	UPROPERTY()
-	const UAbilitySystemComponent* OwnerASComp;
+	const UAbilitySystemComponent* OwnerASCComp;
 	
-	const FGameplayAbilitySpec* CacheAbilitySpec;
+	FGameplayAbilitySpecHandle CacheAbilitySpecHandle;
 	
 	//Options用于对Text的AsNumber参数进行数位限制
 	FNumberFormattingOptions WholeNumberFormattingOptions;

@@ -43,7 +43,7 @@ void UAbilityGauge::NativeConstruct()
 		}
 	}
 	//存储，其他函数也会调用ASC
-	OwnerASComp=OwnerASC;
+	OwnerASCComp=OwnerASC;
 	
 	WholeNumberFormattingOptions.MaximumFractionalDigits=0;
 	TwoDigitNumberFormattingOptions.MaximumFractionalDigits=2;
@@ -136,14 +136,16 @@ void UAbilityGauge::UpdateCooldown()
 
 const FGameplayAbilitySpec* UAbilityGauge::GetAbilitySpec()
 {
-	if (!CacheAbilitySpec)
+	if (!OwnerASCComp) return nullptr;
+	if (!AbilityCDO) return nullptr;
+	if (!CacheAbilitySpecHandle.IsValid())
 	{
-		if (AbilityCDO &&  OwnerASComp)
-		{
-			CacheAbilitySpec=OwnerASComp->FindAbilitySpecFromClass(AbilityCDO->GetClass());
-		}
+		FGameplayAbilitySpec* FoundAbilitySpec=OwnerASCComp->FindAbilitySpecFromClass(AbilityCDO->GetClass());
+		CacheAbilitySpecHandle = FoundAbilitySpec->Handle;
+		return FoundAbilitySpec;
 	}
-	return CacheAbilitySpec;
+
+	return OwnerASCComp->FindAbilitySpecFromHandle(CacheAbilitySpecHandle);
 }
 
 void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)
@@ -156,8 +158,8 @@ void UAbilityGauge::AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec)
 
 	UpdateCanCast();
 
-	const float NewCooldownDuration=UCAbilitySystemStatics::GetCoolDownDurationFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
-	const float NewCost=UCAbilitySystemStatics::GetManaCostFor(AbilitySpec.Ability,*OwnerASComp,AbilitySpec.Level);
+	const float NewCooldownDuration=UCAbilitySystemStatics::GetCoolDownDurationFor(AbilitySpec.Ability,*OwnerASCComp,AbilitySpec.Level);
+	const float NewCost=UCAbilitySystemStatics::GetManaCostFor(AbilitySpec.Ability,*OwnerASCComp,AbilitySpec.Level);
 
 	CooldownDurationText->SetText(FText::AsNumber(NewCooldownDuration));
 	CostText->SetText(FText::AsNumber(NewCost));
@@ -170,7 +172,7 @@ void UAbilityGauge::UpdateCanCast()
 	
 	if (AbilitySpec)
 	{
-		if (OwnerASComp && !UCAbilitySystemStatics::CheckAbilityCost(*AbilitySpec,*OwnerASComp))
+		if (OwnerASCComp && !UCAbilitySystemStatics::CheckAbilityCost(*AbilitySpec,*OwnerASCComp))
 		{
 			bCanCast=false;
 		}
