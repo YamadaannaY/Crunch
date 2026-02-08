@@ -2,8 +2,11 @@
 
 
 #include "TA_Blackhole.h"
+
+#include "NiagaraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/SphereComponent.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Net/UnrealNetwork.h"
 
 ATA_Blackhole::ATA_Blackhole()
@@ -52,6 +55,35 @@ void ATA_Blackhole::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 void ATA_Blackhole::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (HasAuthority())
+	{
+		for (TPair<AActor*,UNiagaraComponent*>& TargetPair : ActorsInRangeMap)
+		{
+			AActor* Target=TargetPair.Key;
+			UNiagaraComponent* NiagaraComponent=TargetPair.Value;
+			
+			FVector PullDir=(GetActorLocation() - Target->GetActorLocation()).GetSafeNormal();
+			
+			Target->SetActorLocation(Target->GetActorLocation() + PullDir*PullSpeed*DeltaTime);
+
+			if (NiagaraComponent)
+			{
+				NiagaraComponent->SetVariablePosition(BlackholeVFXOriginVariableName,VFXComponent->GetComponentLocation());
+			}
+		}
+	}
+}
+
+void ATA_Blackhole::StartTargeting(UGameplayAbility* Ability)
+{
+	Super::StartTargeting(Ability);
+
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().SetTimer(BlackholeDurationTimerHandle,this,&ThisClass::StopBlackhole,BlackholeDuration);
+	}
 }
 
 void ATA_Blackhole::OnRep_BlackholeRange()
@@ -62,11 +94,57 @@ void ATA_Blackhole::OnRep_BlackholeRange()
 void ATA_Blackhole::ActorInBlackholeRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                           UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	
+	TryAddTarget(OtherActor);
 }
 
 void ATA_Blackhole::ActorLeftBlackholeRanege(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	RemoveTarget(OtherActor);
+}
+
+void ATA_Blackhole::TryAddTarget(AActor* OtherTarget)
+{
+	if (!OtherTarget || ActorsInRangeMap.Contains(OtherTarget)) return ;
+	if (GetTeamAttitudeTowards(*OtherTarget) != ETeamAttitude::Hostile) return ;
+
+	UNiagaraComponent* NiagaraComponent=nullptr;
+
+	if (BlackholeLinkVFX)
+	{
+		NiagaraComponent=UNiagaraFunctionLibrary::SpawnSystemAttached(
+			BlackholeLinkVFX,
+			OtherTarget->GetRootComponent(),
+			NAME_None,
+			FVector::Zero(),FRotator::ZeroRotator,
+			EAttachLocation::Type::KeepRelativeOffset,false);
+
+		//确定LinkVFX的起始位置参数
+		if(NiagaraComponent)
+		{
+			NiagaraComponent->SetVariablePosition(BlackholeVFXOriginVariableName,VFXComponent->GetComponentLocation());
+		}
+	}
+
+	ActorsInRangeMap.Add(OtherTarget,NiagaraComponent);
+}
+
+void ATA_Blackhole::RemoveTarget(AActor* OtherTarget)
+{
+	if (!OtherTarget) return ;
+
+	if (ActorsInRangeMap.Contains(OtherTarget))
+	{
+		UNiagaraComponent* VFXComp;
+		ActorsInRangeMap.RemoveAndCopyValue(OtherTarget,VFXComp);
+		if (IsValid(VFXComp))
+		{
+			VFXComp->DestroyComponent();
+		}
+	}
+}
+
+void ATA_Blackhole::StopBlackhole()
 {
 	
 }

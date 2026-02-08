@@ -27,6 +27,8 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void StartTargeting(UGameplayAbility* Ability) override;
 	
 private:
 	UPROPERTY(Replicated)
@@ -44,9 +46,20 @@ private:
 	float PullSpeed;
 	
 	float BlackholeDuration;
+
+	FTimerHandle BlackholeDurationTimerHandle;
 	
 	UPROPERTY(ReplicatedUsing=OnRep_BlackholeRange)
 	float BlackholeRange;
+
+	UPROPERTY(EditDefaultsOnly,Category="VFX")
+	FName BlackholeVFXOriginVariableName="Origin";
+
+	UPROPERTY(EditDefaultsOnly,Category="VFX")
+	class UNiagaraSystem* BlackholeLinkVFX;
+
+	UPROPERTY()
+	TMap<AActor* , class UNiagaraComponent*> ActorsInRangeMap;
 
 	//客户端配置SphereRadius
 	UFUNCTION()
@@ -59,4 +72,13 @@ private:
 	//SphereComponent的EndOverlap回调
 	UFUNCTION()
 	void ActorLeftBlackholeRanege(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	//
+	void TryAddTarget(AActor* OtherTarget);
+
+	//EndOverlap检测到Target时进行Remove
+	void RemoveTarget(AActor* OtherTarget);
+
+	//Blackhole持续时间结束时调用函数
+	void StopBlackhole();
 };
