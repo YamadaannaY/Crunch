@@ -43,10 +43,27 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Animation")
 	UAnimMontage* HoldBlackholeMontage;
 
+	UPROPERTY(EditDefaultsOnly,Category="Animation")
+	UAnimMontage* FinalBlowMontage;
+
 	UPROPERTY(EditDefaultsOnly,Category="Targeting")
 	TSubclassOf<UGameplayEffect> AimEffect;
 
 	FActiveGameplayEffectHandle AimEffectHandle;
+
+	UPROPERTY(EditDefaultsOnly,Category="Targeting")
+	TSubclassOf<UGameplayEffect> FocusEffect;
+
+	FActiveGameplayEffectHandle FocusEffectHandle;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	TSubclassOf<UGameplayEffect> FinalBlowDamageEffect;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	float BlowPushSpeed = 3000.f;
+
+	UPROPERTY(EditDefaultsOnly,Category="Effect")
+	FGameplayTag FinalBlowCueTag;	
 
 	UPROPERTY()
 	class UAbilityTask_PlayMontageAndWait* PlayCastBlackholeMontageTask;
@@ -71,4 +88,11 @@ private:
 	
 	//移除stat.aim Tag
 	void RemoveAimEffect();
+	
+	//添加stat.aim Tag
+	void AddFocusEffect();
+	
+	//移除stat.aim Tag
+	void RemoveFocusEffect();
+	
 };

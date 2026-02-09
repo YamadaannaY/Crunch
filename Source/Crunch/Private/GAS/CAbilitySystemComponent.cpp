@@ -15,7 +15,7 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 	GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&ThisClass::ManaUpdated);
 	GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetExperienceAttribute()).AddUObject(this,&ThisClass::ExperienceUpdated);
 
-	//为Confirm/Cancel 添加InputID
+	//为Confirm/Cancel 添加InputID , 即让ID对应的IA作为这两个概念的触发
 	GenericConfirmInputID=(int32) ECAbilityInputID::Confirm;
 	GenericCancelInputID=(int32) ECAbilityInputID::Cancel;
 }

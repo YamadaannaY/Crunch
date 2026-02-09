@@ -21,8 +21,6 @@ UGA_Combo::UGA_Combo() : ComboMontage(nullptr)
 void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	Super:ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
 	if (! K2_CommitAbility())
 	{
 		K2_EndAbility();

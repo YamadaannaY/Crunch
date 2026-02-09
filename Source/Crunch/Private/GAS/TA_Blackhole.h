@@ -28,7 +28,11 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartTargeting(UGameplayAbility* Ability) override;
+	virtual auto StartTargeting(UGameplayAbility* Ability) -> void override;
+
+	virtual void ConfirmTargetingAndContinue() override;
+
+	virtual void CancelTargeting() override;
 	
 private:
 	UPROPERTY(Replicated)
@@ -73,7 +77,7 @@ private:
 	UFUNCTION()
 	void ActorLeftBlackholeRanege(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	//
+	//BeginOverlap检测到Tagret时进行Add
 	void TryAddTarget(AActor* OtherTarget);
 
 	//EndOverlap检测到Target时进行Remove

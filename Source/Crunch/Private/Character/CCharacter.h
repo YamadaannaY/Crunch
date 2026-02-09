@@ -70,9 +70,12 @@ public:
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventToSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
 
+	FORCEINLINE bool GetIsInFocusMode() const {return  bIsInFocusMode ; }
+	
 protected:
 	//在服务端实现对GA和属性集数值的修改
 	void UpgradeAbilityWithInputID(ECAbilityInputID InputID);
+	
 private:
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
 	void BindGASChangeDelegates();
@@ -81,7 +84,10 @@ private:
 	void DeadTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	void FocusTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void SetIsAiming(bool bIsAiming);
+
+	bool bIsInFocusMode = false ;
 	
 	//修改HeroSpeed
 	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);

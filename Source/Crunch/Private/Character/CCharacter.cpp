@@ -145,6 +145,7 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetFocusStatTag()).AddUObject(this,&ThisClass::FocusTagUpdated);
 
 		//根据PA修改Hero移动速度
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
@@ -183,6 +184,11 @@ void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
 	//瞄准逻辑
 	SetIsAiming(NewCount!=0);
+}
+
+void ACCharacter::FocusTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	bIsInFocusMode = NewCount > 0 ;
 }
 
 void ACCharacter::SetIsAiming(bool bIsAiming)

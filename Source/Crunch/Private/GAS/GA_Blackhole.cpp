@@ -4,7 +4,9 @@
 #include "GA_Blackhole.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "TargetActor_GrounPick.h"
+#include "UCAbilitySystemStatics.h"
 #include "GAS/TA_Blackhole.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
@@ -49,6 +51,7 @@ void UGA_Blackhole::EndAbility(const FGameplayAbilitySpecHandle Handle, const FG
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	RemoveAimEffect();
+	RemoveFocusEffect();
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
@@ -62,6 +65,7 @@ void UGA_Blackhole::PlaceBlackhole(const FGameplayAbilityTargetDataHandle& Targe
 	}
 
 	RemoveAimEffect();
+	AddFocusEffect();
 	
 	if (PlayCastBlackholeMontageTask)
 	{
@@ -103,11 +107,37 @@ void UGA_Blackhole::PlaceBlackhole(const FGameplayAbilityTargetDataHandle& Targe
 
 void UGA_Blackhole::PlacementCancelled(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
-	
+	K2_EndAbility();
 }
 
 void UGA_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
+	if (K2_HasAuthority())
+	{
+		BP_ApplyGameplayEffectToTarget(TargetDataHandle,FinalBlowDamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
+
+		FVector BlowCenter = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint;
+
+		PushTargetsFromLocation(TargetDataHandle,BlowCenter,BlowPushSpeed);
+
+		UAbilityTask_PlayMontageAndWait* PlayFinalBlowMontageTask=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,HoldBlackholeMontage);
+		PlayFinalBlowMontageTask->OnBlendOut.AddDynamic(this,&ThisClass::K2_EndAbility);
+		PlayFinalBlowMontageTask->OnCancelled.AddDynamic(this,&ThisClass::K2_EndAbility);
+		PlayFinalBlowMontageTask->OnInterrupted.AddDynamic(this,&ThisClass::K2_EndAbility);
+		PlayFinalBlowMontageTask->OnCompleted.AddDynamic(this,&ThisClass::K2_EndAbility);
+		PlayFinalBlowMontageTask->ReadyForActivation();
+	}
+	else
+	{
+		PlayMontageLocally(FinalBlowMontage);
+	}
+
+	FGameplayCueParameters FinalBlowCueParams;
+	FinalBlowCueParams.Location = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint;
+	FinalBlowCueParams.RawMagnitude = TargetAreaRadius ;
+
+	GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(FinalBlowCueTag , FinalBlowCueParams);
+	GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag() , FinalBlowCueParams);
 }
 
 void UGA_Blackhole::AddAimEffect()
@@ -120,5 +150,18 @@ void UGA_Blackhole::RemoveAimEffect()
 	if (AimEffectHandle.IsValid())
 	{
 		BP_RemoveGameplayEffectFromOwnerWithHandle(AimEffectHandle);
+	}
+}
+
+void UGA_Blackhole::AddFocusEffect()
+{
+	FocusEffectHandle=BP_ApplyGameplayEffectToOwner(AimEffect);
+}
+
+void UGA_Blackhole::RemoveFocusEffect()
+{
+	if (FocusEffectHandle.IsValid())
+	{
+		BP_RemoveGameplayEffectFromOwnerWithHandle(FocusEffectHandle);
 	}
 }

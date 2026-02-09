@@ -95,6 +95,8 @@ void ACPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValu
 
 void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValue)
 {
+	if (GetIsInFocusMode()) return ;
+	
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
 	//W+D 组合时输入会是 (1,1)，长度 √2,也就是输入值比直线更快，通过归一化获取单位向量避免
 	InputVal.Normalize();
