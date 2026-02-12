@@ -16,13 +16,13 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 
 	if (!MeshComp) return ;
 
-	//1个Socket无法触发Group
+	//1个Socket，没有ASC无法触发Group
 	if (TargetSocketName.Num() <=1) return ;
-
 	if (!MeshComp->GetOwner() || !UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MeshComp->GetOwner())) return ;
 
 	//用Data存储Socket的位置
 	FGameplayEventData Data;
+	
 	TSet<AActor*> HitActors;
 	
 	AActor* OwnerActor=MeshComp->GetOwner();
@@ -30,7 +30,7 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 	
 	for (int i=1;i<TargetSocketName.Num();++i)
 	{
-		//遍历所有Socket，每两个一组形成一段轨迹以模拟路径
+		//遍历所有Socket，每两个一组，利用Sequence配置好的Socket形成一段段轨迹，模拟攻击路径
 		FVector StratLoc=MeshComp->GetSocketLocation(TargetSocketName[i-1]);
 		FVector EndLoc=MeshComp->GetSocketLocation(TargetSocketName[i]);
 
@@ -58,17 +58,21 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 			}
 			if (OwnerTeamInterface)
 			{
+				//Friendly / Hostile
 				if (OwnerTeamInterface->GetTeamAttitudeTowards(*HitResult.GetActor()) !=TargetTeam)
 				{
 					continue;
 				}
 			}
+
+			//传递给EventReceivedTask的回调函数
 			FGameplayAbilityTargetData_SingleTargetHit* TargetHit=new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
 			Data.TargetData.Add(TargetHit);
 			SendLocalGameplayCue(HitResult);
 		}
 	}
-	//让EventTag对应的Event获得Socket的SourceLocation和TargetLocation，执行伤害逻辑
+
+	//将Data的所有HitResult发送给造成伤害者，回调执行ApplyDamageGE
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(MeshComp->GetOwner(),EventTag,Data);
 }
 

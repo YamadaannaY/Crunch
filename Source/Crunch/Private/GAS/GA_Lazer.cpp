@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "GA_Lazer.h"
 #include "AbilitySystemComponent.h"
@@ -14,6 +12,7 @@ void UGA_Lazer::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
                                 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	if (!K2_CommitAbility() || !LazerMontage) return ;
+	
 	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
 	{
 		UAbilityTask_PlayMontageAndWait* PlayerLazerMontageTask=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,LazerMontage);

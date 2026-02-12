@@ -37,6 +37,7 @@ void UCrosshairWidget::NativeConstruct()
 void UCrosshairWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
+	
 	if (CrosshairImage->GetVisibility()==ESlateVisibility::Visible)
 	{
 		UpdateCrosshairPosition();

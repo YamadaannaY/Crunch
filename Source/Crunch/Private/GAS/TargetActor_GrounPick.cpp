@@ -25,7 +25,7 @@ void ATargetActor_GroundPick::SetTargetAreaRadius(float NewRadius)
 	//配置区域半径并使贴花贴合检测区域半径
 	TargetAreaRadius=NewRadius;
 	
-	DecalComp->DecalSize=FVector(NewRadius);
+	DecalComp->DecalSize=FVector(NewRadius);	
 }
 
 void ATargetActor_GroundPick::ConfirmTargetingAndContinue()
@@ -36,6 +36,7 @@ void ATargetActor_GroundPick::ConfirmTargetingAndContinue()
 	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
 	FCollisionShape CollisionShape;
 	CollisionShape.SetSphere(TargetAreaRadius);
+	
 	GetWorld()->OverlapMultiByObjectType(OverlapResults,GetActorLocation(),FQuat::Identity,CollisionObjectQueryParams,CollisionShape);
 
 	TSet<AActor*> TargetActors;
@@ -95,7 +96,7 @@ FVector ATargetActor_GroundPick::GetTargetPoint() const
 	FVector ViewLoc;
 	FRotator ViewRot;
 
-	//获得玩家当前画面使用的视角原点和朝向
+	//获得摄像机视角原点和朝向
 	PrimaryPC->GetPlayerViewPoint(ViewLoc,ViewRot);
 
 	//沿着视口中心延伸TargetTraceRange

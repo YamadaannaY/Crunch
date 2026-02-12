@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -71,11 +69,11 @@ private:
 	UPROPERTY()
 	class UAbilityTask_WaitTargetData* BlackholeTargetingTask;
 
-	//释放Blackhole
+	//释放Blackhole调用逻辑
 	UFUNCTION()
 	void PlaceBlackhole(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
-	//取消释放
+	//取消释放操作调用逻辑
 	UFUNCTION()
 	void PlacementCancelled(const FGameplayAbilityTargetDataHandle& TargetDataHandle);
 
@@ -94,5 +92,4 @@ private:
 	
 	//移除stat.aim Tag
 	void RemoveFocusEffect();
-	
 };

@@ -108,14 +108,12 @@ void UUpperCut::HandleComboChangeEvent(FGameplayEventData EventData)
 	if (EventTag==UGA_Combo::GetComboChangedEventEndTag())
 	{
 		NextComboName=NAME_None;
-		UE_LOG(LogTemp,Warning,TEXT("next combo is cleared"));
 		return ;
 	}
 
 	TArray<FName> TagNames;
 	UGameplayTagsManager::Get().SplitGameplayTagFName(EventTag,TagNames);
 	NextComboName=TagNames.Last();
-	UE_LOG(LogTemp,Warning,TEXT("next combo is:%s"),*NextComboName.ToString());
 }
 
 void UUpperCut::HandleComboCommitEvent(FGameplayEventData EventData)
@@ -150,7 +148,6 @@ void UUpperCut::HandleComboDamageEvent(FGameplayEventData EventData)
 
 			//TransformVector：把角色自身坐标系里的方向，旋转到世界坐标系，也就是PushVel的结果是在角色当前坐标系内PushVelocity的xyz值应用于世界内
 			//eg：（FVector(1000, 0, 200);） 即PushVel：向角色前方推1000，向上推200
-			//可优化：可以改为按照ImpactNormal作为PushVel
 			FVector PushVel=GetAvatarActorFromActorInfo()->GetActorTransform().TransformVector(EffectDef->PushVelocity);
 
 			//将这个Vector施加于对象

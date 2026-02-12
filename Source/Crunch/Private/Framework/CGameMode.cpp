@@ -1,7 +1,6 @@
 	//GameMode是生成Controller的关键类
 //适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置 etc..
 
-
 #include "Framework/CGameMode.h"
 #include "EngineUtils.h"
 #include "GenericTeamAgentInterface.h"
@@ -81,7 +80,7 @@ AStormCore* ACGameMode::GetStormCore() const
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		for (TActorIterator<AStormCore> It(World);It;++It)
+		for (TActorIterator<AStormCore> It(World);It;)
 		{
 			return *It;
 		}

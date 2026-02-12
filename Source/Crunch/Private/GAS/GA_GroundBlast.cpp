@@ -72,17 +72,17 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 	FGameplayCueParameters BlastingCueParams;
 	BlastingCueParams.Location=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,1).ImpactPoint;
 
-	//这是一个参数存储变量，起到桥接的作用
+	//这是一个参数存储变量，起到桥接的作用，在编辑器的Cue中进一步利用
 	BlastingCueParams.RawMagnitude=TargetAreaRadius;
 
-	//只要Cue在服务端被触发，就会广播给所有客户端
+	//由于TargetActor存在于服务端和客户端，所以本地能看到，而服务器也调用意味着可以广播给附近所有网络相关的客户端
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(BlastGameplayCueTag,BlastingCueParams);
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag(),BlastingCueParams);
 
 	UAnimInstance* OwnerAnim=GetOwnerAnimInstance();
 	if (OwnerAnim)
 	{
-		//此时播放一个完整的CastMontage，补上后续的手臂下落Montage。
+		//此时播放一个完整的CastMontage，补上后续的手臂下落Montage动画
 		OwnerAnim->Montage_Play(CastMontage);
 	}
 	

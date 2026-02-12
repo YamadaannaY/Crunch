@@ -109,9 +109,13 @@ void UGA_Blackhole::PlacementCancelled(const FGameplayAbilityTargetDataHandle& T
 {
 	K2_EndAbility();
 }
-
+ 
 void UGA_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle& TargetDataHandle)
 {
+	FGameplayCueParameters FinalBlowCueParams;
+	FinalBlowCueParams.Location = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint;
+	FinalBlowCueParams.RawMagnitude = TargetAreaRadius ;
+	
 	if (K2_HasAuthority())
 	{
 		BP_ApplyGameplayEffectToTarget(TargetDataHandle,FinalBlowDamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
@@ -130,14 +134,11 @@ void UGA_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle&
 	else
 	{
 		PlayMontageLocally(FinalBlowMontage);
+		
+		GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag() , FinalBlowCueParams);
 	}
-
-	FGameplayCueParameters FinalBlowCueParams;
-	FinalBlowCueParams.Location = UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint;
-	FinalBlowCueParams.RawMagnitude = TargetAreaRadius ;
-
+	
 	GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(FinalBlowCueTag , FinalBlowCueParams);
-	GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag() , FinalBlowCueParams);
 }
 
 void UGA_Blackhole::AddAimEffect()
@@ -155,7 +156,7 @@ void UGA_Blackhole::RemoveAimEffect()
 
 void UGA_Blackhole::AddFocusEffect()
 {
-	FocusEffectHandle=BP_ApplyGameplayEffectToOwner(AimEffect);
+	FocusEffectHandle=BP_ApplyGameplayEffectToOwner(FocusEffect);
 }
 
 void UGA_Blackhole::RemoveFocusEffect()

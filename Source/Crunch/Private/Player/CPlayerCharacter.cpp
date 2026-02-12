@@ -58,6 +58,7 @@ void ACPlayerCharacter::PawnClientRestart()
 void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	
 	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (EnhancedInputComp)
 	{
@@ -138,14 +139,13 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
     //InputID为BasicAttack时发送一个PressedTag，用于UpperCut中
 	if (InputID==ECAbilityInputID::BasicAttacks)
 	{
-		//Press在UpperCut监听Event，不会影响正常Attack
+		//这个Tag只在UpperCut监听Event中被应用，正常Attack除非主动调用此Tag否则不会触发
 
 		FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
 		
-		//SetUpInput只在客户端执行，所以这里只有客户端的ASC知道发生了什么，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag,FGameplayEventData());
-
-		//相同的Event发送给服务端，因为GE必须在权威端应用
+		
+		//SetUpInput及其回调函数只在客户端执行，所以这里只有客户端的ASC接受了GameplayEvent，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
 		Server_SendGameplayEventToSelf(BasicAttackTag,FGameplayEventData());
 	}
 }
@@ -245,7 +245,7 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 	//使用真实帧时间，Alpha即一帧内打算靠近目标多少
 	const float LerpAlpha=FMath::Clamp(GetWorld()->GetDeltaSeconds() * CameraLerpSpeed,0.f,1.f);
 
-	//Lerp::  New = Current + (Goal - Current) * Alpha ，插值的意义在于补全移动过程，而Alpha决定了其强度
+	//Lerp::  New=Current+(Goal-Current)*Alpha ，插值的意义在于补全移动过程，而Alpha决定了其强度
 	const FVector NewLocalOffset=FMath::Lerp(CurrentLocalOffset,Goal,LerpAlpha);
 
 	
@@ -255,6 +255,6 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 	CameraBoom->SocketOffset = NewLocalOffset;
 	ViewCamera->SetRelativeLocation(FVector::ZeroVector);
 
-	//递归逼近
+	//使用一个帧执行一次的一次性定时器进行函数递归调用逼近Goal位置
 	CameraLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
 }

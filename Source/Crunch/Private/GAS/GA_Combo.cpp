@@ -27,10 +27,8 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		return ;
 	}
 
-	//允许本地执行Montage
 	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
 	{
-		//Task服务端执行并在这个角色所在所有客户端调用，PredictionKey检测能力是否可预测，如果是不等待服务端直接执行
 		UAbilityTask_PlayMontageAndWait* PlayComboMontageTask=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,ComboMontage);
 		PlayComboMontageTask->OnBlendOut.AddDynamic(this,&ThisClass::K2_EndAbility);
 		PlayComboMontageTask->OnCancelled.AddDynamic(this,&ThisClass::K2_EndAbility);
@@ -44,7 +42,7 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		WaitComboChangeEventTask->ReadyForActivation();
 	}
 
-	//在服务端实现DoDamage
+	//在服务端实现Damage逻辑
 	if (K2_HasAuthority())
 	{
 		UAbilityTask_WaitGameplayEvent* WaitTargetEventTask=UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,GetComboTargetEventTag());

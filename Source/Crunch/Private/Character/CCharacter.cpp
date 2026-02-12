@@ -93,12 +93,12 @@ FRotator ACCharacter::GetCaptureLocalRotation() const
 void ACCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	//对于每个客户端中每个Character都要渲染一次OverHeadUI
+	
+	//对于客户端中除自己之外所有Character都渲染一次OverHeadUI
 	ConfigureOverHeadStatusWidget();
 
 	//获得当前Mesh相对于CapsuleComponent的变换（所谓Transform，指的是一个坐标系的摆放方式，想象Transform是一张坐标纸，而Vector只是其中一个点，Rotator则表明这张纸相对最开始旋转了多少，
 	//Scale表示这张纸相对最开始扩张了多少，最终集合成FTransform）
-	
 	MeshRelativeTransform=GetMesh()->GetRelativeTransform();
 
 	//为刺激源组件添加视觉刺激，即能够触发AI的Sense_Sight
@@ -188,15 +188,15 @@ void ACCharacter::AimTagUpdated(const FGameplayTag Tag, int32 NewCount)
 
 void ACCharacter::FocusTagUpdated(const FGameplayTag Tag, int32 NewCount)
 {
-	bIsInFocusMode = NewCount > 0 ;
+	bIsInFocusMode = NewCount > 0;
 }
 
 void ACCharacter::SetIsAiming(bool bIsAiming)
 {
-	//让角色跟随视角进行旋转，调用具体逻辑
-	
+	//让角色跟随视角进行旋转而不是跟随输入旋转，调用具体逻辑
 	bUseControllerRotationYaw=bIsAiming;
-	GetCharacterMovement()->bOrientRotationToMovement =!bIsAiming;
+	GetCharacterMovement()->bOrientRotationToMovement  =!bIsAiming;
+	
 	OnAimStatChanged(bIsAiming);
 }
 
@@ -214,13 +214,14 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 {
 	if (!OverHeadWidgetComponent) return ;
 
-	//本地玩家不需要Overhead UI
+	//本地客户端下Character不需要OverheadUI
 	if (IsLocallyControlledByPlayer())
 	{
 		OverHeadWidgetComponent->SetHiddenInGame(true);
 		return;
 	}
-	//非本地玩家
+	
+	//非LocalPlayer
 	UOverHeadStatsGauge* OverHeadStatsGauge=Cast<UOverHeadStatsGauge>(OverHeadWidgetComponent->GetUserWidgetObject());
 	if (OverHeadStatsGauge)
 	{
@@ -228,7 +229,8 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 		OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
 		
 		OverHeadWidgetComponent->SetHiddenInGame(false);
-		
+
+		//每次调用重置UpdateTime
 		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);
 		GetWorldTimerManager().SetTimer(HeadStatGaugeVisibilityUpdateTimerHandle,this,&ACCharacter::UpdateHeadGaugeVisibility,HeadStatGaugeVisibilityUpdateGap,true);
 	}
@@ -236,13 +238,14 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 
 void ACCharacter::UpdateHeadGaugeVisibility()
 {
-	//这个客户端的LocalPlayer，即UI渲染对象
+	//Starting first with local players and then available remote ones
 	APawn* LocalPlayerPawn=UGameplayStatics::GetPlayerPawn(this,0);
 	
 	if(LocalPlayerPawn)
 	{
 		//当前Character与本地Pawn的距离差值平方
 		float DistSquared=FVector::DistSquared(GetActorLocation(),LocalPlayerPawn->GetActorLocation());
+
 		//决定是否显示UI
 		OverHeadWidgetComponent->SetHiddenInGame(DistSquared>HeadStatGaugeVisibilityRangeSquared);
 	}
@@ -271,14 +274,13 @@ void ACCharacter::ReSpawnImmediative()
 {
 	if (HasAuthority())
 	{
+		//Removes all active effects that grant any of the tags in Tags
 		GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(UCAbilitySystemStatics::GetDeadStatTag()));
 	}
 }
 
 void ACCharacter::DeathMontageFinished()
 {
-	//BUG修复：由于池化ReSpawn机制，可能在DeathMontage还没有播放完就重生了，此时RagDoll还是会在Duration之后触发，需要明确
-	//触发条件在DeathStat下
 	if (IsDead())
 	{
 		SetRagDollEnabled(true);
@@ -300,7 +302,7 @@ void ACCharacter::SetRagDollEnabled(bool bEnabled)
 		GetMesh()->SetSimulatePhysics(false);
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		
-		//解除RagDoll后将其重新绑定到RootComponent并且恢复到原先设定好的变换位置
+		//解除RagDoll后将其重新绑定到RootComponent并且恢复到缓存好的Transform上
 		GetMesh()->AttachToComponent(GetRootComponent(),FAttachmentTransformRules::KeepRelativeTransform);
 		GetMesh()->SetRelativeTransform(MeshRelativeTransform);
 	}
@@ -340,7 +342,7 @@ void ACCharacter::Respawn()
 	SetAIPerceptionStimuliSourceEnabled(true);
 	SetRagDollEnabled(false);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	/*GetCharacterMovement()->SetMovementMode(MOVE_Walking);*/
+	/* GetCharacterMovement()->SetMovementMode(MOVE_Walking); */
 	
 	//用于让DeathMontage执行BlendOut
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);

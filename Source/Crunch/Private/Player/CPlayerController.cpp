@@ -77,16 +77,15 @@ void ACPlayerController::MatchFinished(AActor* ViewTarget, int WinningTeam)
 	//在GameMode中调用，因此需要具有权威端
 	if (!HasAuthority()) return ;
 
-	//服务端禁用输入
-	CPlayerCharacter->DisableInput(this);
-
 	//显示UI并修改Title
 	Client_MatchFinished(ViewTarget,WinningTeam);
 }
 
 void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinningTeam)
 {
-	//将玩家镜头过渡到另一个Actor的View上
+	CPlayerCharacter->DisableInput(this);
+	
+	//将玩家镜头过渡到一个新的ViewTarget上
 	SetViewTargetWithBlend(ViewTarget,MatchFinishedViewBlendTimeDuration);
 	
 	FString WinLoseMsg="You Win !";

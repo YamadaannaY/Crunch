@@ -25,7 +25,6 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		K2_EndAbility();
 		return ;
 	}
-	Debug::Print("shoot activated");
 	
 	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
 	{
@@ -62,7 +61,6 @@ void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 void UGA_Shoot::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                               const FGameplayAbilityActivationInfo ActivationInfo)
 {
-	Debug::Print("shoot ability ended");
 	K2_EndAbility();
 }
 
@@ -110,6 +108,7 @@ void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 	{
 		PlayMontageLocally(ShootMontage);
 	}
+	
 	FindAimTarget();
 	StartAimTargetCheckTimer();
 }
@@ -147,7 +146,6 @@ void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
 		}
 
 		AProjectileActor* Projectile=GetWorld()->SpawnActor<AProjectileActor>(ProjectileClass,SocketLocation,OwnerAvatarActor->GetActorRotation(),SpawnParams);
-		Projectile->SetGenericTeamId(GetOwnerTeamId());
 		if (Projectile)
 		{
 			Projectile->ShootProjectile(ShootProjectileSpeed,ShootProjectileRange,GetAimTargetIfValid(),GetOwnerTeamId(),MakeOutgoingGameplayEffectSpec(ProjectileEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo)));

@@ -26,6 +26,7 @@ void AProjectileActor::ShootProjectile(float InSpeed, float InMaxDistance, const
 	ProjectileSpeed=InSpeed;
 
 	FRotator OwnerViewRot=GetActorRotation();
+	SetGenericTeamId(InTeamId);
 
 	if (GetOwner())
 	{
@@ -97,14 +98,9 @@ void AProjectileActor::Tick(float DeltaTime)
 	SetActorLocation(GetActorLocation() + MoveDir*ProjectileSpeed*DeltaTime);
 }
 
-void AProjectileActor::TraveMaxDistanceReached()
-{
-	
-}
-
 void AProjectileActor::TravelMaxDistanceReached()
 {
-	
+	Destroy();
 }
 
 void AProjectileActor::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult)

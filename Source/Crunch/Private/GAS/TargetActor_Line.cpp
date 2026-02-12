@@ -61,6 +61,7 @@ void ATargetActor_Line::StartTargeting(UGameplayAbility* Ability)
 	if (!OwningAbility) return ;
 
 	AvatarActor=OwningAbility->GetAvatarActorFromActorInfo();
+	
 	if (HasAuthority())
 	{
 		//进行TargetActor的查询

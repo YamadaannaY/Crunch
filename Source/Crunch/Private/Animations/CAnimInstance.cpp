@@ -13,7 +13,6 @@ void UCAnimInstance::NativeInitializeAnimation()
 {
 	
 	OwnerCharacter=Cast<ACharacter>(TryGetPawnOwner());
-
 	if (OwnerCharacter)
 	{
 		OwnerMovementComp=OwnerCharacter->GetCharacterMovement();
@@ -41,25 +40,26 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		//更新PrevRot
 		BodyPrevRot=BodyRot;
 		
-		//通过差值与时间的差值获得旋转速度
+		//获得旋转速度 ，单位是 °/s
 		YawSpeed=BodyRotDelta.Yaw/DeltaSeconds;
 
 		float YawLerpSpeed=YawSpeedSmoothLerpSpeed;
 
 		//在YawSpeed为0时迅速回到默认状态，以一个更高的LerpToZeroSpeed实现
-		if (YawSpeed ==0 )
+		if (YawSpeed == 0 )
 		{
 			YawLerpSpeed=YawSpeedLerpToZeroSpeed;
 		}
 		
 		SmoothYawSpeed=UKismetMathLibrary::FInterpTo(SmoothYawSpeed,YawSpeed,DeltaSeconds,YawLerpSpeed);
 
-		//BaseAimRotation是Controller的实际朝向
+		//BaseAimRotation：Character的实际视野朝向，包括了Pitch
 		FRotator ControlRot=OwnerCharacter->GetBaseAimRotation();
-		//获得差值，这个差值就是BS中要转过的角度。
+		
+		//获得视线和身体角度的差值，即BS中头部要转过的角度。
 		LookRotOffset=UKismetMathLibrary::NormalizedDeltaRotator(ControlRot,BodyRot);
 
-		//将速度向量进行投影，获得在视角朝向方向的前向速度和右向速度
+		//将速度向量进行点乘投影，叉乘计算，最后获得在合速度在视角朝向方向的前向速度和右向速度
 		FwdSpeed=Vel.Dot(ControlRot.Vector());
 		RightSpeed=-Vel.Dot(ControlRot.Vector().Cross(FVector::UpVector));
 	}
@@ -76,7 +76,7 @@ void UCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 }
 
-bool UCAnimInstance::bShouldDoFullBoday() const
+bool UCAnimInstance::bShouldDoFullBody() const
 {
 	return (GetSpeed() <=0 && !(GetIsAiming()));
 }

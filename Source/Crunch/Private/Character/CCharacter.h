@@ -42,7 +42,8 @@ public:
 
 	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦，Character本身就可以获取位于ASC组件上的Abilities而不是通过Cast对ASC进行转换到CASC，这会导致CASC与Abilities强绑定
 	const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
-	
+
+	//获取Capture Vector/Rotator
 	virtual FVector GetCaptureLocalPosition() const override;
 	virtual FRotator GetCaptureLocalRotation() const override;
 
@@ -58,7 +59,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	/****************************************************/
@@ -69,7 +69,7 @@ public:
 	//将GameplayEvent发送的行为也传递给服务端，在服务端执行权威逻辑，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventToSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
-
+	
 	FORCEINLINE bool GetIsInFocusMode() const {return  bIsInFocusMode ; }
 	
 protected:
@@ -119,7 +119,7 @@ private:
 	//配置Gauge可视组件，将Component转为配置好的GaugeWidget类，并为其绑定委托
 	void ConfigureOverHeadStatusWidget();
 
-	//客户端调用，Timer绑定的回调，对客户端中的每一个角色类调用根据距离判断是否显示自己的OverheadUI是否显示
+	//客户端调用，Timer绑定的回调，对客户端中的每一个此角色实例调用，根据与本地客户端角色实例的距离判断是否要显示自己的OverheadUI是否显示
 	void UpdateHeadGaugeVisibility();
 
 	//Death状态下在客户端调用，判断是否显示OverHeadWidget

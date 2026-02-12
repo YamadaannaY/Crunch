@@ -10,12 +10,10 @@ void UAN_SendGameplayEvent::Notify(USkeletalMeshComponent* MeshComp, UAnimSequen
 {
 	Super::Notify(MeshComp, Animation, EventReference);
 
-	//触发notify时将EventTag发送给Actor以触发WaitEvent，从而触发Received回调（主要获取下一段comboTag的后缀）
-	
-	if (!MeshComp->GetOwner()) return;
+	//触发Notify时将EventTag发送给Actor以触发WaitEventTask，进而触发Received回调（主要获取下一段comboTag的后缀）
+	if (! MeshComp->GetOwner()) return;
 
 	UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MeshComp->GetOwner());
-
 	if (!OwnerASC) return;
 
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(MeshComp->GetOwner(),EventTag,FGameplayEventData());

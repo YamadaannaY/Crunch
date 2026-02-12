@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+	// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "GAS/GAP_Dead.h"
@@ -26,7 +26,6 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 {
 	if (K2_HasAuthority())
 	{
-		//击杀者，通过EffectContext获取	
 		AActor* Killer=TriggerEventData->ContextHandle.GetEffectCauser();
 		if (!Killer || !UCAbilitySystemStatics::IsHero(Killer))
 		{
@@ -52,6 +51,7 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		}
 
 		bool bFound=false;
+		
 		//被击杀者的经验值
 		const float SelfExperience=GetAbilitySystemComponentFromActorInfo_Ensured()->GetGameplayAttributeValue(UCHeroAttributeSet::GetExperienceAttribute(),bFound);
 

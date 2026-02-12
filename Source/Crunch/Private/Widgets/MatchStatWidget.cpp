@@ -39,6 +39,7 @@ void UMatchStatWidget::MatchFinished(AActor* ViewTarget, int WinnerTeam)
 	float Progress =WinnerTeam == 0 ? 1: 0;
 	GetWorld()->GetTimerManager().ClearTimer(UpdateProgressTimerHandle);
 
+	//最后一次更新手动进行，完全置为1/0
 	ProgressImage->GetDynamicMaterial()->SetScalarParameterValue(ProgressDynamicMaterialParaName,Progress);
 }
 

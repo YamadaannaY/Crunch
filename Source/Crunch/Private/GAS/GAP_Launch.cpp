@@ -33,6 +33,7 @@ void UGAP_Launch::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const
 	{
 		//GA只在服务端触发：具体逻辑就是对自己施加一个特定方向的速度，这个速度就是PushTarget函数中传参的PushVel
 		PushSelf(TriggerEventData->TargetData.Get(0)->GetHitResult()->ImpactNormal);
+		
 		K2_EndAbility();
 	}
 }

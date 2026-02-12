@@ -15,13 +15,13 @@ class UCAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 public:
-	//相当于构造函数，这里用于为OwnerMovementComp赋值
+	//相当于构造函数，用于为OwnerMovementComp赋值
 	virtual void NativeInitializeAnimation() override;
 
-	//需要每帧进行逻辑计算的值在这里调用
+	//从GameThread中获得需要的数据并缓存，作为读取World的接口
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-	//
+	//利用缓存好的数据计算动画状态，从而得出AnimGraph需要的逻辑结果
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
 	/****************	ABP中使用的接口函数 *******************/
@@ -64,10 +64,11 @@ public:
 
 	//在静止非瞄准下才使用FullBody，如果静止但是处于AimStat，还是使用UpperBody（没有过滤下半部分的Anim，使角色在原地移动）
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
-	bool bShouldDoFullBoday() const ;
+	bool bShouldDoFullBody() const ;
 
 private:
 	void OwnerAimTagChanged(const FGameplayTag Tag,int32 NewCount);
+	
 	UPROPERTY()
 	ACharacter* OwnerCharacter;
 
@@ -76,28 +77,29 @@ private:
 
 	float Speed;
 
-	//初始YawSpeed
 	float YawSpeed;
 
-	//优化后的最终的YawSpeed
 	float SmoothYawSpeed;
 
-	//Aim locomotion,这两个速度指的是在瞄准方向上的前向速度和水平速度
 	float FwdSpeed;
+	
 	float RightSpeed;
 
 	bool bIsJumping;
+	
 	bool bIsAiming;
 
 	//由于鼠标控制旋转，速度和变化都非常快，所以手动设置一个LerpSeed，控制插值速度，使用InterpTo进行在这个速度下平滑旋转
 	UPROPERTY(EditAnywhere,Category="Animation")
 	float YawSpeedSmoothLerpSpeed=1.f;
 
+	//当YawSpeed为0时，BS从其他节点返回默认状态，这个过程需要快一点，不然角色即使静止也会因为回到默认状态太慢而依旧出现晃动
 	UPROPERTY(EditAnywhere,Category="Animation")
 	float YawSpeedLerpToZeroSpeed=30.f;
 
 	//记录上一个Rotator
 	FRotator BodyPrevRot;
 
+	//获得头部旋转的角度
 	FRotator LookRotOffset;
 };

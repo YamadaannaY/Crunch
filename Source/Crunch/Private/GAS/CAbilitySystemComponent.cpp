@@ -11,6 +11,7 @@
 
 UCAbilitySystemComponent::UCAbilitySystemComponent()
 {
+	//构造函数在两端调用，需要确保限制在服务端
 	GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetHealthAttribute()).AddUObject(this,&ThisClass::HealthUpdated);
 	GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&ThisClass::ManaUpdated);
 	GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetExperienceAttribute()).AddUObject(this,&ThisClass::ExperienceUpdated);
@@ -18,6 +19,13 @@ UCAbilitySystemComponent::UCAbilitySystemComponent()
 	//为Confirm/Cancel 添加InputID , 即让ID对应的IA作为这两个概念的触发
 	GenericConfirmInputID=(int32) ECAbilityInputID::Confirm;
 	GenericCancelInputID=(int32) ECAbilityInputID::Cancel;
+}
+
+void UCAbilitySystemComponent::ServerSideInit()
+{
+	InitializeBaseAttribute();
+	ApplyInitialEffects();
+	GiveInitialAbilities();
 }
 
 void UCAbilitySystemComponent::InitializeBaseAttribute()
@@ -33,9 +41,10 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 	for (const TPair<FName,uint8*>& DataPair : BaseStatsDataTable->GetRowMap())
 	{
 		BaseStats=BaseStatsDataTable->FindRow<FHeroBaseStats>(DataPair.Key,"");
-		//获得具体蓝图生成类
+
+		//获得具体蓝图生成类对象数据行
 		if (BaseStats && BaseStats->Class==GetOwner()->GetClass())
-		{
+		{	
 			break;
 		}
 	}
@@ -70,21 +79,13 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 		SetNumericAttributeBase(UCHeroAttributeSet::GetMaxLevelExperienceAttribute(),MaxExp);
 	}
 
-	//调用一次Exp更新进行初始化，传参为0，即最开始Exp值为0
+	//调用一次Exp更新进行初始化，传参为默认构造，即最开始Exp值为0
 	ExperienceUpdated(FOnAttributeChangeData());
-}
-
-void UCAbilitySystemComponent::ServerSideInit()
-{
-	InitializeBaseAttribute();
-	ApplyInitialEffects();
-	GiveInitialAbilities();
 }
 
 void UCAbilitySystemComponent::ApplyInitialEffects()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
-
 	if (!AbilitySystemGeneric) return;
 	
 	for (const TSubclassOf<UGameplayEffect>& Effect : AbilitySystemGeneric->GetInitialEffects())
@@ -104,7 +105,7 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,0,(int32)AbilityPair.Key,nullptr));
 	}
 
-	//基础GA固定等级为1
+	//基础GA固定等级为1，不进行升级
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: BasicAbilities)
 	{
 		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,1,(int32)AbilityPair.Key,nullptr));
@@ -112,7 +113,7 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 
 	if (!AbilitySystemGeneric) return;
 
-	//被动GA不需要触发，ID为-1
+	//被动GA不需要主动触发，ID为-1
 	for (const TSubclassOf<UGameplayAbility>& PassiveAbility :AbilitySystemGeneric->GetPassiveAbilities())
 	{
 		GiveAbility(FGameplayAbilitySpec(PassiveAbility,1,-1,nullptr));
@@ -123,7 +124,7 @@ void UCAbilitySystemComponent::AuthApplyGameplayEffectToSelf(TSubclassOf<UGamepl
 {
 	if (GetOwner() && GetOwner()->HasAuthority())
 	{
-		FGameplayEffectSpecHandle EffectSpecHandle=MakeOutgoingSpec(GameplayEffect,Level,MakeEffectContext());
+		const FGameplayEffectSpecHandle EffectSpecHandle=MakeOutgoingSpec(GameplayEffect,Level,MakeEffectContext());
 		ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());
 	}
 }
@@ -171,10 +172,14 @@ void UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Implementation(ECAbil
 	SetNumericAttributeBase(UCHeroAttributeSet::GetUpgradePointAttribute(),UpgradePoint-1);
 	AbilitySpec->Level+=1;
 
-	//Call to mark that an ability spec has been modified
 	MarkAbilitySpecDirty(*AbilitySpec);
 
 	Client_AbilitySpecLevelUpdated(AbilitySpec->Handle,AbilitySpec->Level);
+}
+
+bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInputID InputID)
+{
+	return true;
 }
 
 void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGameplayAbilitySpecHandle Handle,
@@ -185,19 +190,13 @@ void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGa
 	{
 		Spec->Level=Level;
 		
-		//广播Spec回调
+		//广播监听Spec变化函数的回调
 		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
 	}
 }
 
-bool UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Validate(ECAbilityInputID InputID)
-{
-	return true;
-}
-
 void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& ChangeData)
 {
-	//由于构造函数在两端都调用，所以判断只在服务端进行
 	if (!GetOwner() || !GetOwner()->HasAuthority() ) return ;
 
 	bool bFound=false;
@@ -235,7 +234,8 @@ void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Chang
 			}
 		}
 	}
-	else RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
+	else
+		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
 }
 
 void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeData)
@@ -253,9 +253,7 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 		}
 	}
 	else
-	{
 		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetManaFullStatTag());
-	}
 	
 	if (ChangeData.NewValue<=0)
 	{

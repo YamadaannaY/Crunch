@@ -15,16 +15,14 @@ class ACPlayerController : public APlayerController ,public IGenericTeamAgentInt
 {
 	GENERATED_BODY()
 public:
-	//只在服务端执行，此时对Character执行ServerInit
+	//只在服务端的PlayerController上调用
 	virtual void OnPossess(APawn* NewPawn) override;
 	
-	//只在客户端和监听服务器执行，调用ClientInit
+	//只在客户端和监听服务器的PlayerController上调用
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
-
-	/** Assigns Team Agent to given TeamID */
+	
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
-	/** Retrieve team identifier in form of FGenericTeamId */
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -40,8 +38,6 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly,Category="View")
 	float MatchFinishedViewBlendTimeDuration=2.f;
-	//在本地Player的视口内渲染UI
-	void SpawnGameplayWidget();
 	
 	UPROPERTY()
 	class ACPlayerCharacter* CPlayerCharacter;
@@ -65,6 +61,10 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputAction* ToggleGameplayMenuAction;
 	
+	//在本地Player的视口内渲染UI
+	void SpawnGameplayWidget();
+
+	//ToggleShopIA的回调
 	UFUNCTION()
 	void ToggleShop();
 

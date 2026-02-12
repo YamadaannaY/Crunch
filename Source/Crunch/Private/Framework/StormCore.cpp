@@ -7,13 +7,13 @@
 #include "GenericTeamAgentInterface.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/ProjectileActor.h"
 #include "net/UnrealNetwork.h"
 
 
 // Sets default values
 AStormCore::AStormCore()
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	InfluenceRange=CreateDefaultSubobject<USphereComponent>("Influence Range");
 	InfluenceRange->SetupAttachment(GetRootComponent());
@@ -65,7 +65,6 @@ void AStormCore::PossessedBy(AController* NewController)
 	OwnerAIC=Cast<AAIController>(NewController);
 }
 
-// Called every frame
 void AStormCore::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -76,7 +75,6 @@ void AStormCore::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
 void AStormCore::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -109,7 +107,7 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 	}
 	
 	IGenericTeamAgentInterface* OtherTeamAgentInterface=Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (OtherTeamAgentInterface)
+	if (OtherTeamAgentInterface && !OtherActor->IsA(AProjectileActor::StaticClass()))
 	{
 		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0)
 		{
@@ -126,9 +124,9 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	IGenericTeamAgentInterface* OtherTeamAgentInterface=Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (OtherTeamAgentInterface)
+	if (OtherTeamAgentInterface &&!OtherActor->IsA(AProjectileActor::StaticClass()))
 	{
-		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0)
+		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0 )
 		{
 			TeamOneInfluencerCount--;
 			if (TeamOneInfluencerCount<0)
@@ -190,10 +188,11 @@ void AStormCore::CaptureCore()
 {
 	float ExpandDuration=GetMesh()->GetAnimInstance()->Montage_Play(ExpandMontage);
 
-	//在Mon
+	//让Montage播放完的时候基地Core刚好到核心Core的位置
 	CoreCaptureSpeed=FVector::Distance(GetMesh()->GetComponentLocation(),CoreToCapture->GetActorLocation())/ExpandDuration;
 
-		CoreToCapture->SetActorEnableCollision(false);
+	CoreToCapture->SetActorEnableCollision(false);
+	
 	GetCharacterMovement()->MaxWalkSpeed=0.f;
 
 	FTimerHandle ExpandTimerHandle;
@@ -204,7 +203,8 @@ void AStormCore::ExpandFinished()
 {
 	CoreToCapture->SetActorLocation(GetMesh()->GetComponentLocation());
 	CoreToCapture->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepWorldTransform,"root");
-	GetMesh()->GetAnimInstance()->Montage_Play(CaptureMontage);
+
+GetMesh()->GetAnimInstance()->Montage_Play(CaptureMontage);
 }
 
 void AStormCore::OnRep_CoreToCapture()
