@@ -35,7 +35,7 @@ public:
 	//在Inventory中传入Item，调用这个函数接收，进行文本赋值和Icon显示
 	void UpdateInventoryItem(const UInventoryItem* Item);
 
-	//对Slot进行清空操作，恢复空的状态
+	//对Slot进行清空操作，恢复空的状态,解除ASC相关委托绑定
 	void EmptySlot();
 
 	//判断当前Slot是否为空

@@ -17,6 +17,7 @@ struct FItemCollection
 	GENERATED_BODY()
 public:
 	FItemCollection();
+	
 	FItemCollection(const TArray<const UPA_ShopItem*>& InItems);
 
 	//添加Item
@@ -25,11 +26,11 @@ public:
 	//判断是否已经含有Item，结合bAddUnique使用
 	bool Contains(const UPA_ShopItem* Item) const;
 	
-	//获取Items
+	//获取Items	
 	const TArray<const UPA_ShopItem*>& GetItems() const;
 	
 private:
-	//Items集合体
+	//PAItem数组
 	UPROPERTY()
 	TArray<const UPA_ShopItem*> Items;
 };

@@ -25,7 +25,7 @@ void UAbilityGauge::NativeConstruct()
 		//当Cost/Cooldown调用时触发的委托
 		OwnerASC->AbilityCommittedCallbacks.AddUObject(this,&ThisClass::AbilityCommitted);
 		
-		//接受SpecDirtied广播，执行回调函数
+		//在UpGradeGA中Spec被修改并且进行Dirt，对DirtSpec进行广播，这里进行相应，修改GALevel的UI
 		OwnerASC->AbilitySpecDirtiedCallbacks.AddUObject(this,&ThisClass::AbilitySpecUpdated);
 
 		//当UpgradePoint和Mana值变化时对应的回调
@@ -42,9 +42,10 @@ void UAbilityGauge::NativeConstruct()
 			UpgradePointUpdated(ChangeData);
 		}
 	}
-	//存储，其他函数也会调用ASC
+	//缓存，其他函数也会调用ASC
 	OwnerASCComp=OwnerASC;
-	
+
+	//整数与带两个小数点的文本Op设置
 	WholeNumberFormattingOptions.MaximumFractionalDigits=0;
 	TwoDigitNumberFormattingOptions.MaximumFractionalDigits=2;
 }
@@ -53,7 +54,7 @@ void UAbilityGauge::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
 
-	//获取Item池中的GAClass
+	//从TSubClass到具体类，获得GA类模板实例CDO
 	AbilityCDO=Cast<UGameplayAbility>(ListItemObject);
 
 	//获取这个GA配置的GE对应的数值
@@ -77,6 +78,7 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
 
 void UAbilityGauge::AbilityCommitted(UGameplayAbility* Ability)
 {
+	//找到当前激活GA匹配的Gauge
 	if (Ability->GetClass()->GetDefaultObject() ==AbilityCDO)
 	{
 		//这两个值用局部变量定义，因为需要多次调用此函数，每次都是初始化为0开始
@@ -86,7 +88,7 @@ void UAbilityGauge::AbilityCommitted(UGameplayAbility* Ability)
 		//获得具体值
 		Ability->GetCooldownTimeRemainingAndDuration(Ability->GetCurrentAbilitySpecHandle(),Ability->GetCurrentActorInfo(),CooldownTimeRemaining,CooldownDuration);
 
-		//开始冷却逻辑
+		//开始冷却
 		StartCooldown(CooldownTimeRemaining,CooldownDuration);
 	}
 }
@@ -130,7 +132,7 @@ void UAbilityGauge::UpdateCooldown()
 	FNumberFormattingOptions* FormattingOptions=CacheCooldownTimeRemaining>1 ? &WholeNumberFormattingOptions : &TwoDigitNumberFormattingOptions;
 	CooldownCounterText->SetText(FText::AsNumber(CacheCooldownTimeRemaining,FormattingOptions));
 
-	//加上一个倒计时渲染
+	//加上一个根据倒计时变化的Dynamic材质参数
 	Icon->GetDynamicMaterial()->SetScalarParameterValue(CooldownPercentParaName,1.0f-CacheCooldownTimeRemaining/CacheCooldownDuration);
 }
 
@@ -140,6 +142,8 @@ const FGameplayAbilitySpec* UAbilityGauge::GetAbilitySpec()
 	if (!AbilityCDO) return nullptr;
 	if (!CacheAbilitySpecHandle.IsValid())
 	{
+		//由于Spec指针被存储在动态数组特性的数据结构中，增减Spec都会影响容器的地址，如果缓存Spec指针，其指向可能由于容器的移动而为空
+		//因此存储SpecHandle，即一个GA对应的唯一的Id
 		FGameplayAbilitySpec* FoundAbilitySpec=OwnerASCComp->FindAbilitySpecFromClass(AbilityCDO->GetClass());
 		CacheAbilitySpecHandle = FoundAbilitySpec->Handle;
 		return FoundAbilitySpec;

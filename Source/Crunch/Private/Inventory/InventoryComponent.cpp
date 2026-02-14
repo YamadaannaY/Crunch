@@ -29,6 +29,7 @@ UInventoryItem* UInventoryComponent::GetInventoryItemByHandle(const FInventoryIt
 	{
 		return *FoundItem;
 	}
+	
 	return nullptr;
 }
 
@@ -72,6 +73,7 @@ bool UInventoryComponent::IsFullFor(const UPA_ShopItem* Item) const
 
 	if (IsAllSlotOccupied())
 	{
+		//如果所有Stack都已经有了Item，只能去寻找当前Item占用的Stack是否还有容量
 		return GetAvailableStackForItem(Item) ==nullptr;
 	}
 
@@ -88,7 +90,7 @@ UInventoryItem* UInventoryComponent::GetAvailableStackForItem(const UPA_ShopItem
 	//是否是可叠加存储的Item
 	if (!Item->GetIsStackable()) return nullptr;
 
-	//遍历Map，找到当前形参PA对应的InventoryItem，再判断Stack是否存满
+	//遍历Map，判断当前Item是否已经存在于背包中，再判断Stack是否存满
 	for (const TPair<FInventoryItemHandle,UInventoryItem*>& ItemPair: InventoryMap)
 	{
 		if (ItemPair.Value && ItemPair.Value->IsForItem(Item) && !ItemPair.Value->IsStackFull())
@@ -329,6 +331,8 @@ bool UInventoryComponent::TryItemCombination(const UPA_ShopItem* NewItem)
 		{
 			RemoveItem(Ingredient);
 		}
+
+		//移除所有原料Item，合成目标Item
 		GrantItem(CombinationItem);
 
 		return true ;
@@ -344,10 +348,9 @@ void UInventoryComponent::Client_ItemRemoved_Implementation(FInventoryItemHandle
 
 	if (!InventoryItem) return ;
 	
-	//用于处理ManaUpdate委托，不会GAS触发部分
+	//客户端调用这个函数只是为了解绑ManaUpdate函数，不处理GAS触发部分
 	InventoryItem->RemoveGASModifications();
-
-	//不用处理ASC相关
+	
 	OnItemRemoveDelegate.Broadcast(ItemHandle);
 	InventoryMap.Remove(ItemHandle);
 }
@@ -392,15 +395,19 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 {
 	if (!ItemToPurchase) return ;
 
-	if (GetGold()<ItemToPurchase->GetPrice()) return ;
+	if (GetGold() < ItemToPurchase->GetPrice()) return ;
 
 	if (!IsFullFor(ItemToPurchase))
 	{
 		//这个函数会触发PostGameplayEffectExecute,常用于逻辑修改，这里进行Add，修改Gold值
 		OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
+
 		GrantItem(ItemToPurchase);
+		
 		return ;
 	}
+
+	//如果无法继续添加Item，继续尝试是否可以与现有Item直接合成
 	if (TryItemCombination(ItemToPurchase))
 	{
 		OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());

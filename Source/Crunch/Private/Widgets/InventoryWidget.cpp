@@ -12,6 +12,7 @@
 void UInventoryWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	
 	if (APawn* OwnerPawn=GetOwningPlayerPawn())
 	{
 		InventoryComponent=OwnerPawn->GetComponentByClass<UInventoryComponent>();
@@ -45,6 +46,7 @@ void UInventoryWidget::NativeConstruct()
 					NewEmptyWidget->OnRightButtonClick.AddUObject(this,&ThisClass::ToggleContextMenu);
 				}
 			}
+			
 			SpawnContextMenu();
 		}
 	}
@@ -93,6 +95,7 @@ void UInventoryWidget::ToggleContextMenu(const FInventoryItemHandle& ItemHandle)
 	{
 		//二次点击清空
 		ClearContextMenu();
+		
 		return;
 	}
 
@@ -180,6 +183,7 @@ void UInventoryWidget::HandleItemDragDrop(UInventoryItemWidget* DestinationWidge
 	if (!SourceWidget->IsEmpty())
 	{
 		PopulatedItemEntryWidgets[SourceWidget->GetItemHandle()]=SourceWidget;
+		
 		if (InventoryComponent)
 		{
 			InventoryComponent->ItemSlotChange(SourceWidget->GetItemHandle(),SourceWidget->GetSlotNumber());
@@ -200,7 +204,6 @@ void UInventoryWidget::ItemRemoved(const FInventoryItemHandle& ItemHandle)
 void UInventoryWidget::ItemAbilityCommitted(const FInventoryItemHandle& ItemHandle, float CooldownDuration,
 	float CooldownTimeRemaining)
 {
-	Debug::Print("2");
 	UInventoryItemWidget** FoundWidget = PopulatedItemEntryWidgets.Find(ItemHandle);
 	if (FoundWidget && *FoundWidget)
 	{

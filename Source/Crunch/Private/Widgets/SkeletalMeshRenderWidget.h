@@ -18,6 +18,7 @@ public:
 	virtual void NativeConstruct() override;
 private:
 	virtual void SpawnRenderActor() override;
+	
 	virtual ARenderActor* GetRenderActor() const  override;
 
 	UPROPERTY(EditDefaultsOnly,Category="SkeletalMeshRender")

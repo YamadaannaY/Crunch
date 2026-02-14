@@ -14,6 +14,7 @@ class CRUNCH_API AASkeletalMeshRenderActor : public ARenderActor
 public:
 	AASkeletalMeshRenderActor();
 
+	//配置RenderActor的Mesh和Anim
 	void ConfigureSkeletalMeshRenderActor(USkeletalMesh* MeshAsset,TSubclassOf<UAnimInstance> AnimBlueprint);
 
 	virtual void BeginPlay() override;

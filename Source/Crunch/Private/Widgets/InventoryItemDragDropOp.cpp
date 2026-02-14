@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "InventoryItemDragDropOp.h"
 #include "Widgets/InventoryItemWidget.h"
 #include "Widgets/ItemWidget.h"

@@ -30,8 +30,6 @@ void UCrosshairWidget::NativeConstruct()
 	{
 		Debug::Print("crosshair widget need to be parented under a canvas panel to place itself properly");
 	}
-
-	
 }
 
 void UCrosshairWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)

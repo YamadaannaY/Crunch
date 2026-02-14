@@ -40,13 +40,13 @@ void UStatsGauge::NativeConstruct()
 	}
 }
 
+void UStatsGauge::AttributeChanged(const FOnAttributeChangeData& Data)
+{
+	SetValue(Data.NewValue);
+}
+
 void UStatsGauge::SetValue(float NewValue)
 {
 	//改变GaugeText
 	AttributeText->SetText(FText::AsNumber(NewValue,&FormattingOptions));
-}
-
-void UStatsGauge::AttributeChanged(const FOnAttributeChangeData& Data)
-{
-	SetValue(Data.NewValue);
 }

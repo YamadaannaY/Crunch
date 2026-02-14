@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "CAssetManager.h"
 
@@ -8,7 +6,7 @@ UCAssetManager& UCAssetManager::Get()
 	UCAssetManager* Singleton = Cast<UCAssetManager>(GEngine->AssetManager.Get());
 	if (Singleton) return *Singleton;
 
-	UE_LOG(LogTemp,Fatal,TEXT("AssetManager needs to be of the type  CAssetManager"));
+	UE_LOG(LogTemp,Fatal,TEXT("AssetManager needs to be of the type CAssetManager"));
 	
 	return (*NewObject<UCAssetManager>());
 }
@@ -22,7 +20,7 @@ bool UCAssetManager::GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) co
 {
 	TArray<UObject*> LoadedObjects;
 
-	//这个函数只会查找所有重写了ID或者在Setting的AssetManager中登记了的DA
+	//这个函数只会查找所有重写了ID或者在Setting的AssetManager中登记了的PA
 	const bool bLoaded=GetPrimaryAssetObjectList(UPA_ShopItem::GetShopItemAssetType(),LoadedObjects);
 
 	if (bLoaded)
@@ -72,11 +70,9 @@ void UCAssetManager::BuildItemMaps()
 			//遍历其软引用ItemArray并同步加载其指针
 			for (const TSoftObjectPtr<UPA_ShopItem>& Ingredient : Item->GetIngredients())
 			{
-				const UPA_ShopItem* IngredientItem = Ingredient.LoadSynchronous();
-
 				//将子Item加载到Items
+				const UPA_ShopItem* IngredientItem = Ingredient.LoadSynchronous();
 				Items.Add(IngredientItem);
-				
 				AddToCombinationMap(IngredientItem,Item);
 			}
 			IngredientMap.Add(Item,FItemCollection{Items});

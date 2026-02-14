@@ -7,7 +7,9 @@
 
 void UAbilityListView::ConfigureAbilities(const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& Abilities)
 {
-	/**********	AddItem->加入数据源->当需要生成Widget时->OnEntryWidgetGenerated->NativeOnListItemObjectSet		***************/
+	/**********	AddItem->当数据池有数据并且可视区缺少配置数量Widget时->新建一个EntryWidget->
+	 *调用IUserObjectListEntry::SetListItemObject()，触发NativeOnListItemObjectSet(UObject* ListItemObject)
+	 *，然后广播OnEntryWidgetGenerated().Broadcast(EntryWidget);			***************/
 
 	//当ListView进行Create或Reuse一个EntryWidget时触发一次
 	OnEntryWidgetGenerated().AddUObject(this,&ThisClass::AbilityGaugeGenerated);
@@ -15,7 +17,7 @@ void UAbilityListView::ConfigureAbilities(const TMap<ECAbilityInputID, TSubclass
 	//对所有Abilities进行注册
 	for (const TPair<ECAbilityInputID,TSubclassOf<UGameplayAbility>>& AbilityPair : Abilities)
 	{
-		//Abilities的CDO被加入到ListView的数据源中
+		//Abilities的CDO被加入到ListItem作为数据源
 		AddItem(AbilityPair.Value.GetDefaultObject());
 	}
 }

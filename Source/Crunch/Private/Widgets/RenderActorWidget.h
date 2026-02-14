@@ -33,8 +33,13 @@ private:
 	virtual void SpawnRenderActor() PURE_VIRTUAL(URenderActorWidget::SpawnRenderActor);
 	virtual ARenderActor* GetRenderActor() const  PURE_VIRTUAL(URenderActorWidget::GetRenderActor,return nullptr;)
 
+	//用一个定时器，确定捕捉频率，以固定频率循环调用UpdateRender
 	void BeginRenderCapture();
+
+	//调用RenderActor的UpdateRender
 	void UpdateRender();
+
+	//停止捕捉
 	void StopRenderCapture();
 	
 	UPROPERTY(meta=(BindWidget))
@@ -53,6 +58,7 @@ private:
 	int FrameRate=24;
 
 	float RenderTickInterval;
+	
 	FTimerHandle RenderTimerHandle;
 	
 	UPROPERTY()

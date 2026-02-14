@@ -18,7 +18,7 @@ void UShopWidget::NativeConstruct()
 	//调用ShopItemType的加载
 	LoadShopItem();
 
-	//创建一个新实例Widget时触发的委托回调，进行初始化，这个初始化是对于这个格子而言，数据更新不会调用此初始化
+	//在ShopItemWidget生成时调用的逻辑
 	ShopItemList->OnEntryWidgetGenerated().AddUObject(this,&ThisClass::ShopItemWidgetGenerated);
 
 	//获取组件
@@ -40,7 +40,7 @@ void UShopWidget::ShopItemLoadFinished()
 
 	for (const UPA_ShopItem* ShopItem : ShopItems)
 	{
-		//将这个PA加入Item数组中，作为Widget的数据。实际上的EntryWidget是一个简单的只有空Image的Widget，其显示由PA决定
+		//添加到数据池中，由于NumEntries设置的足够大，被Add即立刻加载
 		ShopItemList->AddItem(const_cast<UPA_ShopItem*>(ShopItem));		
 	}
 }
@@ -57,6 +57,7 @@ void UShopWidget::ShopItemWidgetGenerated(UUserWidget& NewWidget)
 		{
 			ItemWidget->OnItemPurchaseIssued.AddUObject(InventoryComponent,&UInventoryComponent::TryPurchase);
 		}
+		
 		ItemWidget->OnShopItemClicked.AddUObject(this,&ThisClass::ShowItemCombination);
 		ItemsMap.Add(ItemWidget->GetShopItem(),ItemWidget);
 	}

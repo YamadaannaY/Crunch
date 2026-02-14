@@ -47,6 +47,7 @@ FGenericTeamId ACGameMode::GetTeamIDForPlayer(const APlayerController* PlayerCon
 	//轮流分配
 	static int PlayerCount=0;
 	++PlayerCount;
+		
 	return FGenericTeamId(PlayerCount%2);
 }
 
@@ -68,7 +69,6 @@ AActor* ACGameMode::FindNextStartSpotTeam(const FGenericTeamId TeamID) const
 		if (It->PlayerStartTag == *StartSpotTag)
 		{
 			It->PlayerStartTag=FName("Taken");
-			//*this
 			return *It;
 		}
 	}

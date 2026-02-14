@@ -91,12 +91,14 @@ void UInventoryItemWidget::UpdateInventoryItem(const UInventoryItem* Item)
 		{
 			StartCoolDown(AbilityCooldownDuration,AbilityCooldownRemaining);
 		}
-		float  AbilityCost=InventoryItem->GetManaCost();
+		float AbilityCost=InventoryItem->GetManaCost();
+		
 		ManaCostText->SetVisibility(AbilityCost==0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 		ManaCostText->SetText(FText::AsNumber(AbilityCost));
 
 		CooldownDurationText->SetVisibility(AbilityCooldownDuration==0.f ? ESlateVisibility::Hidden : ESlateVisibility::Visible);
 		CooldownCountText->SetText(FText::AsNumber(AbilityCooldownDuration));
+
 		BindCanCastAbilityDelegate();
 	}
 	else
@@ -227,6 +229,7 @@ void UInventoryItemWidget::UpdateCooldown()
 	const float CooldownAmt=1.f-CooldownTimeRemaining/CooldownTimeDuration;
 	CooldownDisplayFormattingOptions.MaximumFractionalDigits=CooldownTimeRemaining>1.f ? 0 : 2;
 	CooldownCountText->SetText(FText::AsNumber(CooldownTimeRemaining,&CooldownDisplayFormattingOptions));
+	
 	if (GetItemIcon())
 	{
 		GetItemIcon()->GetDynamicMaterial()->SetScalarParameterValue(CooldownAmtDynamicMaterialParaName,CooldownAmt);
@@ -245,5 +248,6 @@ void UInventoryItemWidget::SetIcon(UTexture2D* IconTexture)
 		GetItemIcon()->GetDynamicMaterial()->SetTextureParameterValue(IconTextureDynamicMaterialParaName,IconTexture);
 		return ;
 	}
+	
 	Super::SetIcon(IconTexture);
 }

@@ -31,7 +31,7 @@ public:
 	FOnItemAbilityCommitted OnItemAbilityCommitted;
 	FOnItemStackCountChangeDelegate OnItemStackCountChangeDelegate;
 	
-	//调用后在服务端和客户端尝试激活Item，应用GE或者赋予GA
+	//作为Input触发的回调，这个函数发生在客户端，利用RPC服务端尝试激活Item，应用GE或者赋予GA
 	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
 
 	void SellItem(const FInventoryItemHandle& ItemHandle);
@@ -63,6 +63,7 @@ public:
 	//判断当前PA对应的Item所需合成的所有子Item是否都可以在Inventory中被找到
 	bool FindIngredientForItem(const UPA_ShopItem* Item,TArray<UInventoryItem*>& OutIngredients,const TArray<const UPA_ShopItem*>& IngredientToIgnore=TArray<const UPA_ShopItem*>()) const;
 
+	//找到ShopItem资产对应的背包Item
 	UInventoryItem* TryGetItemForShopItem(const UPA_ShopItem* Item) const ;
 
 	//利用Slot槽位下标配合键盘对应数字键位输入触发IA，激活对应的Item

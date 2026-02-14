@@ -42,7 +42,7 @@ struct FAbilityWidgetData :public FTableRowBase
 class UImage;
 class UTextBlock;
 
-//这是一个Widget类，同时还继承ListEntry（ListView的Item需要用ListEntry才可以在Editor中自定义编辑）
+//这是一个Widget类，同时还继承ListEntry（ListView的Item需要用ListEntry才可以在编辑器中可见）
 UCLASS()
 class UAbilityGauge : public UUserWidget,public IUserObjectListEntry
 {
@@ -52,7 +52,7 @@ public:
 	//构建时调用函数，将Counter隐藏，同时绑定对Cost/Cooldown回调，处理的是整体逻辑
 	virtual void NativeConstruct() override;
 	
-	//获取Item池中的数据，利用数据处理对UI的配置
+	//当ListView第一次生成EntryWidget时，数据类的这个类被调用，依据数据对Widget进行处理
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
 	//将Data中存储的Icon加载并赋予IconMaterialParaName

@@ -123,8 +123,9 @@ void UGameplayWidget::SetShowMouseCursor(bool bShow)
 void UGameplayWidget::SetFocusToGameAndUI()
 {
 	FInputModeGameAndUI GameAndUIInputMode;
-	//不因为ouse down而隐藏鼠标
+	//不因Capture下Mousedown操作而隐藏鼠标
 	GameAndUIInputMode.SetHideCursorDuringCapture(false);
+	
 	GetOwningPlayer()->SetInputMode(GameAndUIInputMode);
 }
 

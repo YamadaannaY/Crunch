@@ -30,9 +30,12 @@ public:
 	
 	//利用有参构造函数调用ID生成函数创建一个Handle
 	static FInventoryItemHandle CreateHandle();
-	
+
+	//提供一个InvalidHandle
 	static FInventoryItemHandle InvalidHandle();
+	
 	bool IsValid() const;
+	
 	uint32 GetHandleId() const;
 	
 private:
@@ -63,13 +66,13 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key);
  */
 
 UCLASS()
-class CRUNCH_API UInventoryItem : public UObject
+class UInventoryItem : public UObject
 {
 	GENERATED_BODY()
 public:
-	UInventoryItem();
-
 	FOnAbilityCanCastUpdateDelegate OnAbilityCanCastUpdated;
+
+	UInventoryItem();
 	
 	//增加StackCount,成功添加返回true
 	bool AddStackCount();
@@ -85,18 +88,21 @@ public:
 	
 	//判断传参ShopItem是否等于当前InventoryItem对应的ShopItem
 	bool IsForItem(const UPA_ShopItem* Item) const;
-
-	float GetAbilityCooldownTimeRemaining() const;
-	float GetAbilityCooldownDuration() const ;
-	float GetManaCost() const ;
-	bool CanCastAbility() const ;
 	
 	//为新创建的InventoryItem赋值
 	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem,UAbilitySystemComponent* ASC);
 
-	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
-	FORCEINLINE FInventoryItemHandle GetHandle() const {return Handle;}
-	FORCEINLINE int GetStackCount() const {return StackCount;}
+	float GetAbilityCooldownTimeRemaining() const;
+	float GetAbilityCooldownDuration() const ;
+	float GetManaCost() const ;
+
+	const UPA_ShopItem* GetShopItem() const {return ShopItem;}
+	FInventoryItemHandle GetHandle() const {return Handle;}
+	int GetStackCount() const {return StackCount;}
+	int GetItemSlot() const {return Slot;}
+	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const {return GrantedAbilitySpecHandle;}
+
+	bool CanCastAbility() const ;
 
 	//GrantedAbility激活的服务端RPC函数上调用
 	bool TryActivateGrantedAbility();
@@ -114,25 +120,28 @@ public:
 
 	//更新Slot
 	void SetSlot(int NewSlot);
-	int GetItemSlot() const {return Slot;}
 	
-	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const {return GrantedAbilitySpecHandle;}
 	void SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle NewHandle);
 private:
 	void ApplyGASModifications();
 
 	void ManaUpdated(const FOnAttributeChangeData& ChangeData) const ;
-	
+
+	//Item句柄
 	FInventoryItemHandle Handle;
-	
+
+	//PA数据资产
 	UPROPERTY()
 	const UPA_ShopItem* ShopItem;
 
+	/***** 仓库Item独有的参数		*****/
 	//已经叠加的层数
 	int StackCount;
 
 	//占的Slot位置
 	int Slot;
+
+	//****       GA      *************//
 	
 	//为了移除Effect保留其Handle
 	FActiveGameplayEffectHandle ApplyEquippedEffectHandle;

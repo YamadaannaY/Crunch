@@ -52,7 +52,7 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key)
 	return Key.GetHandleId();
 }
 
-UInventoryItem::UInventoryItem():StackCount(1),Slot(0),ShopItem(nullptr),OwnerASC(nullptr)
+UInventoryItem::UInventoryItem():ShopItem(nullptr),StackCount(1),Slot(0),OwnerASC(nullptr)
 {
 	
 }
@@ -139,10 +139,12 @@ void UInventoryItem::InitItem(const FInventoryItemHandle& NewHandle, const UPA_S
 	Handle=NewHandle;
 	ShopItem=NewShopItem;
 	OwnerASC=ASC;
+	
 	if (OwnerASC)
 	{
 		OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&UInventoryItem::ManaUpdated);
 	}
+	
 	ApplyGASModifications();
 }
 
@@ -230,13 +232,14 @@ bool UInventoryItem::TryActivateGrantedAbility()
 	{
 		return true;
 	}
+	
 	return false;
 }
 
 void UInventoryItem::ApplyConsumeEffect()
 {
 	if (!ShopItem) return ;
-
+	
 	TSubclassOf<UGameplayEffect> ConsumeEffect=GetShopItem()->GetConsumeEffect();
 	if (!ConsumeEffect) return ;
 

@@ -23,6 +23,7 @@ void USkeletalMeshRenderWidget::NativeConstruct()
 		USceneCaptureComponent2D* SceneCapture=SkeletalMeshRenderActor->GetCaptureComponent();
 		if (PlayerCharacterRenderTargetInterface && SceneCapture)
 		{
+			//Set the Loc/Rot of the component relative to its parent
 			SceneCapture->SetRelativeLocation(PlayerCharacterRenderTargetInterface->GetCaptureLocalPosition());
 			SceneCapture->SetRelativeRotation(PlayerCharacterRenderTargetInterface->GetCaptureLocalRotation());
 		}

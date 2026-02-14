@@ -58,13 +58,14 @@ void URenderActorWidget::ConfigureRenderActor()
 
 void URenderActorWidget::BeginRenderCapture()
 {
-	//24帧渲染速度
+	//24帧渲染速度 
 	RenderTickInterval=1.f/(float)FrameRate;
 
 	UWorld* World = GetWorld();
 	if (World)
 	{
-		World->GetTimerManager().SetTimer(RenderTimerHandle,this,&URenderActorWidget::UpdateRender,RenderTickInterval,true);	
+		World->GetTimerManager().SetTimer(RenderTimerHandle,this,
+			&URenderActorWidget::UpdateRender,RenderTickInterval,true);	
 	}
 }
 

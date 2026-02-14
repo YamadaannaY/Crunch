@@ -22,6 +22,7 @@ private:
 	//递归调用函数以进行某一个TreeNode的所有对应方向的StreamSpline描绘
 	void DrawStream(bool bUpperStream,const ITreeNodeInterface* StartingNodeInterface,UUserWidget* StartingNodeWidget,UCanvasPanelSlot* StartingNodeSlot,int StartingNodeDepth,float& NextLeafXPosition,TArray<UCanvasPanelSlot*>& OutStreamSlots);
 
+	//移除Panel上所有子Widget
 	void ClearTree();
 
 	//创建ItemWidget控件，放入Canvas并分配初始位置

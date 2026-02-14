@@ -21,7 +21,7 @@ class CRUNCH_API AStormCore : public ACharacter
 public:
 	FOnGoalReachedDelegate OnGoalReachedDelegate;
 	FOnTeamInfluenceCountUpdatedDelegate OnTeamInfluenceCountUpdatedDelegate;
-	// Sets default values for this character's properties
+
 	AStormCore();
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -29,17 +29,13 @@ public:
 	//获取Core相对于两个Gaol之间距离的位置，折算为Progress
 	float GetProgress() const ;
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void PossessedBy(AController* NewController) override;
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
 	//在编辑器中进行修改PropertyName对应的变量时立刻在World中实时调整，而不必等到运行游戏，方便观察
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 

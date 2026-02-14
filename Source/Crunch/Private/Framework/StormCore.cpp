@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 
 #include "StormCore.h"
 #include "Components/DecalComponent.h"
@@ -10,8 +8,6 @@
 #include "GAS/ProjectileActor.h"
 #include "net/UnrealNetwork.h"
 
-
-// Sets default values
 AStormCore::AStormCore()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -68,16 +64,12 @@ void AStormCore::PossessedBy(AController* NewController)
 void AStormCore::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	if (CoreToCapture)
 	{
 		FVector CoreMoveDir=(GetMesh()->GetComponentLocation() - CoreToCapture->GetActorLocation()).GetSafeNormal();
 		CoreToCapture->AddActorWorldOffset(CoreMoveDir*CoreCaptureSpeed*DeltaTime);
 	}
-}
-
-void AStormCore::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
 void AStormCore::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -87,7 +79,7 @@ void AStormCore::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyCh
 	FName PropertyName=PropertyChangedEvent.GetPropertyName();
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(AStormCore,InfluenceRadius))
 	{
-		InfluenceRange->SetSphereRadius( InfluenceRadius);
+		InfluenceRange->SetSphereRadius(InfluenceRadius);
 		const FVector DecalSize=GroundDecalComponent->DecalSize;
 		GroundDecalComponent->DecalSize=FVector{DecalSize.X,InfluenceRadius,InfluenceRadius};
 	}
@@ -124,11 +116,12 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	IGenericTeamAgentInterface* OtherTeamAgentInterface=Cast<IGenericTeamAgentInterface>(OtherActor);
-	if (OtherTeamAgentInterface &&!OtherActor->IsA(AProjectileActor::StaticClass()))
+	if (OtherTeamAgentInterface && !OtherActor->IsA(AProjectileActor::StaticClass()))
 	{
 		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0 )
 		{
 			TeamOneInfluencerCount--;
+			
 			if (TeamOneInfluencerCount<0)
 			{
 				TeamOneInfluencerCount=0;
@@ -137,6 +130,7 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 		else if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==1)
 		{
 			TeamTwoInfluencerCount--;
+			
 			if (TeamTwoInfluencerCount<0)
 			{
 				TeamTwoInfluencerCount=0;
