@@ -62,6 +62,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (EnhancedInputComp)
 	{
+		//Trigger
 		//Jump是内置的基础跳跃函数
 		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::Jump);
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
@@ -126,6 +127,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 		UpgradeAbilityWithInputID(InputID);
 		return ;
 	}
+	
 	//触发对应ID下的GA
 	if (bPressed)
 	{
@@ -141,6 +143,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	{
 		//这个Tag只在UpperCut监听Event中被应用，正常Attack除非主动调用此Tag否则不会触发
 
+		//BasicAttack由Pressed/Released两种Triggers，对应触发两种Tag的回调函数
 		FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
 		
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag,FGameplayEventData());

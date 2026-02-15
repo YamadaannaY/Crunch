@@ -31,7 +31,7 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		UAbilityTask_WaitGameplayEvent* WaitStartShootingTask=UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,UCAbilitySystemStatics::GetBasicAttackInputPressedTag());
 		WaitStartShootingTask->EventReceived.AddDynamic(this,&ThisClass::StartShooting);
 		WaitStartShootingTask->ReadyForActivation();
-
+		
 		UAbilityTask_WaitGameplayEvent* WaitStopShootingTask=UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,UCAbilitySystemStatics::GetBasicAttackInputReleasedTag());
 		WaitStopShootingTask->EventReceived.AddDynamic(this,&ThisClass::StopShooting);
 		WaitStopShootingTask->ReadyForActivation();
