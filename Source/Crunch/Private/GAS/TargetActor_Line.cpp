@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/SceneComponent.h"
 #include "Crunch/Crunch.h"
+#include "EngineUtils.h"
 #include "Kismet/KismetMathLibrary.h"
 
 ATargetActor_Line::ATargetActor_Line() :AvatarActor(nullptr)
@@ -133,6 +134,14 @@ void ATargetActor_Line::UpdateTargetTrace()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(AvatarActor);
 	QueryParams.AddIgnoredActor(this);
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+	{
+		AActor* Actor = *It;
+		if (Actor->GetName().Contains("StormCore"))
+		{
+			QueryParams.AddIgnoredActor(Actor);
+		}
+	}
 
 	FCollisionResponseParams ResponseParams(ECR_Overlap);
 	

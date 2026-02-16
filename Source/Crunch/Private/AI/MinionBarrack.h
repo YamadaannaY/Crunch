@@ -43,6 +43,9 @@ private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	TArray<APlayerStart*> SpawnSpots;
 
+	UPROPERTY(EditDefaultsOnly,Category="Spawn")
+	int MaxSpawnNums = 15;
+
 	int NextSpawnSpotIndex=-1;
 
 	//记录在Barrack中的PlayerStart，根据Index获得位置

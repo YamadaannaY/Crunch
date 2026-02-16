@@ -61,7 +61,7 @@ private:
 
 	UPROPERTY(VisibleDefaultsOnly,Category="Component")
 	class USphereComponent* TargetEndDetectionSphere;
-
+	
 	FTimerHandle PeriodicalTargetingTimerHandle;
 
 	//找到所有TargetData应该存储的Actor

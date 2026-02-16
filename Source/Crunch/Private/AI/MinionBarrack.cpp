@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AI/MinionBarrack.h"
 #include "Minion.h"
 #include "GameFramework/PlayerStart.h"
@@ -63,8 +60,11 @@ void AMinionBarrack::SpawnNewGroup()
 		--i;
 	}
 
-	//意味着当前所有没有DeadTag下的，这种情况下新生成Minion To Do：设置上限？）
-	SpawnNewMinion(i);
+	if (i != 0 && MinionPool.Num()<MaxSpawnNums)
+	{
+		//意味着当前所有没有DeadTag下的，这种情况下新生成Minion)
+		SpawnNewMinion(i);
+	}
 }
 
 void AMinionBarrack::SpawnNewMinion(int Amt)

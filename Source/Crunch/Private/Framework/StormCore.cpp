@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/ProjectileActor.h"
 #include "net/UnrealNetwork.h"
+#include "Player/CPlayerCharacter.h"
 
 AStormCore::AStormCore()
 {
@@ -103,12 +104,27 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 	{
 		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0)
 		{
-			TeamOneInfluencerCount++;
+			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
+			{
+				TeamOneInfluencerCount+=4;
+			}
+			else
+			{
+				TeamTwoInfluencerCount++;
+			}
 		}
 		else if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==1)
 		{
-			TeamTwoInfluencerCount++;
+			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
+			{
+				TeamOneInfluencerCount+=4;
+			}
+			else
+			{
+				TeamTwoInfluencerCount++;
+			}
 		}
+		
 		UpdateTeamWeight();
 	}
 }
@@ -120,7 +136,14 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 	{
 		if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==0 )
 		{
-			TeamOneInfluencerCount--;
+			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
+			{
+				TeamOneInfluencerCount-=4;
+			}
+			else
+			{
+				TeamTwoInfluencerCount--;
+			}
 			
 			if (TeamOneInfluencerCount<0)
 			{
@@ -129,7 +152,14 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 		}
 		else if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==1)
 		{
-			TeamTwoInfluencerCount--;
+			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
+			{
+				TeamOneInfluencerCount-=4;
+			}
+			else
+			{
+				TeamTwoInfluencerCount--;
+			}
 			
 			if (TeamTwoInfluencerCount<0)
 			{
