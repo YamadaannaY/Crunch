@@ -25,6 +25,7 @@ public:
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Experience)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, StrengthGrowthRate)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, IntelligenceGrowthRate)
+    ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, Acceleration)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, PrevLevelExperience)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, NextLevelExperience)
     ATTRIBUTE_ACCESSORS(UCHeroAttributeSet, MaxLevelExperience)
@@ -71,6 +72,9 @@ private:
 	UPROPERTY()
 	FGameplayAttributeData IntelligenceGrowthRate;
 
+	UPROPERTY(ReplicatedUsing= OnRep_Acceleration)
+	FGameplayAttributeData Acceleration;
+
 	UFUNCTION()
 	void OnRep_Intelligence(const FGameplayAttributeData& OldValue);
 
@@ -100,4 +104,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_Gold(const FGameplayAttributeData& OldValue);
+
+	UFUNCTION()
+	void OnRep_Acceleration(const FGameplayAttributeData& OldValue);
 };

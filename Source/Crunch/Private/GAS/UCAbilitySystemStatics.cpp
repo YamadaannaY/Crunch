@@ -4,6 +4,8 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayEffect.h"
+#include "AbilitySystemGlobals.h"
+#include "GameplayCueManager.h"
 #include "Abilities/GameplayAbility.h"
 
 FGameplayTag UCAbilitySystemStatics::GetBasicAttackAbilityTag()
@@ -235,4 +237,14 @@ float UCAbilitySystemStatics::GetCoolDownRemainingFor(const UGameplayAbility* Ab
 		}
 	}
 	return CooldownRemaining;
+}
+
+void UCAbilitySystemStatics::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult,
+	const FGameplayTag& GameplayCueTag)
+{
+	FGameplayCueParameters GameplayCueParameters;
+	GameplayCueParameters.Location=HitResult.ImpactPoint;
+	GameplayCueParameters.Normal=HitResult.ImpactNormal;
+
+	UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(CueTargetActor, GameplayCueTag, EGameplayCueEvent::Executed, GameplayCueParameters);
 }

@@ -15,6 +15,7 @@
 #include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "Perception/AISense_Sight.h"
 #include "Crunch/Crunch.h"
+#include "GAS/CHeroAttributeSet.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
 // Sets default values
@@ -147,6 +148,7 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetFocusStatTag()).AddUObject(this,&ThisClass::FocusTagUpdated);
 
+		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetAccelerationAttribute()).AddUObject(this,&ThisClass::AccelerationUpdated);
 		//根据PA修改Hero移动速度
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
 	}
@@ -203,6 +205,11 @@ void ACCharacter::SetIsAiming(bool bIsAiming)
 void ACCharacter::MoveSpeedUpdated(const FOnAttributeChangeData& Data)
 {
 	GetCharacterMovement()->MaxWalkSpeed=Data.NewValue;
+}
+
+void ACCharacter::AccelerationUpdated(const FOnAttributeChangeData& Data)
+{
+	GetCharacterMovement()->MaxAcceleration=Data.NewValue;
 }
 
 void ACCharacter::OnAimStatChanged(bool bIsAiming)

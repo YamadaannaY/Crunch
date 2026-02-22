@@ -64,6 +64,7 @@ void UGA_Lazer::ShootLazer(FGameplayEventData PayLoad)
 	
 	UAbilityTask_WaitTargetData* WaitDamageTask=UAbilityTask_WaitTargetData::WaitTargetData(this,NAME_None,
 		EGameplayTargetingConfirmation::CustomMulti,LazerTargetActorClass);
+	
 	WaitDamageTask->ValidData.AddDynamic(this,&ThisClass::TargetReceived);
 	WaitDamageTask->ReadyForActivation();
 

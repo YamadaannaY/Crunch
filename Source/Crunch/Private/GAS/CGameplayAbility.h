@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -52,6 +50,12 @@ protected:
 
 	//Targets根据Loc位置向量参数计算得到方向，施加Push效果
 	void PushTargetsFromLocation(const TArray<AActor*>& Targets, const FVector& FromLocation , float PushSpeed);
+
+	//对象为Actors，封装Loc为AvatarActor的位置
+	void PushTargetsFromOwnerLocation(const TArray<AActor*>& Targets,float PushSpeed);
+
+	//对象为TargetDataHandle，从中取出Actors调用PushTargets
+	void PushTargetsFromOwningLocation(const FGameplayAbilityTargetDataHandle& TargetDataHandle,float PushSpeed);
 
 	//将GE赋予HitResult中存储的Actor对象
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);

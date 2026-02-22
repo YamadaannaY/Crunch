@@ -92,6 +92,8 @@ private:
 	//修改HeroSpeed
 	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
 	
+	void AccelerationUpdated(const FOnAttributeChangeData& Data);
+	
 	//分不同的角色进行不同的具体逻辑设置
 	virtual void OnAimStatChanged(bool bIsAiming);
 

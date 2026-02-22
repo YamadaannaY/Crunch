@@ -19,6 +19,7 @@ void UCHeroAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	DOREPLIFETIME_CONDITION_NOTIFY(UCHeroAttributeSet, UpgradePoint, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCHeroAttributeSet, MaxLevel, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCHeroAttributeSet, Gold, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCHeroAttributeSet, Acceleration, COND_None, REPNOTIFY_Always);
 }
 
 void UCHeroAttributeSet::OnRep_Intelligence(const FGameplayAttributeData& OldValue)
@@ -69,4 +70,9 @@ void UCHeroAttributeSet::OnRep_MaxLevel(const FGameplayAttributeData& OldValue)
 void UCHeroAttributeSet::OnRep_Gold(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCHeroAttributeSet, Gold, OldValue);
+}
+
+void UCHeroAttributeSet::OnRep_Acceleration(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCHeroAttributeSet, Acceleration, OldValue);
 }

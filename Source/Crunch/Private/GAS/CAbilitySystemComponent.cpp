@@ -64,6 +64,7 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 		SetNumericAttributeBase(UCHeroAttributeSet::GetStrengthGrowthRateAttribute(),BaseStats->StrengthGrowthRate);
 		SetNumericAttributeBase(UCHeroAttributeSet::GetIntelligenceGrowthRateAttribute(),BaseStats->IntelligenceGrowthRate);
 		SetNumericAttributeBase(UCHeroAttributeSet::GetGoldAttribute(),BaseStats->BaseGold);
+		SetNumericAttributeBase(UCHeroAttributeSet::GetAccelerationAttribute(),2048);
 	}
 
 	//一个曲线表Table存储了所有等级的经验数值

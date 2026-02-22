@@ -134,6 +134,7 @@ void ATargetActor_Line::UpdateTargetTrace()
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(AvatarActor);
 	QueryParams.AddIgnoredActor(this);
+	//允许游戏运行时在世界中查找运行时实例
 	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
 	{
 		AActor* Actor = *It;
