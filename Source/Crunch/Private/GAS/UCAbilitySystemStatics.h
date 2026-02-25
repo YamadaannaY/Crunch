@@ -34,6 +34,8 @@ public:
 	static FGameplayTag GetTargetUpdatedTag();
 	static FGameplayTag GetHeroRoleTag();
 	static FGameplayTag GetCrosshairTag();
+	static FGameplayTag GetGenericDamagePointTag();
+	static FGameplayTag GetGenericTargetPointTag();
 	
 	static float GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability);
 	static float GetStaticCostForAbility(const UGameplayAbility* Ability);

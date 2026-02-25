@@ -96,6 +96,16 @@ FGameplayTag UCAbilitySystemStatics::GetCrosshairTag()
 	return FGameplayTag::RequestGameplayTag("stats.crosshair");
 }
 
+FGameplayTag UCAbilitySystemStatics::GetGenericDamagePointTag()
+{
+	return FGameplayTag::RequestGameplayTag("ability.generic.damage");
+}
+
+FGameplayTag UCAbilitySystemStatics::GetGenericTargetPointTag()
+{
+	return FGameplayTag::RequestGameplayTag("ability.generic.target");
+}
+
 float UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(const UGameplayAbility* Ability)
 {
 	if (!Ability) return 0.f;
