@@ -17,6 +17,9 @@ class CRUNCH_API ULobbyWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
+public:
+	virtual void NativeConstruct() override;
+	
 private:
 	UPROPERTY(meta=(BindWidget))
 	UWidgetSwitcher* MainSwitcher;
@@ -29,4 +32,14 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UUniformGridPanel* TeamSelectionSlotGridPanel;
+
+	UPROPERTY(EditDefaultsOnly,Category="TeamSelection")
+	TSubclassOf<class UTeamSelectionWidget> TeamSelectionWidgetClass;
+
+	UPROPERTY()
+	TArray<UTeamSelectionWidget*> TeamSelectionSlots;
+
+	void ClearAndPopulateTeamSelectionSlots();
+
+	void SlotSelected(uint8 NewSlotID);
 };
