@@ -13,4 +13,7 @@ UCLASS()
 class CRUNCH_API ALobbyGameMode : public ACGameMode
 {
 	GENERATED_BODY()
+
+public:
+	ALobbyGameMode();
 };
