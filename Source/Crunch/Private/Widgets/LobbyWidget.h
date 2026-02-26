@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//Lobby的显示Widget，附带一个GridPanel，其中包含许多Slot，通过Click交互，对应更新信息
 
 #pragma once
 
@@ -6,12 +6,15 @@
 #include "Blueprint/UserWidget.h"
 #include "LobbyWidget.generated.h"
 
+struct FPlayerSelection;
 class UUniformGridPanel;
 class UButton;
 class UWidgetSwitcher;
+
 /**
  * 
  */
+
 UCLASS()
 class CRUNCH_API ULobbyWidget : public UUserWidget
 {
@@ -39,7 +42,23 @@ private:
 	UPROPERTY()
 	TArray<UTeamSelectionWidget*> TeamSelectionSlots;
 
+	UPROPERTY()
+	class ALobbyPlayerController* LobbyPlayerController;
+
+	UPROPERTY()
+	class ACGameState* CGameState;
+
+	FTimerHandle ConfigureGameStateTimerHandle;
+
+	//清理Panel并重新分配Slot
 	void ClearAndPopulateTeamSelectionSlots();
 
+	//当客户端的Slot被点击时，将当前SlotId传给LobbyController以提供给PlayerSelection，让Selection在这个Slot显示
 	void SlotSelected(uint8 NewSlotID);
+
+	//配置GameState委托回调，保证触发交互的时候已经有了CGameState
+	void ConfigureGameState();
+
+	//绑定一个现有SlotArray被修改的时候响应的函数，更新一次所有Slot的信息
+	void UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>& PlayerSelections);
 };
