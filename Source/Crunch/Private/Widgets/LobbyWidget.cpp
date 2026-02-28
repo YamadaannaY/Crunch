@@ -4,6 +4,7 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/TileView.h"
 #include "Framework/CGameState.h"
 #include "Framework/CAssetManager.h"
 #include "Widgets/TeamSelectionWidget.h"
@@ -138,9 +139,6 @@ void ULobbyWidget::CharacterDefinitionLoaded()
 	
 	if (UCAssetManager::Get().GetLoadedCharacterDefinition(LoadedCharacterDefinitions))
 	{
-		for (const UPA_CharacterDefination* LoadedCharacterDefinition : LoadedCharacterDefinitions)
-		{
-			UE_LOG(LogTemp,Warning,TEXT("Loaded Character : %s"),*(LoadedCharacterDefinition->GetCharacterDisplayName()));
-		}
+			CharacterSelectionTileView->SetListItems(LoadedCharacterDefinitions);
 	}
 }

@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "LobbyWidget.generated.h"
 
+class UTileView;
 struct FPlayerSelection;
 class UUniformGridPanel;
 class UButton;
@@ -38,6 +39,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UUniformGridPanel* TeamSelectionSlotGridPanel;
+
+	UPROPERTY(meta=(BindWidget))
+	UTileView* CharacterSelectionTileView;
 
 	UPROPERTY(EditDefaultsOnly,Category="TeamSelection")
 	TSubclassOf<class UTeamSelectionWidget> TeamSelectionWidgetClass;

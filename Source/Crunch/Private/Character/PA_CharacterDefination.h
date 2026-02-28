@@ -24,11 +24,11 @@ public:
 	
 	FString GetCharacterDisplayName() const { return CharacterName; }
 
-	UTexture2D* LoadIcon() const ;
-
 	TSubclassOf<ACCharacter> GetCharacterClass() const ;
 
 	TSubclassOf<UAnimInstance> GetDisplayAnimationBP() const ;
+
+	UTexture2D* LoadIcon() const ;
 
 	USkeletalMesh* LoadDisplayMesh() const ;
 	
