@@ -1,5 +1,5 @@
-
 #include "CAssetManager.h"
+#include "Character/PA_CharacterDefination.h"
 
 UCAssetManager& UCAssetManager::Get()
 {
@@ -14,6 +14,11 @@ UCAssetManager& UCAssetManager::Get()
 void UCAssetManager::LoadShopItems(const FStreamableDelegate& LoadFinishedCallback)
 {
 	LoadPrimaryAssetsWithType(UPA_ShopItem::GetShopItemAssetType(),TArray<FName>(),FStreamableDelegate::CreateUObject(this,&ThisClass::ShopItemLoadFinished,LoadFinishedCallback));
+}
+
+void UCAssetManager::LoadCharacterDefinition(const FStreamableDelegate& LoadFinishedCallback)
+{
+	LoadPrimaryAssetsWithType(UPA_CharacterDefination::GetCharacterDefinitionAssetType(),TArray<FName>(),LoadFinishedCallback);
 }
 
 bool UCAssetManager::GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) const
@@ -31,6 +36,22 @@ bool UCAssetManager::GetLoadedShopItem(TArray<const UPA_ShopItem*>& OutItems) co
 			OutItems.Add(Cast<UPA_ShopItem>(ObjectLoaded));
 		}
 	}
+	return bLoaded;
+}
+
+bool UCAssetManager::GetLoadedCharacterDefinition(TArray<UPA_CharacterDefination*>& LoadedCharacterDefinition) const
+{
+	TArray<UObject*> LoadedObjects;
+
+	const bool bLoaded = GetPrimaryAssetObjectList(UPA_CharacterDefination::GetCharacterDefinitionAssetType() , LoadedObjects);
+	if (bLoaded)
+	{
+		for (UObject* ObjectLoaded : LoadedObjects)
+		{
+			LoadedCharacterDefinition.Add(Cast<UPA_CharacterDefination>(ObjectLoaded));
+		}
+	}
+
 	return bLoaded;
 }
 

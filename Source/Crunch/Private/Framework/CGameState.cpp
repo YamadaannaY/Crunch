@@ -45,6 +45,11 @@ const TArray<FPlayerSelection>& ACGameState::GetPlayerSelection() const
 	return PlayerSelectionArray;
 }
 
+bool ACGameState::CanStartHeroSelection() const
+{
+	return PlayerSelectionArray.Num() == PlayerArray.Num();
+}
+
 void ACGameState::OnRep_PlayerSelectionArray() const
 {
 	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);

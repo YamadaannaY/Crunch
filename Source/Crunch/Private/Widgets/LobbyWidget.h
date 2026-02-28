@@ -29,6 +29,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UWidget* TeamSelectionRoot;
+	
+	UPROPERTY(meta=(BindWidget))
+	UWidget* HeroSelectionRoot;
 
 	UPROPERTY(meta=(BindWidget))
 	UButton* StartHeroSelectionButton;
@@ -61,4 +64,13 @@ private:
 
 	//绑定一个现有SlotArray被修改的时候响应的函数，更新一次所有Slot的信息
 	void UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>& PlayerSelections);
+
+	//当所有人都进行了TeamSelection后才允许调用此函数，为ButtonClick的回调,服务端侧在LobbyController中分发到所有客户端的委托
+	UFUNCTION()
+	void StartHeroSelectionButtonClicked();
+
+	//分发委托的响应，TeamSelection完毕，切换到HeroSelection
+	void SwitchToHeroSelection();
+
+	void CharacterDefinitionLoaded();
 };

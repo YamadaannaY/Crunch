@@ -26,6 +26,9 @@ public:
 
 	//返回当前所有添加到Slot的Selection
 	const TArray<FPlayerSelection>& GetPlayerSelection() const ;
+
+	//当所有Player都已经选择了Slot创建SelectionArray则true否则false
+	bool CanStartHeroSelection() const ;
 	
 private:
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerSelectionArray)

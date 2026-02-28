@@ -1,7 +1,11 @@
 #include "LobbyWidget.h"
+#include "Character/PA_CharacterDefination.h"
+#include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
+#include "Components/WidgetSwitcher.h"
 #include "Framework/CGameState.h"
+#include "Framework/CAssetManager.h"
 #include "Widgets/TeamSelectionWidget.h"
 #include "NetWork/NetStatics.h"
 #include "Player/LobbyPlayerController.h"
@@ -13,9 +17,20 @@ void ULobbyWidget::NativeConstruct()
 	ClearAndPopulateTeamSelectionSlots();
 
 	LobbyPlayerController = GetOwningPlayer<ALobbyPlayerController>();
+	if (LobbyPlayerController)
+	{
+		//某一个客户端点击Button则所有客户端触发此委托
+		LobbyPlayerController->OnSwitchToHeroSelection.BindUObject(this,&ThisClass::SwitchToHeroSelection);
+	}
 
 	//确保State已经就绪
 	ConfigureGameState();
+
+	//true的情况下Button会高亮
+	StartHeroSelectionButton->SetIsEnabled(false);
+	StartHeroSelectionButton->OnClicked.AddDynamic(this,&ThisClass::StartHeroSelectionButtonClicked);
+	
+	UCAssetManager::Get().LoadCharacterDefinition(FStreamableDelegate::CreateUObject(this,&ThisClass::CharacterDefinitionLoaded));
 }
 
 void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
@@ -51,7 +66,6 @@ void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
 			TeamSelectionSlots.Add(NewSelectionSlot);
 		}
 	}
-	
 }
 
 void ULobbyWidget::SlotSelected(uint8 NewSlotID)
@@ -79,7 +93,7 @@ void ULobbyWidget::ConfigureGameState()
 	{
 		CGameState->OnPlayerSelectionUpdated.AddUObject(this,&ThisClass::UpdatePlayerSelectionOnDisplay);
 
-		//用默认的Selection数组进行一次初始化
+		//用默认的Selection数组进行一次初始化，默认是没有Selection的，则所有显示Empty
 		UpdatePlayerSelectionOnDisplay(CGameState->GetPlayerSelection());
 	}
 }
@@ -96,5 +110,37 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		if (!PlayerSelection.IsValid()) continue;
 
 		TeamSelectionSlots[PlayerSelection.GetPlayerSlot()]->UpdateSlotInfo(PlayerSelection.GetPlayerNickName());
+	}
+
+	//每次都执行判断函数确定Button是否可以点击
+	if (CGameState)
+	{
+		StartHeroSelectionButton->SetIsEnabled(CGameState->CanStartHeroSelection());
+	}
+}
+
+void ULobbyWidget::StartHeroSelectionButtonClicked()
+{
+	if (LobbyPlayerController)
+	{
+		LobbyPlayerController->Server_StartHeroSelection();
+	}
+}
+
+void ULobbyWidget::SwitchToHeroSelection()
+{
+	MainSwitcher->SetActiveWidget(HeroSelectionRoot);
+}
+
+void ULobbyWidget::CharacterDefinitionLoaded()
+{
+	TArray<UPA_CharacterDefination*> LoadedCharacterDefinitions;
+	
+	if (UCAssetManager::Get().GetLoadedCharacterDefinition(LoadedCharacterDefinitions))
+	{
+		for (const UPA_CharacterDefination* LoadedCharacterDefinition : LoadedCharacterDefinitions)
+		{
+			UE_LOG(LogTemp,Warning,TEXT("Loaded Character : %s"),*(LoadedCharacterDefinition->GetCharacterDisplayName()));
+		}
 	}
 }
