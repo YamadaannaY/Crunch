@@ -33,6 +33,15 @@ bool ACGameState::IsSlotOccupied(uint8 SlotId) const
 	return false;
 }
 
+bool ACGameState::IsDefinitionSelected(const UPA_CharacterDefination* Definition) const
+{
+	const FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate
+	([&](const FPlayerSelection& PlayerSelection)
+		{return PlayerSelection.GetCharacterDefinition() == Definition;});
+
+	return FoundPlayerSelection != nullptr;
+}
+
 void ACGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -48,6 +57,43 @@ const TArray<FPlayerSelection>& ACGameState::GetPlayerSelection() const
 bool ACGameState::CanStartHeroSelection() const
 {
 	return PlayerSelectionArray.Num() == PlayerArray.Num();
+}
+
+void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
+	const UPA_CharacterDefination* SelectedDefinition)
+{
+	if (IsDefinitionSelected(SelectedDefinition)) return ;
+
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
+	{
+		return PlayerSelection.IsForPlayer(SelectingPlayer);
+	});
+
+	if (FoundPlayerSelection)
+	{
+		FoundPlayerSelection->SetCharacterDefinition(SelectedDefinition);
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+}
+
+void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* DefinitionToDelete)
+{
+
+	if (!DefinitionToDelete) return ;
+
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
+	{
+		return PlayerSelection.GetCharacterDefinition() == DefinitionToDelete;
+	});
+
+	if (FoundPlayerSelection)
+	{
+		FoundPlayerSelection->SetCharacterDefinition(nullptr);
+		
+		//更新客户端的PlayerSelectionArray
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+
 }
 
 void ACGameState::OnRep_PlayerSelectionArray() const

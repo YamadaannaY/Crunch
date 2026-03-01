@@ -1,4 +1,6 @@
 #include "LobbyWidget.h"
+
+#include "CharacterEntryWidget.h"
 #include "Character/PA_CharacterDefination.h"
 #include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
@@ -9,6 +11,7 @@
 #include "Framework/CAssetManager.h"
 #include "Widgets/TeamSelectionWidget.h"
 #include "NetWork/NetStatics.h"
+#include "Player/CPlayerState.h"
 #include "Player/LobbyPlayerController.h"
 
 void ULobbyWidget::NativeConstruct()
@@ -32,6 +35,11 @@ void ULobbyWidget::NativeConstruct()
 	StartHeroSelectionButton->OnClicked.AddDynamic(this,&ThisClass::StartHeroSelectionButtonClicked);
 	
 	UCAssetManager::Get().LoadCharacterDefinition(FStreamableDelegate::CreateUObject(this,&ThisClass::CharacterDefinitionLoaded));
+
+	if (CharacterSelectionTileView)
+	{
+		CharacterSelectionTileView->OnItemSelectionChanged().AddUObject(this,&ThisClass::CharacterSelected);
+	}
 }
 
 void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
@@ -106,11 +114,25 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		SelectionSlot->UpdateSlotInfo("Empty");
 	}
 
+	for (UUserWidget* CharacterEntryAsWidget : CharacterSelectionTileView->GetDisplayedEntryWidgets())
+	{
+		if (UCharacterEntryWidget* CharacterEntryWidget = Cast<UCharacterEntryWidget>(CharacterEntryAsWidget))
+		{
+			CharacterEntryWidget->SetSelected(false);
+		}
+	}
+
 	for (const FPlayerSelection& PlayerSelection : PlayerSelections)
 	{
 		if (!PlayerSelection.IsValid()) continue;
 
 		TeamSelectionSlots[PlayerSelection.GetPlayerSlot()]->UpdateSlotInfo(PlayerSelection.GetPlayerNickName());
+
+		UCharacterEntryWidget* SelectedEntry = CharacterSelectionTileView->GetEntryWidgetFromItem<UCharacterEntryWidget>(PlayerSelection.GetCharacterDefinition());
+		if (SelectedEntry)
+		{
+			SelectedEntry->SetSelected(true);
+		}
 	}
 
 	//每次都执行判断函数确定Button是否可以点击
@@ -140,5 +162,16 @@ void ULobbyWidget::CharacterDefinitionLoaded()
 	if (UCAssetManager::Get().GetLoadedCharacterDefinition(LoadedCharacterDefinitions))
 	{
 			CharacterSelectionTileView->SetListItems(LoadedCharacterDefinitions);
+	}
+}
+
+void ULobbyWidget::CharacterSelected(UObject* SelectedUObject)
+{
+	if (!CPlayerState) CPlayerState = GetOwningPlayerState<ACPlayerState>();
+	if (!CPlayerState) return ;
+
+	if (const UPA_CharacterDefination* CharacterDefinition = Cast<UPA_CharacterDefination>(SelectedUObject))
+	{
+		CPlayerState->Server_SetSelectedCharacterDefinition(CharacterDefinition);
 	}
 }

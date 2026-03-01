@@ -55,6 +55,9 @@ private:
 	UPROPERTY()
 	class ACGameState* CGameState;
 
+	UPROPERTY()
+	class ACPlayerState* CPlayerState;
+
 	FTimerHandle ConfigureGameStateTimerHandle;
 
 	//清理Panel并重新分配Slot
@@ -77,4 +80,6 @@ private:
 	void SwitchToHeroSelection();
 
 	void CharacterDefinitionLoaded();
+
+	void CharacterSelected(UObject* SelectedUObject);
 };
