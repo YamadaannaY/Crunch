@@ -34,7 +34,7 @@ TSubclassOf<ACCharacter> UPA_CharacterDefination::GetCharacterClass() const
 	return TSubclassOf<ACCharacter>();
 }
 
-TSubclassOf<UAnimInstance> UPA_CharacterDefination::GetDisplayAnimationBP() const
+TSubclassOf<UAnimInstance> UPA_CharacterDefination::LoadDisplayAnimationBP() const
 {
 	TSubclassOf<UAnimInstance> DisplayAnim = DisplayAnimBP.LoadSynchronous();
 	if (!DisplayAnim) return nullptr;

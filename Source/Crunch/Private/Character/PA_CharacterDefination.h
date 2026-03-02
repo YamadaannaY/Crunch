@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "UniversalObjectLocators/AnimInstanceLocatorFragment.h"
 #include "PA_CharacterDefination.generated.h"
 
 class ACCharacter;
@@ -26,7 +25,7 @@ public:
 
 	TSubclassOf<ACCharacter> GetCharacterClass() const ;
 
-	TSubclassOf<UAnimInstance> GetDisplayAnimationBP() const ;
+	TSubclassOf<UAnimInstance> LoadDisplayAnimationBP() const ;
 
 	UTexture2D* LoadIcon() const ;
 

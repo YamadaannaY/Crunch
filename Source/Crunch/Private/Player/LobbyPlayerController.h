@@ -18,6 +18,8 @@ class CRUNCH_API ALobbyPlayerController : public AMenuPlayerController
 
 public:
 	FOnSwitchToHeroSelection OnSwitchToHeroSelection;
+
+	ALobbyPlayerController();
 	
 	//在Widget引起的逻辑中被调用，所以在客户端中，因此需要一个RPC，将被点击Slot的ID发送给GameState
 	UFUNCTION(Server ,Reliable , WithValidation)

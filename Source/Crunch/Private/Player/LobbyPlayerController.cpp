@@ -39,3 +39,8 @@ void ALobbyPlayerController::ClientStartHeroSelection_Implementation()
 {
 	OnSwitchToHeroSelection.ExecuteIfBound();
 }
+
+ALobbyPlayerController::ALobbyPlayerController()
+{
+	bAutoManageActiveCameraTarget = false;
+}

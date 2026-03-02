@@ -1,5 +1,5 @@
 #include "LobbyWidget.h"
-
+#include "Widgets/CharacterDisplay.h"
 #include "CharacterEntryWidget.h"
 #include "Character/PA_CharacterDefination.h"
 #include "Components/Button.h"
@@ -9,6 +9,8 @@
 #include "Components/TileView.h"
 #include "Framework/CGameState.h"
 #include "Framework/CAssetManager.h"
+#include "GameFramework/PlayerStart.h"
+#include "Kismet/GameplayStatics.h"
 #include "Widgets/TeamSelectionWidget.h"
 #include "NetWork/NetStatics.h"
 #include "Player/CPlayerState.h"
@@ -40,6 +42,8 @@ void ULobbyWidget::NativeConstruct()
 	{
 		CharacterSelectionTileView->OnItemSelectionChanged().AddUObject(this,&ThisClass::CharacterSelected);
 	}
+
+	SpawnCharacterDisplay();
 }
 
 void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
@@ -133,6 +137,10 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		{
 			SelectedEntry->SetSelected(true);
 		}
+		if (PlayerSelection.IsForPlayer(GetOwningPlayerState()))
+		{
+			UpdatedCharacterDisplay(PlayerSelection);
+		}
 	}
 
 	//每次都执行判断函数确定Button是否可以点击
@@ -174,4 +182,30 @@ void ULobbyWidget::CharacterSelected(UObject* SelectedUObject)
 	{
 		CPlayerState->Server_SetSelectedCharacterDefinition(CharacterDefinition);
 	}
+}
+
+void ULobbyWidget::SpawnCharacterDisplay()
+{
+	if (CharacterDisplay) return ;
+	if (!CharacterDisplayClass) return ;
+
+	FTransform CharacterDisplayTransform = FTransform::Identity;
+	
+	AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(),APlayerStart::StaticClass());
+	if (PlayerStart)
+	{
+		CharacterDisplayTransform = PlayerStart->GetActorTransform();
+	}
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	CharacterDisplay = GetWorld()->SpawnActor<ACharacterDisplay>(CharacterDisplayClass,SpawnParams);
+	CharacterDisplay->SetActorTransform(CharacterDisplayTransform);
+	GetOwningPlayer()->SetViewTarget(CharacterDisplay);
+}
+
+void ULobbyWidget::UpdatedCharacterDisplay(const FPlayerSelection& PlayerSelection)
+{
+	if (!PlayerSelection.GetCharacterDefinition()) return;
+
+	CharacterDisplay->ConfigureWithCharacterDefinition(PlayerSelection.GetCharacterDefinition());
 }

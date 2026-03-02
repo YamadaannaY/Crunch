@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Player/PlayerInfoTypes.h"
 #include "LobbyWidget.generated.h"
 
 class UTileView;
@@ -58,6 +59,12 @@ private:
 	UPROPERTY()
 	class ACPlayerState* CPlayerState;
 
+	UPROPERTY(EditDefaultsOnly,Category="Character Display")
+	TSubclassOf<class ACharacterDisplay> CharacterDisplayClass;
+
+	UPROPERTY()
+	ACharacterDisplay* CharacterDisplay;
+
 	FTimerHandle ConfigureGameStateTimerHandle;
 
 	//清理Panel并重新分配Slot
@@ -79,7 +86,15 @@ private:
 	//分发委托的响应，TeamSelection完毕，切换到HeroSelection
 	void SwitchToHeroSelection();
 
+	//加载所有PA_Definition并设置为TileView的ListItem
 	void CharacterDefinitionLoaded();
 
+	//CharacterDefListItem被点击时的回调
 	void CharacterSelected(UObject* SelectedUObject);
+
+	//初始化创建一个显示Hero动作和外形的DisplayActor类
+	void SpawnCharacterDisplay();
+
+	//更新Display类，调用Selection其中的Definition封装好的API进行配置
+	void UpdatedCharacterDisplay(const FPlayerSelection& PlayerSelection);
 };
