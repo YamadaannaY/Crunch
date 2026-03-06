@@ -7,6 +7,7 @@
 #include "Player/PlayerInfoTypes.h"
 #include "LobbyWidget.generated.h"
 
+class UAbilityListView;
 class UTileView;
 struct FPlayerSelection;
 class UUniformGridPanel;
@@ -43,6 +44,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UTileView* CharacterSelectionTileView;
+
+	UPROPERTY(meta=(BindWidget))
+	UAbilityListView* AbilityListView;
 
 	UPROPERTY(EditDefaultsOnly,Category="TeamSelection")
 	TSubclassOf<class UTeamSelectionWidget> TeamSelectionWidgetClass;
@@ -88,7 +92,7 @@ private:
 
 	//加载所有PA_Definition并设置为TileView的ListItem
 	void CharacterDefinitionLoaded();
-
+	
 	//CharacterDefListItem被点击时的回调
 	void CharacterSelected(UObject* SelectedUObject);
 

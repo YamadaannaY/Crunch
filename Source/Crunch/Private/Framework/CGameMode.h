@@ -16,7 +16,7 @@ class ACGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
-	//在“服务器端”生成一个PlayerController实例,客户端会收到这个Controller的镜像（也是一个实例）
+	//在服务器端生成一个PlayerController实例,客户端会收到这个Controller的镜像（也是一个实例）
 	virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
 
 	//属于GameMode的BeginPlay,会在World开始Play时调用，比所有Actor早

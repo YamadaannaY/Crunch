@@ -1,13 +1,12 @@
-
 #include "StormCore.h"
 #include "Components/DecalComponent.h"
 #include "AIController.h"
-#include "GenericTeamAgentInterface.h"
 #include "Camera/CameraComponent.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/ProjectileActor.h"
-#include "net/UnrealNetwork.h"
 #include "Player/CPlayerCharacter.h"
+#include "net/UnrealNetwork.h"
 
 AStormCore::AStormCore()
 {
@@ -34,7 +33,7 @@ void AStormCore::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& Out
 
 float AStormCore::GetProgress() const
 {
-	FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
+	const FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
 	FVector VectorFromTeamOne=GetActorLocation()- TeamTwoGoalLoc;
 	VectorFromTeamOne.Z=0.f;
 
@@ -42,12 +41,11 @@ float AStormCore::GetProgress() const
 	return VectorFromTeamOne.Size()/TravelLength;
 }
 
-// Called when the game starts or when spawned
 void AStormCore::BeginPlay()
 {
 	Super::BeginPlay();
-	FVector TeamOneGoalLoc=TeamOneGoal->GetActorLocation();
-	FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
+	const FVector TeamOneGoalLoc=TeamOneGoal->GetActorLocation();
+	const FVector TeamTwoGoalLoc=TeamTwoGoal->GetActorLocation();
 
 	FVector GoalOffset=TeamOneGoalLoc-TeamTwoGoalLoc;
 	GoalOffset.Z=0;
@@ -73,7 +71,7 @@ void AStormCore::Tick(float DeltaTime)
 	}
 }
 
-void AStormCore::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+void AStormCore::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
@@ -110,21 +108,20 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 			}
 			else
 			{
-				TeamTwoInfluencerCount++;
+				TeamOneInfluencerCount++;
 			}
 		}
 		else if (OtherTeamAgentInterface->GetGenericTeamId().GetId()==1)
 		{
 			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
 			{
-				TeamOneInfluencerCount+=4;
+				TeamTwoInfluencerCount+=4;
 			}
 			else
 			{
 				TeamTwoInfluencerCount++;
 			}
 		}
-		
 		UpdateTeamWeight();
 	}
 }
@@ -142,7 +139,7 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 			}
 			else
 			{
-				TeamTwoInfluencerCount--;
+				TeamOneInfluencerCount--;
 			}
 			
 			if (TeamOneInfluencerCount<0)
@@ -154,7 +151,7 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 		{
 			if (OtherActor->IsA(ACPlayerCharacter::StaticClass()))
 			{
-				TeamOneInfluencerCount-=4;
+				TeamTwoInfluencerCount-=4;
 			}
 			else
 			{
@@ -194,7 +191,7 @@ void AStormCore::UpdateGoal()
 	if (!HasAuthority()) return ;
 	if (!OwnerAIC) return ;
 	if (!GetCharacterMovement()) return ;
-
+	
 	if (TeamWeight > 0.f)
 	{
 		OwnerAIC->MoveToActor(TeamOneGoal);
@@ -228,7 +225,7 @@ void AStormCore::ExpandFinished()
 	CoreToCapture->SetActorLocation(GetMesh()->GetComponentLocation());
 	CoreToCapture->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepWorldTransform,"root");
 
-GetMesh()->GetAnimInstance()->Montage_Play(CaptureMontage);
+	GetMesh()->GetAnimInstance()->Montage_Play(CaptureMontage);
 }
 
 void AStormCore::OnRep_CoreToCapture()

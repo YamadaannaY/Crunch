@@ -15,9 +15,8 @@ class AMinionBarrack : public AActor
 	GENERATED_BODY()
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	
 private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	FGenericTeamId BarrackTeamId;

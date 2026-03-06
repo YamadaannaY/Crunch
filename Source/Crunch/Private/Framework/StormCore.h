@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -33,11 +31,10 @@ protected:
 
 	virtual void PossessedBy(AController* NewController) override;
 public:
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
 	//在编辑器中进行修改PropertyName对应的变量时立刻在World中实时调整，而不必等到运行游戏，方便观察
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Move")
@@ -60,14 +57,18 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
 	UAnimMontage* CaptureMontage;
-	
+
+	//BeginOverlapCallBack
 	UFUNCTION()
 	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	
+	//EndOverlapCallBack
 	UFUNCTION()
 	void InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	//更新Weight值
 	void UpdateTeamWeight();
+	
 	//更新Goal的移动方向和速度
 	void UpdateGoal();
 	
@@ -75,7 +76,6 @@ private:
 	void CaptureCore();
 	
 	//捕捉完成后收缩
-	
 	void ExpandFinished();
 	
 	UPROPERTY(EditAnywhere,Category="Team")
@@ -94,6 +94,7 @@ private:
 	AActor* CoreToCapture;
 
 	float CoreCaptureSpeed;
+	
 	float TravelLength=0.f;
 	
 	UFUNCTION()

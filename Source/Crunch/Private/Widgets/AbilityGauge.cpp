@@ -10,6 +10,7 @@
 #include "GAS/CAttributeSet.h"
 #include "GAS/CHeroAttributeSet.h"
 #include "GAS/UCAbilitySystemStatics.h"
+#include "Widgets/AbilityToolTip.h"
 
 void UAbilityGauge::NativeConstruct()
 {
@@ -73,6 +74,22 @@ void UAbilityGauge::ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData
 	if (Icon && WidgetData)
 	{
 		Icon->GetDynamicMaterial()->SetTextureParameterValue(IconMaterialParaName,WidgetData->Icon.LoadSynchronous());
+		CreateToolTipWidget(WidgetData);
+	}
+}
+
+void UAbilityGauge::CreateToolTipWidget(const FAbilityWidgetData* AbilityWidgetData)
+{
+	if (!AbilityWidgetData || !AbilityToolTipClass) return ;
+
+	UAbilityToolTip* InstantiatedToolTip = CreateWidget<UAbilityToolTip>(GetOwningPlayer() , AbilityToolTipClass);
+	if (InstantiatedToolTip)
+	{
+		const float CooldownDuration=UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
+		const float Cost=UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
+		InstantiatedToolTip->SetAbilityInfo(AbilityWidgetData->AbilityName , AbilityWidgetData->Icon.LoadSynchronous() , AbilityWidgetData->Description , CooldownDuration , Cost);
+
+		SetToolTip(InstantiatedToolTip);
 	}
 }
 

@@ -1,11 +1,11 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "PA_CharacterDefination.generated.h"
 
+class UGameplayAbility;
+enum class ECAbilityInputID : uint8;
 class ACCharacter;
 /**
  * 
@@ -23,14 +23,17 @@ public:
 	
 	FString GetCharacterDisplayName() const { return CharacterName; }
 
-	TSubclassOf<ACCharacter> GetCharacterClass() const ;
+	//查询/加载软指针
+	TSubclassOf<ACCharacter> LoadCharacterClass() const ;
 
+	//查询加载软指针
 	TSubclassOf<UAnimInstance> LoadDisplayAnimationBP() const ;
 
 	UTexture2D* LoadIcon() const ;
 
 	USkeletalMesh* LoadDisplayMesh() const ;
-	
+
+	const TMap<ECAbilityInputID , TSubclassOf<UGameplayAbility>>* GetAbilities() const ;
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Character")
 	FString CharacterName;

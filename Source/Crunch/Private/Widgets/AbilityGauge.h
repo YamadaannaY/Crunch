@@ -3,6 +3,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameplayAbilitySpecHandle.h"
+#include "Abilities/GameplayAbilityTargetTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "AbilityGauge.generated.h"
@@ -82,6 +83,9 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	FName UpgradePointAvailableParaName="UpgradeAvailable";
 
+	UPROPERTY(EditDefaultsOnly,Category="Tool Tip")
+	TSubclassOf<class UAbilityToolTip> AbilityToolTipClass;
+
 	//要覆盖的Image
 	UPROPERTY(meta=(BindWidget))
 	UImage* Icon;
@@ -138,8 +142,7 @@ private:
 
 	//通过此Gauge中存储的AbilityCDO对应的Class获取Spec
 	const FGameplayAbilitySpec* GetAbilitySpec();
-
-
+	
 	//SpecDirtied广播的回调
 	void AbilitySpecUpdated(const FGameplayAbilitySpec& AbilitySpec);
 
@@ -151,5 +154,7 @@ private:
 
 	//调用UpdateCanCast判断Mana值是否足以释放技能
 	void ManaUpdated(const FOnAttributeChangeData& Data);
+
+	void CreateToolTipWidget(const FAbilityWidgetData* AbilityWidgetData);
 };
 

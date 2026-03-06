@@ -2,7 +2,6 @@
 #include "Minion.h"
 #include "GameFramework/PlayerStart.h"
 
-// Called when the game starts or when spawned
 void AMinionBarrack::BeginPlay()
 {
 	Super::BeginPlay();

@@ -33,7 +33,8 @@ void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const U
 	if (!CGameState) return ;
 	if (!NewDefinition) return ;
 	if (CGameState->IsDefinitionSelected(NewDefinition)) return ;
-	
+
+	//有的话先置为null
 	if (PlayerSelection.GetCharacterDefinition())
 	{
 		CGameState->SetCharacterDeselected(PlayerSelection.GetCharacterDefinition());
