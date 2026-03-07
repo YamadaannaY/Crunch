@@ -31,12 +31,20 @@ bool FPlayerSelection::IsForPlayer(const APlayerState* PlayerState) const
 bool FPlayerSelection::IsValid() const
 {
 #if WITH_EDITOR
-	return  true;
-#else
-	if (! PlayerUniqueId.IsValid()) return false;
 	if (Slot == GetInvalidSlot()) return false;
-	if (Slot >= UNetStatics::GetPlayerCountPerTeam()* 2) return false;
-	
+	if (Slot >= UNetStatics::GetPlayerCountPerTeam() * 2) return false;
+	return true;
+
+#else
+	if (!PlayerUniqueId.IsValid())
+		return false;
+
+	if (Slot == GetInvalidSlot())
+		return false;
+
+	if (Slot >= UCNetStatics::GetPlayerCountPerTeam() * 2)
+		return false;
+
 	return true;
 #endif
 }

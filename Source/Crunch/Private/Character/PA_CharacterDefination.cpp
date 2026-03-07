@@ -13,15 +13,12 @@ FPrimaryAssetType UPA_CharacterDefination::GetCharacterDefinitionAssetType()
 
 UTexture2D* UPA_CharacterDefination::LoadIcon() const
 {
+	UTexture2D* Icon=CharacterIcon.LoadSynchronous();
+	if (!Icon) return nullptr;
+	
 	if (CharacterIcon.IsValid())
 	{
-		// 1.尝试直接从内存获取（如果已经加载过，这一步极快）
-		if (UTexture2D* LoadedClass = CharacterIcon.Get())
-		{
-			return LoadedClass;
-		}
-		// 2.内存中没有，才执行同步加载
-		return CharacterIcon.LoadSynchronous();
+		return CharacterIcon.Get();
 	}
 
 	return nullptr;
@@ -29,35 +26,24 @@ UTexture2D* UPA_CharacterDefination::LoadIcon() const
 
 TSubclassOf<ACCharacter> UPA_CharacterDefination::LoadCharacterClass() const
 {
-	if (CharacterClass.IsValid())
-	{
-		// 1.尝试直接从内存获取（如果已经加载过，这一步极快）
-		if (UClass* LoadedClass = CharacterClass.Get())
-		{
-			return LoadedClass;
-		}
-
-		// 2.内存中没有，才执行同步加载
-		return Cast<UClass>(CharacterClass.LoadSynchronous());
-	}
+	TSubclassOf<ACharacter> Character = CharacterClass.LoadSynchronous();
+	if (!Character) return nullptr;
+	
+	if (CharacterClass.IsValid()) return CharacterClass.Get();
 
 	return TSubclassOf<ACCharacter>();
 }
 
 TSubclassOf<UAnimInstance> UPA_CharacterDefination::LoadDisplayAnimationBP() const
 {
+	TSubclassOf<UAnimInstance> DisplayAnim = DisplayAnimBP.LoadSynchronous();
+	if (!DisplayAnim) return nullptr;
+	
 	if (DisplayAnimBP.IsValid())
 	{
-		// 1.尝试直接从内存获取（如果已经加载过，这一步极快）
-		if (UClass* LoadedClass = DisplayAnimBP.Get())
-		{
-			return LoadedClass;
-		}
-
-		// 2.内存中没有，才执行同步加载
-		return Cast<UClass>(DisplayAnimBP.LoadSynchronous());
+		return DisplayAnimBP.Get();
 	}
-	
+
 	return TSubclassOf<UAnimInstance>();
 }
 
@@ -68,17 +54,6 @@ USkeletalMesh* UPA_CharacterDefination::LoadDisplayMesh() const
 
 	ACharacter* Character = Cast<ACharacter>(LoadedCharacterClass.GetDefaultObject());
 	if (!Character) return nullptr;
-	
+
 	return Character->GetMesh()->GetSkeletalMeshAsset();
-}
-
-const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>* UPA_CharacterDefination::GetAbilities() const 
-{
-	TSubclassOf<ACCharacter> LoadedCharacterClass = LoadCharacterClass();
-	if (!LoadedCharacterClass) return nullptr;
-
-	ACCharacter* Character = Cast<ACCharacter>(LoadedCharacterClass.GetDefaultObject());
-	if (!Character) return nullptr;
-
-	return &Character->GetAbilities();
 }
