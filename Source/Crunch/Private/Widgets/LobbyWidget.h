@@ -50,6 +50,9 @@ private:
 	
 	UPROPERTY(meta=(BindWidget))
 	class UPlayerTeamLayoutWidget* PlayerTeamLayoutWidget;
+	
+	UPROPERTY(meta=(BindWidget))
+	UButton* StartMatchButton; 
 
 	UPROPERTY(EditDefaultsOnly,Category="TeamSelection")
 	TSubclassOf<class UTeamSelectionWidget> TeamSelectionWidgetClass;
@@ -104,4 +107,7 @@ private:
 
 	//更新Display类，调用Selection其中的Definition封装好的API进行配置
 	void UpdatedCharacterDisplay(const FPlayerSelection& PlayerSelection);
+	
+	UFUNCTION()
+	void StartMatchButtonClicked();
 };

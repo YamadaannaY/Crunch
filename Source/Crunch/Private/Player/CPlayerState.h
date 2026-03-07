@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "PlayerInfoTypes.h"
 #include "GameFramework/PlayerState.h"
 #include "CPlayerState.generated.h"
@@ -22,11 +23,17 @@ public:
 	
 	virtual void BeginPlay() override;
 	
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+	
 	ACPlayerState();
 
 	//配置Selection中的Definition，同步处理了客户端的Def
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_SetSelectedCharacterDefinition(const UPA_CharacterDefination* NewDefinition);
+	
+	TSubclassOf<APawn> GetSelectedPawnClass() const;
+	
+	FGenericTeamId GetTeamIdBaseOnSlot() const;
 private:
 	UPROPERTY(Replicated)
 	FPlayerSelection PlayerSelection;

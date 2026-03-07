@@ -32,4 +32,8 @@ public:
 	//在客户端广播委托，触发绑定的回调函数，主要是通过Switcher进行Widget切换
 	UFUNCTION(Client,Reliable)
 	void ClientStartHeroSelection();
+	
+	UFUNCTION(Server,Reliable , WithValidation)
+	void Server_RequestionStartMatch();
+
 };

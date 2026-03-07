@@ -41,6 +41,8 @@ public:
 	//在当前Definition未被其他Player选中的情况下为调用Player赋值
 	void SetCharacterSelected(const APlayerState* SelectingPlayer , const UPA_CharacterDefination* SelectedDefinition);
 	
+	//是否所有玩家选择Hero可以开始比赛
+	bool CanStartMatch() const ;
 private:
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerSelectionArray)
 	TArray<FPlayerSelection> PlayerSelectionArray;

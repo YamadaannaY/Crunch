@@ -76,6 +76,16 @@ void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
 	}
 }
 
+bool ACGameState::CanStartMatch() const
+{
+	for (const FPlayerSelection& PlayerSelection : PlayerSelectionArray)
+	{
+		if (PlayerSelection.GetCharacterDefinition() == nullptr) return false ; 
+	}
+	
+	return true;
+}
+
 void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* DefinitionToDelete)
 {
 

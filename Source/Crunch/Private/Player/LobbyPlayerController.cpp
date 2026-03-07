@@ -1,4 +1,5 @@
 #include "LobbyPlayerController.h"
+#include "Framework/CGameInstance.h"
 #include "GameFramework/PlayerState.h"
 #include "Framework/CGameState.h"
 
@@ -43,4 +44,18 @@ void ALobbyPlayerController::ClientStartHeroSelection_Implementation()
 ALobbyPlayerController::ALobbyPlayerController()
 {
 	bAutoManageActiveCameraTarget = false;
+}
+
+void ALobbyPlayerController::Server_RequestionStartMatch_Implementation()
+{
+	UCGameInstance* CGameInstance = Cast<UCGameInstance>(GetWorld()->GetGameInstance());
+	if (CGameInstance)
+	{
+		CGameInstance->StartMatch();
+	}
+}
+
+bool ALobbyPlayerController::Server_RequestionStartMatch_Validate()
+{
+	return true;
 }

@@ -1,7 +1,9 @@
 #include "CPlayerState.h"
 #include  "Framework/CGameState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/CCharacter.h"
 #include "Net/UnrealNetwork.h"
+#include "NetWork/NetStatics.h"
 
 void ACPlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -22,10 +24,36 @@ void ACPlayerState::BeginPlay()
 	}
 }
 
+void ACPlayerState::CopyProperties(APlayerState* PlayerState)
+{
+	Super::CopyProperties(PlayerState);
+	
+	ACPlayerState* NewPlayerState = Cast<ACPlayerState>(PlayerState);
+	if (NewPlayerState)
+	{
+		NewPlayerState->PlayerSelection = PlayerSelection;
+	}
+}
+
 ACPlayerState::ACPlayerState()
 {
 	bReplicates = true;
 	SetNetUpdateFrequency(100.f);
+}
+
+TSubclassOf<APawn> ACPlayerState::GetSelectedPawnClass() const
+{
+	if (PlayerSelection.GetCharacterDefinition())
+	{
+		return PlayerSelection.GetCharacterDefinition()->LoadCharacterClass();
+	}
+	
+	return nullptr;
+}
+
+FGenericTeamId ACPlayerState::GetTeamIdBaseOnSlot() const
+{
+	return PlayerSelection.GetPlayerSlot() < UNetStatics::GetPlayerCountPerTeam() ? FGenericTeamId{0} : FGenericTeamId{1};
 }
 
 void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const UPA_CharacterDefination* NewDefinition)
