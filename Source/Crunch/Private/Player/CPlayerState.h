@@ -33,7 +33,7 @@ private:
 
 	UPROPERTY()
 	class ACGameState* CGameState;
-
+	
 	//将NewSelections中此Player存储的PlayerSelection更新
 	void PlayerSelectionUpdated(const TArray<FPlayerSelection>& NewPlayerSelections);
 };

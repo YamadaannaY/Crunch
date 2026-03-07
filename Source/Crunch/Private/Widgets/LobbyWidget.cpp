@@ -3,6 +3,7 @@
 #include "AbilityListView.h"
 #include "Widgets/CharacterDisplay.h"
 #include "CharacterEntryWidget.h"
+#include "PlayerTeamLayoutWidget.h"
 #include "Character/PA_CharacterDefination.h"
 #include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
@@ -149,6 +150,11 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 	if (CGameState)
 	{
 		StartHeroSelectionButton->SetIsEnabled(CGameState->CanStartHeroSelection());
+	}
+	
+	if (PlayerTeamLayoutWidget)
+	{
+		PlayerTeamLayoutWidget->UpdatePlayerSelection(PlayerSelections);
 	}
 }
 

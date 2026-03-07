@@ -2,12 +2,12 @@
 #include "GameFramework/PlayerState.h"
 #include "NetWork/NetStatics.h"
 
-FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid())
+FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid()),CharacterDefinition(nullptr)
 {
 	
 }
 
-FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) : Slot(InSlot)
+FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) : Slot(InSlot),CharacterDefinition(nullptr)
 {
 	if (InPlayerState)
 	{
@@ -43,5 +43,5 @@ bool FPlayerSelection::IsValid() const
 
 uint8 FPlayerSelection::GetInvalidSlot()
 {
-	return uint8(255);
+	return uint8{255};
 }

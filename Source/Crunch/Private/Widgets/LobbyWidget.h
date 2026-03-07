@@ -19,7 +19,7 @@ class UWidgetSwitcher;
  */
 
 UCLASS()
-class CRUNCH_API ULobbyWidget : public UUserWidget
+class ULobbyWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -47,6 +47,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UAbilityListView* AbilityListView;
+	
+	UPROPERTY(meta=(BindWidget))
+	class UPlayerTeamLayoutWidget* PlayerTeamLayoutWidget;
 
 	UPROPERTY(EditDefaultsOnly,Category="TeamSelection")
 	TSubclassOf<class UTeamSelectionWidget> TeamSelectionWidgetClass;
