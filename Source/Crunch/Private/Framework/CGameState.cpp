@@ -72,6 +72,8 @@ void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
 	if (FoundPlayerSelection)
 	{
 		FoundPlayerSelection->SetCharacterDefinition(SelectedDefinition);
+		
+		//Widget中响应此回调，更新客户端上的Array
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 }

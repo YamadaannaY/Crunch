@@ -11,8 +11,11 @@ UCLASS()
 class CRUNCH_API UCGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
+	
 public:
+	//点击Button调用此函数从而加载GameMap
 	void StartMatch();
+	
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Map")
 	TSoftObjectPtr<UWorld> MainMenuLevel;
@@ -23,5 +26,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Map")
 	TSoftObjectPtr<UWorld> GameLevel;
 	
+	//加载GameMap
 	void LoadLevelAndListen(TSoftObjectPtr<UWorld> Level);
 };

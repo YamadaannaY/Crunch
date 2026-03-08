@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -21,9 +19,15 @@ public:
 
 	//属于GameMode的BeginPlay,会在World开始Play时调用，比所有Actor早
 	virtual void StartPlay() override;
+	
+	//在服务端上为每个Controller调用一次,确定生成的Pawn，在SpawnPlayerController之后调用
+	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
+	
+	//将确定好的Pawn生成，配置其StartSpot和TeamId
+	virtual APawn* SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot) override;
 private:
 	//为生成的Controller分配ID，采用一个static值在0,1两个TeamID之间轮流分配（暂时，方便测试）
-	FGenericTeamId GetTeamIDForPlayer(const APlayerController*  PlayerController) const;
+	FGenericTeamId GetTeamIDForPlayer(const AController* InController) const;
 
 	//根据当前ControllerID的Map对应Tag遍历所有StartPoint，找到没有被使用的点并返回，作为Controller的生成点
 	AActor* FindNextStartSpotTeam(const FGenericTeamId TeamID) const;
@@ -31,6 +35,10 @@ private:
 	//让TeamID和设置的StartPoint中的TagName对应映射
 	UPROPERTY(EditDefaultsOnly,Category="Team")
 	TMap<FGenericTeamId,FName> TeamStartSpotTagMap;
+	
+	//默认Pawn，在某些没有找到玩家选择的Hero的情况下选择的Hero
+	UPROPERTY(EditDefaultsOnly , Category="Team")
+	TSubclassOf<APawn> BackupPawn;
 
 	//ActorIterator迭代器找到World中第一个StormCore
 	class AStormCore* GetStormCore() const ;

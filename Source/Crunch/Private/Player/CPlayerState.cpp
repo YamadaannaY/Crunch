@@ -67,6 +67,7 @@ void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const U
 	{
 		CGameState->SetCharacterDeselected(PlayerSelection.GetCharacterDefinition());
 	}
+	
 	//服务端赋值
 	PlayerSelection.SetCharacterDefinition(NewDefinition);
 	//客户端同步赋值

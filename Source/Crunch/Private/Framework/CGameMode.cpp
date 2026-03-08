@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "Framework/StormCore.h"
 #include "Player/CPlayerController.h"
+#include "Player/CPlayerState.h"
 
 	APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
@@ -42,8 +43,42 @@ void ACGameMode::StartPlay()
 	}
 }
 
-FGenericTeamId ACGameMode::GetTeamIDForPlayer(const APlayerController* PlayerController) const
+	UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
+	{
+		ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
+		
+		if (CPlayerState && CPlayerState->GetSelectedPawnClass())
+		{
+			return CPlayerState->GetSelectedPawnClass();
+		}
+		
+		return BackupPawn;
+	}
+
+	APawn* ACGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+	{
+		IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayer);
+		const FGenericTeamId TeamId = GetTeamIDForPlayer(NewPlayer);
+		
+		if (NewPlayerTeamInterface)
+		{
+			NewPlayerTeamInterface->SetGenericTeamId(TeamId);
+		}
+		
+		StartSpot = FindNextStartSpotTeam(TeamId);
+		NewPlayer->StartSpot = StartSpot;
+		
+		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	}
+
+	FGenericTeamId ACGameMode::GetTeamIDForPlayer(const AController* InController) const
 {
+	ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
+	
+	if (CPlayerState && CPlayerState->GetSelectedPawnClass())
+	{
+		return CPlayerState->GetTeamIdBaseOnSlot();
+	}
 	//轮流分配
 	static int PlayerCount=0;
 	++PlayerCount;
@@ -65,10 +100,9 @@ AActor* ACGameMode::FindNextStartSpotTeam(const FGenericTeamId TeamID) const
 
 	for (TActorIterator<APlayerStart> It(World);It;++It)
 	{
-		//ActorType* operator->() return **this
 		if (It->PlayerStartTag == *StartSpotTag)
 		{
-			It->PlayerStartTag=FName("Taken");
+			It->PlayerStartTag=FName("Taken"); 
 			return *It;
 		}
 	}

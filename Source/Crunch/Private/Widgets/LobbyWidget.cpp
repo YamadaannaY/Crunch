@@ -9,6 +9,7 @@
 #include "Components/UniformGridSlot.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/TileView.h"
+#include "Crunch/DebugHelper.h"
 #include "Framework/CGameState.h"
 #include "Framework/CAssetManager.h"
 #include "GameFramework/PlayerStart.h"

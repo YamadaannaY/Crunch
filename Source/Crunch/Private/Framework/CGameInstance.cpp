@@ -2,7 +2,7 @@
 
 void UCGameInstance::StartMatch()
 {
-	if (GetWorld()->GetNetMode() == NM_DedicatedServer || GetWorld()->GetNetMode() == NM_ListenServer)
+	if (GetWorld()->GetNetMode() == NM_ListenServer || GetWorld()->GetNetMode() == NM_DedicatedServer)
 	{
 		LoadLevelAndListen(GameLevel);
 	}

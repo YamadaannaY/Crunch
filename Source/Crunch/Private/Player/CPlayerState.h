@@ -31,8 +31,10 @@ public:
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_SetSelectedCharacterDefinition(const UPA_CharacterDefination* NewDefinition);
 	
+	//获取当前CharacterClass
 	TSubclassOf<APawn> GetSelectedPawnClass() const;
 	
+	//根据当前PlayerSlot获取TeamId(即Slot生成逻辑)
 	FGenericTeamId GetTeamIdBaseOnSlot() const;
 private:
 	UPROPERTY(Replicated)

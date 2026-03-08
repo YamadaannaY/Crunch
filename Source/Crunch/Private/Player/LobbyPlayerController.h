@@ -8,7 +8,7 @@
 
 DECLARE_DELEGATE(FOnSwitchToHeroSelection);
 /**
- * 
+ *
  */
 
 UCLASS()
@@ -33,7 +33,7 @@ public:
 	UFUNCTION(Client,Reliable)
 	void ClientStartHeroSelection();
 	
+	//Button点击的回调，服务端启动MapTravel加载
 	UFUNCTION(Server,Reliable , WithValidation)
 	void Server_RequestionStartMatch();
-
 };
