@@ -13,7 +13,8 @@ UCAssetManager& UCAssetManager::Get()
 
 void UCAssetManager::LoadShopItems(const FStreamableDelegate& LoadFinishedCallback)
 {
-	LoadPrimaryAssetsWithType(UPA_ShopItem::GetShopItemAssetType(),TArray<FName>(),FStreamableDelegate::CreateUObject(this,&ThisClass::ShopItemLoadFinished,LoadFinishedCallback));
+	LoadPrimaryAssetsWithType(UPA_ShopItem::GetShopItemAssetType(),TArray<FName>(),
+		FStreamableDelegate::CreateUObject(this,&ThisClass::ShopItemLoadFinished,LoadFinishedCallback));
 }
 
 void UCAssetManager::LoadCharacterDefinition(const FStreamableDelegate& LoadFinishedCallback)
@@ -105,8 +106,10 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
 {
 	FItemCollection* Combinations=CombinationMap.Find(Ingredient);
 
+	//如果在合成表中找到Ingredient对应的集合，就从中添加合成Item，否则创建此集合
 	if (Combinations)
 	{
+		
 		if (!Combinations->Contains(CombinationItem))   Combinations->AddItem(CombinationItem);
 	}
 	else

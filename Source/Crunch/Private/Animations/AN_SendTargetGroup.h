@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+/*****************  用于利用多个Socket组成的轨迹进行碰撞检测并返回TargetGroup	************************/
 
 #pragma once
 

@@ -1,3 +1,6 @@
+// 跨地图存在的游戏进程唯一的类，在游戏启动时创建，结束时销毁，在这里调用关卡切换逻辑最合适，不会因为关卡切换收到任何影响，
+// 其他如Mode,State,World都会进行一次重建
+
 #pragma once
 
 #include "CoreMinimal.h"

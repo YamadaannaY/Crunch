@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//这是一个全局单例的管理类，主要处理了PA类型的数据的加载和处理，通过Type标记PA进行特定加载，通过Get获取此管理类进行Load函数调用
 
 #pragma once
 
@@ -52,7 +52,9 @@ private:
 	//接受LoadAsset委托的回调
 	void ShopItemLoadFinished(FStreamableDelegate Callback);
 
-	//为两个Map赋值
+	//构建ItemMap
 	void BuildItemMaps();
+	
+	//构建CombinationMap
 	void AddToCombinationMap(const UPA_ShopItem* Ingredient,const UPA_ShopItem* CombinationItem);
 };

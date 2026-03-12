@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//一个经验Gauge，监听经验值相关属性值并进行Text和ProgressBar的DynamicMaterial参数更新
 
 #pragma once
 

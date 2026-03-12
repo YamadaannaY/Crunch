@@ -1,6 +1,3 @@
-/*****************  用于利用多个Socket组成的轨迹进行碰撞检测并返回TargetGroup	************************/
-
-
 #include "Animations/AN_SendTargetGroup.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemGlobals.h"
@@ -58,7 +55,6 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 			}
 			if (OwnerTeamInterface)
 			{
-				//Friendly / Hostile
 				if (OwnerTeamInterface->GetTeamAttitudeTowards(*HitResult.GetActor()) !=TargetTeam)
 				{
 					continue;

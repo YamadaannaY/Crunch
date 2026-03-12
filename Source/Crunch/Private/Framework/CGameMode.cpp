@@ -1,4 +1,4 @@
-	//GameMode是生成Controller的关键类
+//GameMode是生成Controller的关键类
 //适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置 etc..
 
 #include "Framework/CGameMode.h"
@@ -16,7 +16,7 @@
 
 	//获取Controller的TeamInterface接口处理TeamID
 	IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayerController);
-
+		
 	//为Controller分配ID
 	const FGenericTeamId TeamId=GetTeamIDForPlayer(NewPlayerController);
 	
@@ -43,47 +43,47 @@ void ACGameMode::StartPlay()
 	}
 }
 
-	UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
-	{
-		ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
-		
-		if (CPlayerState && CPlayerState->GetSelectedPawnClass())
-		{
-			return CPlayerState->GetSelectedPawnClass();
-		}
-		
-		return BackupPawn;
-	}
-
-	APawn* ACGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
-	{
-		IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayer);
-		const FGenericTeamId TeamId = GetTeamIDForPlayer(NewPlayer);
-		
-		if (NewPlayerTeamInterface)
-		{
-			NewPlayerTeamInterface->SetGenericTeamId(TeamId);
-		}
-		
-		StartSpot = FindNextStartSpotTeam(TeamId);
-		NewPlayer->StartSpot = StartSpot;
-		
-		return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
-	}
-
-	FGenericTeamId ACGameMode::GetTeamIDForPlayer(const AController* InController) const
+UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
 	ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
 	
 	if (CPlayerState && CPlayerState->GetSelectedPawnClass())
 	{
-		return CPlayerState->GetTeamIdBaseOnSlot();
+		return CPlayerState->GetSelectedPawnClass();
 	}
-	//轮流分配
-	static int PlayerCount=0;
-	++PlayerCount;
+	
+	return BackupPawn;
+}
+
+APawn* ACGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
+{
+	IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayer);
+	const FGenericTeamId TeamId = GetTeamIDForPlayer(NewPlayer);
 		
-	return FGenericTeamId(PlayerCount%2);
+	if (NewPlayerTeamInterface)
+	{
+		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
+	}
+	
+	StartSpot = FindNextStartSpotTeam(TeamId);
+	NewPlayer->StartSpot = StartSpot;
+		
+	return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+}
+
+FGenericTeamId ACGameMode::GetTeamIDForPlayer(const AController* InController) const
+{
+ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
+
+if (CPlayerState && CPlayerState->GetSelectedPawnClass())
+{
+	return CPlayerState->GetTeamIdBaseOnSlot();
+}
+		
+//轮流分配
+static int PlayerCount=0;
+++PlayerCount;
+return FGenericTeamId(PlayerCount%2);
 }
 
 AActor* ACGameMode::FindNextStartSpotTeam(const FGenericTeamId TeamID) const

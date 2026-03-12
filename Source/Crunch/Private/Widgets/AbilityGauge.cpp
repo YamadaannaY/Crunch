@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Widgets/AbilityGauge.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "LevelGauge.h"
@@ -16,17 +14,16 @@ void UAbilityGauge::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//只有开始冷却才显示倒计时数值
+	//初始化不显示，只有开始冷却才显示倒计时数值
 	CooldownCounterText->SetVisibility(ESlateVisibility::Hidden);
 
 	UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningPlayerPawn());
-
 	if (OwnerASC)
 	{
 		//当Cost/Cooldown调用时触发的委托
 		OwnerASC->AbilityCommittedCallbacks.AddUObject(this,&ThisClass::AbilityCommitted);
 		
-		//在UpGradeGA中Spec被修改并且进行Dirt，对DirtSpec进行广播，这里进行相应，修改GALevel的UI
+		//在UpGradeGA中Spec被修改并且进行Dirt，对DirtSpec进行广播，这里进行监听，修改GALevel的UI显示
 		OwnerASC->AbilitySpecDirtiedCallbacks.AddUObject(this,&ThisClass::AbilitySpecUpdated);
 
 		//当UpgradePoint和Mana值变化时对应的回调
@@ -43,10 +40,11 @@ void UAbilityGauge::NativeConstruct()
 			UpgradePointUpdated(ChangeData);
 		}
 	}
-	//缓存，其他函数也会调用ASC
+	
+	//缓存
 	OwnerASCComp=OwnerASC;
 
-	//整数与带两个小数点的文本Op设置
+	//整数与带两个小数点的文本Op
 	WholeNumberFormattingOptions.MaximumFractionalDigits=0;
 	TwoDigitNumberFormattingOptions.MaximumFractionalDigits=2;
 }
@@ -62,7 +60,7 @@ void UAbilityGauge::NativeOnListItemObjectSet(UObject* ListItemObject)
 	const float CooldownDuration=UCAbilitySystemStatics::GetStaticCooldownDurationForAbility(AbilityCDO);
 	const float Cost=UCAbilitySystemStatics::GetStaticCostForAbility(AbilityCDO);
 
-	//设置Text，初始化LevelGauge，最开始是0级
+	//设置Text，初始化LevelGauge
 	CooldownDurationText->SetText(FText::AsNumber(CooldownDuration));
 	CostText->SetText(FText::AsNumber(Cost));
 	LevelGauge->GetDynamicMaterial()->SetScalarParameterValue(AbilityLevelParaName,0);

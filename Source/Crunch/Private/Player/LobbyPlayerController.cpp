@@ -6,7 +6,7 @@
 void ALobbyPlayerController::Server_RequestSlotSelectionChange_Implementation(uint8 NewSlotID)
 {
 	if (!GetWorld()) return ;
-	
+	UE_LOG(LogTemp,Warning,TEXT("ServerSlotId : %d"),NewSlotID)
 	ACGameState* CGameState = GetWorld()->GetGameState<ACGameState>();
 	if (!CGameState) return ;
 	CGameState->RequestPlayerSelectionChange(GetPlayerState<APlayerState>() , NewSlotID);
@@ -43,6 +43,7 @@ void ALobbyPlayerController::ClientStartHeroSelection_Implementation()
 
 ALobbyPlayerController::ALobbyPlayerController()
 {
+	//手动配置Camera位置
 	bAutoManageActiveCameraTarget = false;
 }
 

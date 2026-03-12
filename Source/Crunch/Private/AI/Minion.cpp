@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AI/Minion.h"
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -21,7 +18,7 @@ void AMinion::Activate()
 	ReSpawnImmediative();
 }
 
-void AMinion::SetGoal(AActor* Goal)
+void AMinion::SetGoal(AActor* Goal) const 
 {
 	if (AAIController* AIController = GetController<AAIController>())
 	{

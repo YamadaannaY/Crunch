@@ -24,16 +24,16 @@ void ULobbyWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	ClearAndPopulateTeamSelectionSlots();
-
+	
+	//确保State已经就绪
+	ConfigureGameState();
+	
 	LobbyPlayerController = GetOwningPlayer<ALobbyPlayerController>();
 	if (LobbyPlayerController)
 	{
 		//某一个客户端点击Button则所有客户端触发此委托
 		LobbyPlayerController->OnSwitchToHeroSelection.BindUObject(this,&ThisClass::SwitchToHeroSelection);
 	}
-
-	//确保State已经就绪
-	ConfigureGameState();
 
 	//true的情况下Button会高亮
 	StartHeroSelectionButton->SetIsEnabled(false);
@@ -78,7 +78,6 @@ void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
 				NewGridSlot->SetRow(Row);
 				NewGridSlot->SetColumn(Col);
 			}
-
 			//连环逻辑的第一步，为Slot的点击进行回调
 			NewSelectionSlot->OnSlotClicked.AddUObject(this,&ThisClass::SlotSelected);
 			
@@ -92,6 +91,7 @@ void ULobbyWidget::SlotSelected(uint8 NewSlotID)
 	//服务端将被点击SlotWidget的ID和当前PlayerState进行绑定配置一个PlayerSelection
 	if (LobbyPlayerController)
 	{
+
 		LobbyPlayerController->Server_RequestSlotSelectionChange(NewSlotID);
 	}
 }

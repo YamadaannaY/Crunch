@@ -1,8 +1,7 @@
 #include "PlayerInfoTypes.h"
 #include "GameFramework/PlayerState.h"
-#include "NetWork/NetStatics.h"
 
-FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid()),CharacterDefinition(nullptr)
+FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid()),PlayerNickName(),CharacterDefinition(nullptr)
 {
 	
 }
@@ -31,10 +30,7 @@ bool FPlayerSelection::IsForPlayer(const APlayerState* PlayerState) const
 bool FPlayerSelection::IsValid() const
 {
 #if WITH_EDITOR
-	if (Slot == GetInvalidSlot()) return false;
-	if (Slot >= UNetStatics::GetPlayerCountPerTeam() * 2) return false;
 	return true;
-
 #else
 	if (!PlayerUniqueId.IsValid())
 		return false;

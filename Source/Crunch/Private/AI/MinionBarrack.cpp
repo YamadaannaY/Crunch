@@ -5,9 +5,11 @@
 void AMinionBarrack::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	if (HasAuthority())
 	{
-		GetWorldTimerManager().SetTimer(SpawnIntervalTimerHandle,this,&ThisClass::SpawnNewGroup,GroupSpawnInterval,true);
+		GetWorldTimerManager().SetTimer
+		(SpawnIntervalTimerHandle,this,&ThisClass::SpawnNewGroup,GroupSpawnInterval,true);
 	}
 }
 
@@ -26,7 +28,6 @@ AMinion* AMinionBarrack::GetNextAvailableMinion() const
 {
 	for (AMinion* Minion : MinionPool)
 	{
-		//没有DeadTag视为激活
 		if (!Minion->IsActive())
 		{
 			return Minion;
@@ -37,7 +38,7 @@ AMinion* AMinionBarrack::GetNextAvailableMinion() const
 
 void AMinionBarrack::SpawnNewGroup()
 {
-	//Group一次生成多少Minion
+	//一次生成多少Minion
 	int i =MinionPerGroup;
 
 	while (i>0)
@@ -49,11 +50,9 @@ void AMinionBarrack::SpawnNewGroup()
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
 		
-		//找到DeadTag下的Minion
+		//找到Pool中DeadTag下的Minion进行ReSpawn
 		AMinion* NextAvailableMinion=GetNextAvailableMinion();
 		if (!NextAvailableMinion) break;
-
-		//ReSpawn
 		NextAvailableMinion->SetActorTransform(SpawnTransform);
 		NextAvailableMinion->Activate();
 		--i;
@@ -61,7 +60,7 @@ void AMinionBarrack::SpawnNewGroup()
 
 	if (i != 0 && MinionPool.Num()<MaxSpawnNums)
 	{
-		//意味着当前所有没有DeadTag下的，这种情况下新生成Minion)
+		//意味着当前没有足够数量DeadTag下的Minion存在，这种情况下新生成Minion，但是不超出Max限制)
 		SpawnNewMinion(i);
 	}
 }

@@ -98,11 +98,10 @@ void ACCharacter::BeginPlay()
 	//对于客户端中除自己之外所有Character都渲染一次OverHeadUI
 	ConfigureOverHeadStatusWidget();
 
-	//获得当前Mesh相对于CapsuleComponent的变换（所谓Transform，指的是一个坐标系的摆放方式，想象Transform是一张坐标纸，而Vector只是其中一个点，Rotator则表明这张纸相对最开始旋转了多少，
-	//Scale表示这张纸相对最开始扩张了多少，最终集合成FTransform）
+	//获得当前Mesh相对于父组件的变换，包括loc，rot，与父组件的相对位置等等
 	MeshRelativeTransform=GetMesh()->GetRelativeTransform();
 
-	//为刺激源组件添加视觉刺激，即能够触发AI的Sense_Sight
+	//为刺激源组件添加Sense，即能够触发AI的Sense_Sight
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
 }
 
@@ -116,7 +115,6 @@ UAbilitySystemComponent* ACCharacter::GetAbilitySystemComponent() const
 	return CAbilitySystemComponent;
 }
 
-//将SendEvent也发送给服务端
 void ACCharacter::Server_SendGameplayEventToSelf_Implementation(const FGameplayTag EventTag,
 	const FGameplayEventData& EventData)
 {
@@ -149,7 +147,6 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetFocusStatTag()).AddUObject(this,&ThisClass::FocusTagUpdated);
 
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetAccelerationAttribute()).AddUObject(this,&ThisClass::AccelerationUpdated);
-		//根据PA修改Hero移动速度
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
 	}
 }
@@ -232,20 +229,19 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 	UOverHeadStatsGauge* OverHeadStatsGauge=Cast<UOverHeadStatsGauge>(OverHeadWidgetComponent->GetUserWidgetObject());
 	if (OverHeadStatsGauge)
 	{
-		//属性变化时保持动态更新
+		//监听Health/Mana
 		OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
 		
 		OverHeadWidgetComponent->SetHiddenInGame(false);
 
-		//每次调用重置UpdateTime
+		//每次配置重置UpdateTime
 		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);
 		GetWorldTimerManager().SetTimer(HeadStatGaugeVisibilityUpdateTimerHandle,this,&ACCharacter::UpdateHeadGaugeVisibility,HeadStatGaugeVisibilityUpdateGap,true);
 	}
 }
 
-void ACCharacter::UpdateHeadGaugeVisibility()
+void ACCharacter::UpdateHeadGaugeVisibility() const 
 {
-	//Starting first with local players and then available remote ones
 	APawn* LocalPlayerPawn=UGameplayStatics::GetPlayerPawn(this,0);
 	
 	if(LocalPlayerPawn)
@@ -277,11 +273,10 @@ bool ACCharacter::IsDead() const
 	return GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetDeadStatTag());
 }
 
-void ACCharacter::ReSpawnImmediative()
+void ACCharacter::ReSpawnImmediative() const
 {
 	if (HasAuthority())
 	{
-		//Removes all active effects that grant any of the tags in Tags
 		GetAbilitySystemComponent()->RemoveActiveEffectsWithGrantedTags(FGameplayTagContainer(UCAbilitySystemStatics::GetDeadStatTag()));
 	}
 }
@@ -294,7 +289,7 @@ void ACCharacter::DeathMontageFinished()
 	}
 }
 
-void ACCharacter::SetRagDollEnabled(bool bEnabled)
+void ACCharacter::SetRagDollEnabled(bool bEnabled) const 
 {
 	if (bEnabled)
 	{
@@ -351,9 +346,10 @@ void ACCharacter::Respawn()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	/* GetCharacterMovement()->SetMovementMode(MOVE_Walking); */
 	
-	//用于让DeathMontage执行BlendOut
-	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 	SetStatusGaugeEnabled(true);
+	
+	//处理在某些DeathMontage没有结束的情况下ReSpawn，用于让DeathMontage执行BlendOut
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.f);
 
 	//重新复活在最开始生成的位置
 	if (HasAuthority() && GetController())
@@ -376,10 +372,12 @@ void ACCharacter::Respawn()
 
 void ACCharacter::OnDead()
 {
+	//override in CharacterClass
 }
 
 void ACCharacter::OnRespawn()
 {
+	//override in CharacterClass
 }
 
 void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
@@ -401,7 +399,7 @@ void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled) const
 {
 	if (!PerceptionStimuliSourceComponent) return ;
 
-	//是否将刺激源组件添加到感知系统，由于将感知Pawn设置为false，这里可以进行自主判断
+	//是否将刺激源组件添加到感知系统，将Default中感知Pawn的默认设置修改false，这里进行手动判断
 	if (bIsEnabled)
 	{
 		PerceptionStimuliSourceComponent->RegisterWithPerceptionSystem();
@@ -414,10 +412,10 @@ void ACCharacter::SetAIPerceptionStimuliSourceEnabled(bool bIsEnabled) const
 
 void ACCharacter::OnStun()
 {
-	//override in character class 
+	//override in subcharacter class 
 }
 
 void ACCharacter::OnRecoveryFromStun()
 {
-	//override in character class 
+	//override in subcharacter class 
 }

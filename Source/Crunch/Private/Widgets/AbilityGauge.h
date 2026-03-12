@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//
 
 #pragma once
+
 #include "CoreMinimal.h"
 #include "GameplayAbilitySpecHandle.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
@@ -53,10 +54,10 @@ public:
 	//构建时调用函数，将Counter隐藏，同时绑定对Cost/Cooldown回调，处理的是整体逻辑
 	virtual void NativeConstruct() override;
 	
-	//当ListView第一次生成EntryWidget时，数据类的这个类被调用，依据数据对Widget进行处理
+	//当ListView第一次生成EntryWidget时这个类被调用，调用数据池数据对Widget进行处理
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
-	//将Data中存储的Icon加载并赋予IconMaterialParaName
+	//将Data中存储的Icon加载并赋予IconMaterialParaName，在Widget被创建后调用
 	void ConfigureWithWidgetData(const FAbilityWidgetData* WidgetData);
 	
 private:
@@ -86,7 +87,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Tool Tip")
 	TSubclassOf<class UAbilityToolTip> AbilityToolTipClass;
 
-	//要覆盖的Image
 	UPROPERTY(meta=(BindWidget))
 	UImage* Icon;
 
@@ -155,6 +155,6 @@ private:
 	//调用UpdateCanCast判断Mana值是否足以释放技能
 	void ManaUpdated(const FOnAttributeChangeData& Data);
 
+	//为AbilityGauge创建一个ToolTip，利用AbilityCDO的属性进行文本配置
 	void CreateToolTipWidget(const FAbilityWidgetData* AbilityWidgetData);
 };
-

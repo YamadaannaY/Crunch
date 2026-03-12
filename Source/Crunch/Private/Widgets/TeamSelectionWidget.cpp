@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "TeamSelectionWidget.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
@@ -24,5 +21,6 @@ void UTeamSelectionWidget::NativeConstruct()
 
 void UTeamSelectionWidget::SelectButtonClicked()
 {
+	UE_LOG(LogTemp,Warning,TEXT("Slot id = %d"),int{SlotID});
 	OnSlotClicked.Broadcast(SlotID);
 }

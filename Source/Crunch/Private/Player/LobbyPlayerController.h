@@ -1,4 +1,4 @@
-//在LobbyMap中配置了LobbyPlayerController，每一个角色都拥有一个LobbyMap，通过LobbyGameModeLobbyWidget
+//在LobbyMap中配置了LobbyPlayerController用于处理Lobby的UI交互
 
 #pragma once
 
@@ -21,7 +21,7 @@ public:
 
 	ALobbyPlayerController();
 	
-	//在Widget引起的逻辑中被调用，所以在客户端中，因此需要一个RPC，将被点击Slot的ID发送给GameState
+	//客户端UI将被点击Slot的ID发送给GameState
 	UFUNCTION(Server ,Reliable , WithValidation)
 	void Server_RequestSlotSelectionChange(uint8 NewSlotID);
 

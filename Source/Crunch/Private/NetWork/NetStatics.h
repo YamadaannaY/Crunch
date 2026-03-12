@@ -1,3 +1,5 @@
+//NetWork中要用到的数据，用函数封装
+
 #pragma once
 
 #include "CoreMinimal.h"

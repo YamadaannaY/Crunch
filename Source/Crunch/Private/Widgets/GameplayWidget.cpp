@@ -79,7 +79,6 @@ void UGameplayWidget::ToggleGameplayMenu()
 
 void UGameplayWidget::ShowGameplayMenu()
 {
-	//Menu
 	MainSwitcher->SetActiveWidget(GameplayMenuRootPanel);
 	SetOwningPawnInputEnabled(false);
 	SetShowMouseCursor(true);

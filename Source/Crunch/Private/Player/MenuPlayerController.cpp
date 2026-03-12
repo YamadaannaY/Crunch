@@ -5,14 +5,9 @@ void AMenuPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//纯UI交互
 	SetInputMode(FInputModeUIOnly());
 	SetShowMouseCursor(true);
-
-	//服务端?
-	if (HasAuthority() && IsLocalPlayerController())
-	{
-		SpawnWidget();
-	}
 }
 
 void AMenuPlayerController::OnRep_PlayerState()

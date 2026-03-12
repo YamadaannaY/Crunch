@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//游戏核心角色类，Hero和Minion都是继承于此，实现共同的基础逻辑
 
 #pragma once
 
@@ -22,25 +22,23 @@ class ACCharacter : public ACharacter, public IAbilitySystemInterface, public IG
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ACCharacter();
 
-	//服务端的Init,处理了对ASC的初始化，并且应用初始化基础属性的函数（仅在客户端初始化）
+	//处理了对ASC组件的初始化，并且应用初始化基础属性的函数（仅在客户端初始化）
 	void ServerSideInit();
 
-	//客户端的Init，只处理对ASC的初始化，对属性的初始化交给权威端
+	//只处理对ASC组件的初始化，对属性的初始化交给权威端
 	void ClientSideInit();
 
-	//这个函数用在客户端上，判断由客户端控制的玩家角色，因为在客户端上只有一个Controller，即玩家拥有的Controller，从而判断真正的玩家是哪一个
+	//这个函数用在客户端上，判断由客户端控制的玩家角色，因为在客户端上有很多模拟代理，但是只有一个本地Controller，即玩家拥有的Controller
 	bool IsLocallyControlledByPlayer();
 
-	//处理AIC的ServerInit,PlayerController在Controller类中调用
+	//被Controller控制时在服务端调用，此时进行ServerSideInit
 	virtual void PossessedBy(AController* NewController) override;
 
-	//用于复制所有需要给客户端的值
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦，Character本身就可以获取位于ASC组件上的Abilities而不是通过Cast对ASC进行转换到CASC，这会导致CASC与Abilities强绑定
+	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦
 	const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
 	//获取Capture Vector/Rotator
@@ -55,55 +53,63 @@ private:
 	FRotator HeadShotCaptureLocalRotation;
 
 protected:
-	//BeginPlay会被当前Actor所在所有客户端的镜像所调用，是显示OverHeadUI的完美时机
+	//所有Character在客户端调用此函数是显示OverHeadUI的完美时机
 	virtual void BeginPlay() override;
 
 public:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	/****************************************************/
 	/*						GA
 	/****************************************************/
-public:
+	
+	//获取ASC
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	//将GameplayEvent发送的行为也传递给服务端，在服务端执行权威逻辑，触发WaitEvent回调
+	
+	//用于客户端本地输入触发Event的情况：将GameplayEvent发送这一行为也传递给服务端，在服务端执行逻辑，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventToSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
 	
+	//是否处于聚焦模式，此时禁止移动
 	FORCEINLINE bool GetIsInFocusMode() const {return  bIsInFocusMode ; }
 	
 protected:
-	//在服务端实现对GA和属性集数值的修改
+	//升级ID对应的GA
 	void UpgradeAbilityWithInputID(ECAbilityInputID InputID);
 	
 private:
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
 	void BindGASChangeDelegates();
-
-	//当Tag（附加或者删除时）实现的函数
+	
+	//当Tag变化时调用
 	void DeadTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void StunTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void AimTagUpdated(const FGameplayTag Tag, int32 NewCount);
 	void FocusTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	
+	//通过GetGameplayAttributeValueChangeDelegate绑定的回调函数
+	//当属性修改时调用
+	void AccelerationUpdated(const FOnAttributeChangeData& Data);
+	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
+	
+	//是否处于瞄准状态
 	void SetIsAiming(bool bIsAiming);
+	
+	//不同角色子类（拥有瞄准能力）进行不同的逻辑配置
+	virtual void OnAimStatChanged(bool bIsAiming);
 
 	bool bIsInFocusMode = false ;
 	
-	//修改HeroSpeed
-	void MoveSpeedUpdated(const FOnAttributeChangeData& Data);
-	
-	void AccelerationUpdated(const FOnAttributeChangeData& Data);
-	
-	//分不同的角色进行不同的具体逻辑设置
-	virtual void OnAimStatChanged(bool bIsAiming);
-
 	UPROPERTY(VisibleDefaultsOnly, Category="Gameplay Ability")
 	class UCAbilitySystemComponent* CAbilitySystemComponent;
+	
 	UPROPERTY()
 	class UCAttributeSet* CAttributeSet;
 
 	/***********UI************/
 
+	FTimerHandle HeadStatGaugeVisibilityUpdateTimerHandle;
+	
 	//Gauge可视组件
 	UPROPERTY(VisibleAnywhere, Category="UI")
 	class UWidgetComponent* OverHeadWidgetComponent;
@@ -115,14 +121,12 @@ private:
 	//要判断距离的平方（以节省开方计算性能为目的）
 	UPROPERTY(EditDefaultsOnly, Category="UI")
 	float HeadStatGaugeVisibilityRangeSquared = 10000000.f;
-
-	FTimerHandle HeadStatGaugeVisibilityUpdateTimerHandle;
-
+	
 	//配置Gauge可视组件，将Component转为配置好的GaugeWidget类，并为其绑定委托
 	void ConfigureOverHeadStatusWidget();
 
 	//客户端调用，Timer绑定的回调，对客户端中的每一个此角色实例调用，根据与本地客户端角色实例的距离判断是否要显示自己的OverheadUI是否显示
-	void UpdateHeadGaugeVisibility();
+	void UpdateHeadGaugeVisibility() const ;
 
 	//Death状态下在客户端调用，判断是否显示OverHeadWidget
 	void SetStatusGaugeEnabled(bool bEnabled);
@@ -133,7 +137,7 @@ public:
 	bool IsDead() const;
 
 	//直接移除DeadTag
-	void ReSpawnImmediative();
+	void ReSpawnImmediative() const ;
 
 private:
 	//Mesh相对Capsule的变换，用于换Mesh，RagDoll复位等情景下保持新的Mesh变换与最开始相同
@@ -151,9 +155,9 @@ private:
 	void DeathMontageFinished();
 
 	//RagDoll实现
-	void SetRagDollEnabled(bool bEnabled);
+	void SetRagDollEnabled(bool bEnabled) const ;
 
-	//播放DeathMontage，记录这个Montage的持续时间，设置一个定时器，间隔为持续时间加上DeathMontageFinishTimeShift，调用 DeathMontageFinished
+	//播放DeathMontage并设置一个定时器调用DeathMontageFinished
 	void PlayDeathAnimation();
 
 	//当DeadTag生效时的触发函数

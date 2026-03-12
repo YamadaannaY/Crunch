@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ValueGauge.h"
 
 #include "AbilitySystemComponent.h"
@@ -49,14 +46,13 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 	CacheValue=NewValue;
 	CacheMaxValue=NewMaxValue;
 
-	//NewMaxValue作为分母不能为0 (并非不能？？？)
+	//NewMaxValue作为分母不能为0
 	if (NewMaxValue==0)
 	{
 		UE_LOG(LogTemp,Warning,TEXT("ValueGauge:%s,NewMaxValue can`t be 0"),*GetName());
 		return;
 	}
 
-	//改变Bar的Percent
 	const float NewPercent=NewValue/NewMaxValue;
 	ProgressBar->SetPercent(NewPercent);
 
@@ -72,12 +68,10 @@ void UValueGauge::SetValue(float NewValue, float NewMaxValue)
 
 void UValueGauge::ValueChanged(const FOnAttributeChangeData& ChangeData)
 {
-	//当Value改变时
 	SetValue(ChangeData.NewValue,CacheMaxValue);
 }
 
 void UValueGauge::MaxValueChanged(const FOnAttributeChangeData& ChangeData)
 {
-	//当MaxValue改变时
 	SetValue(CacheValue,ChangeData.NewValue);
 }

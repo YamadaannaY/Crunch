@@ -1,3 +1,4 @@
+//Controller类决定了UI交互逻辑和生成Widget
 
 #pragma once
 
@@ -23,5 +24,6 @@ private:
 	UPROPERTY()
 	UUserWidget* MenuWidget;
 
+	//生成MenuWidget并加入Viewport
 	void SpawnWidget();
 };

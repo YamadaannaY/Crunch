@@ -6,19 +6,21 @@ void ACGameState::RequestPlayerSelectionChange(const APlayerState* RequestingPla
 	//服务端进行Slot的修改操作
 	if (!HasAuthority() || IsSlotOccupied(DesiredSlot)) return ;
 
-	FPlayerSelection* PlayerSelectionPtr = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
-		{return PlayerSelection.IsForPlayer(RequestingPlayer);});
-
-	//如果当前执行点击操作的Player已经做过点击操作被存储在Array中，则修改其SlotID
+	//将规则应用到Array中，有则返回，否则nullptr
+	FPlayerSelection* PlayerSelectionPtr = PlayerSelectionArray.FindByPredicate
+	([&](const FPlayerSelection& PlayerSelection){return PlayerSelection.IsForPlayer(RequestingPlayer);});
+	
+	//如果存在，则修改其Slot
 	if (PlayerSelectionPtr)
 	{
 		PlayerSelectionPtr ->SetSlot(DesiredSlot);
 	}
-	//当前Player没有执行过点击操作，则新建一个Selection，存储当前PlayerState和对应的SlotID
+	//此Player并未创建过PlayerSelection,此时新建一个Selection
 	else
 	{
 		PlayerSelectionArray.Add(FPlayerSelection(DesiredSlot , RequestingPlayer));
 	}
+	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 }
 
 bool ACGameState::IsSlotOccupied(uint8 SlotId) const
@@ -36,8 +38,7 @@ bool ACGameState::IsSlotOccupied(uint8 SlotId) const
 bool ACGameState::IsDefinitionSelected(const UPA_CharacterDefination* Definition) const
 {
 	const FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate
-	([&](const FPlayerSelection& PlayerSelection)
-		{return PlayerSelection.GetCharacterDefinition() == Definition;});
+	([&](const FPlayerSelection& PlayerSelection){return PlayerSelection.GetCharacterDefinition() == Definition;});
 
 	return FoundPlayerSelection != nullptr;
 }
@@ -64,6 +65,7 @@ void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
 {
 	if (IsDefinitionSelected(SelectedDefinition)) return ;
 
+	//找到当前玩家对应的Selection并传入
 	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
 	{
 		return PlayerSelection.IsForPlayer(SelectingPlayer);
@@ -71,9 +73,8 @@ void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
 
 	if (FoundPlayerSelection)
 	{
+		//Widget中响应此回调，根据Def更新HeroSlot
 		FoundPlayerSelection->SetCharacterDefinition(SelectedDefinition);
-		
-		//Widget中响应此回调，更新客户端上的Array
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 }
@@ -102,7 +103,7 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* Definiti
 	{
 		FoundPlayerSelection->SetCharacterDefinition(nullptr);
 		
-		//更新客户端的PlayerSelectionArray
+		//Widget中响应此回调，更新HeroSlot
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 
@@ -110,5 +111,6 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* Definiti
 
 void ACGameState::OnRep_PlayerSelectionArray() const
 {
+	////Widget中响应此回调
 	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 }

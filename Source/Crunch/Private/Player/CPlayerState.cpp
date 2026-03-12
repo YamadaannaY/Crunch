@@ -17,8 +17,8 @@ void ACPlayerState::BeginPlay()
 	Super::BeginPlay();
 
 	CGameState = Cast<ACGameState>(UGameplayStatics::GetGameState(this));
-	//变化来自服务端，意味着服务端的数据已经处理好了
-	if (CGameState && !HasAuthority())
+	//变化来自服务端，意味着服务端的数据已经处理好了,此时更新PlayerSelection到PlayerState中存储
+	if (CGameState)
 	{
 		CGameState->OnPlayerSelectionUpdated.AddUObject(this,&ThisClass::PlayerSelectionUpdated);
 	}
@@ -68,7 +68,7 @@ void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const U
 		CGameState->SetCharacterDeselected(PlayerSelection.GetCharacterDefinition());
 	}
 	
-	//服务端赋值
+	//为CharacterDef赋值到Selection上，特别用于Level切换的时候继承
 	PlayerSelection.SetCharacterDefinition(NewDefinition);
 	//客户端同步赋值
 	CGameState->SetCharacterSelected(this,NewDefinition);
@@ -78,6 +78,7 @@ bool ACPlayerState::Server_SetSelectedCharacterDefinition_Validate(const UPA_Cha
 {
 	return true;
 }
+
 
 void ACPlayerState::PlayerSelectionUpdated(const TArray<FPlayerSelection>& NewPlayerSelections)
 {

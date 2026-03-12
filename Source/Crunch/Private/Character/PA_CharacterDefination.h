@@ -14,25 +14,29 @@ UCLASS()
 class UPA_CharacterDefination : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
-	
 public:
-
+	//获取唯一的AssetID
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 
+	//获取当前AssetType，用于加载
 	static FPrimaryAssetType GetCharacterDefinitionAssetType();
 	
-	FString GetCharacterDisplayName() const { return CharacterName; }
+	//获取展示Character的PlayerName
+	FORCEINLINE FString GetCharacterDisplayName() const { return CharacterName; }
 
-	//查询/加载软指针
+	//加载CharacterClass软指针
 	TSubclassOf<ACCharacter> LoadCharacterClass() const ;
 
-	//查询加载软指针
+	//加载AnimInstance软指针
 	TSubclassOf<UAnimInstance> LoadDisplayAnimationBP() const ;
 
+	//加载Texture2D软指针
 	UTexture2D* LoadIcon() const ;
 
+	//从加载好的Class中获取CDO并加载其Mesh
 	USkeletalMesh* LoadDisplayMesh() const ;
 
+	//从加载好的Class中获取CDO并直接加载Abilities
 	const TMap<ECAbilityInputID , TSubclassOf<UGameplayAbility>>* GetAbilities() const ;
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Character")

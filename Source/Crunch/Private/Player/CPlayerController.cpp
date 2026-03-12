@@ -1,4 +1,3 @@
-
 #include "Player/CPlayerController.h"
 #include "CPlayerCharacter.h"
 #include "EnhancedInputComponent.h"
@@ -137,7 +136,7 @@ void ACPlayerController::ShowWinLoseState()
 {
 	if (GameplayWidget)
 	{
-		//直接显示Menu
+		//在游戏输赢时直接显示Menu
 		GameplayWidget->ShowGameplayMenu();
 	}
 }

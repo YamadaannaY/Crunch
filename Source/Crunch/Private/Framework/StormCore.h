@@ -1,3 +1,5 @@
+//GameMode核心类之一，作为判定游戏胜利的关键被创建
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,7 +26,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//获取Core相对于两个Gaol之间距离的位置，折算为Progress
+	//获取Core相对于两个Gaol之间距离的位置，折算为Progress的比例
 	float GetProgress() const ;
 protected:
 	virtual void BeginPlay() override;
@@ -57,27 +59,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
 	UAnimMontage* CaptureMontage;
-
-	//BeginOverlapCallBack
-	UFUNCTION()
-	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-	
-	//EndOverlapCallBack
-	UFUNCTION()
-	void InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	//更新Weight值
-	void UpdateTeamWeight();
-	
-	//更新Goal的移动方向和速度
-	void UpdateGoal();
-	
-	//到达最终目标位置后，StormCore扩张对TeamCore进行捕捉
-	void CaptureCore();
-	
-	//捕捉完成后收缩
-	void ExpandFinished();
-	
 	UPROPERTY(EditAnywhere,Category="Team")
 	AActor* TeamOneGoal;
 
@@ -93,20 +74,42 @@ private:
 	UPROPERTY(ReplicatedUsing=OnRep_CoreToCapture)
 	AActor* CoreToCapture;
 
+	UPROPERTY()
+	class AAIController* OwnerAIC;
+
 	float CoreCaptureSpeed;
 	
 	float TravelLength=0.f;
 	
+	int TeamOneInfluencerCount=0;
+	int TeamTwoInfluencerCount=0;
+	
+	float TeamWeight =0.f ;
+
+	//BeginOverlap回调
+	UFUNCTION()
+	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	
+	//EndOverlap回调
+	UFUNCTION()
+	void InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	
+	//客户端调用CaptureTeamCore
 	UFUNCTION()
 	void OnRep_CoreToCapture();
 
-	void GoalReached(int WiningTeam);
+	//更新Weight值
+	void UpdateTeamWeight();
 	
-	int TeamOneInfluencerCount=0;
-	int TeamTwoInfluencerCount=0;
+	//更新Core的移动方向和速度
+	void UpdateCore() const ;
+	
+	//到达最终目标位置后执行的逻辑
+	void CaptureTeamCore();
+	
+	//捕捉完成后收缩
+	void ExpandFinished() const ;
 
-	float TeamWeight =0.f ;
-
-	UPROPERTY()
-	class AAIController* OwnerAIC;
+	//根据Team参数广播GoalReached委托为每一个玩家调用MatchFinish和调用CaptureCore
+	void GoalReached(int WiningTeam);
 };

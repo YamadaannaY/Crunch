@@ -183,10 +183,10 @@ void AStormCore::UpdateTeamWeight()
 	}
 	UE_LOG(LogTemp,Warning,TEXT("TeamOne Count:%d, TeamTwo Count:%d, Weight:%f"),TeamOneInfluencerCount,TeamTwoInfluencerCount,TeamWeight);
 
-	UpdateGoal();
+	UpdateCore();
 }
 
-void AStormCore::UpdateGoal()
+void AStormCore::UpdateCore() const 
 {
 	if (!HasAuthority()) return ;
 	if (!OwnerAIC) return ;
@@ -205,11 +205,10 @@ void AStormCore::UpdateGoal()
 	GetCharacterMovement()->MaxWalkSpeed=Speed;
 }
 
-void AStormCore::CaptureCore()
+void AStormCore::CaptureTeamCore()
 {
-	float ExpandDuration=GetMesh()->GetAnimInstance()->Montage_Play(ExpandMontage);
+	const float ExpandDuration=GetMesh()->GetAnimInstance()->Montage_Play(ExpandMontage);
 
-	//让Montage播放完的时候基地Core刚好到核心Core的位置
 	CoreCaptureSpeed=FVector::Distance(GetMesh()->GetComponentLocation(),CoreToCapture->GetActorLocation())/ExpandDuration;
 
 	CoreToCapture->SetActorEnableCollision(false);
@@ -220,7 +219,7 @@ void AStormCore::CaptureCore()
 	GetWorldTimerManager().SetTimer(ExpandTimerHandle,this,&ThisClass::ExpandFinished,ExpandDuration);
 }
 
-void AStormCore::ExpandFinished()
+void AStormCore::ExpandFinished() const 
 {
 	CoreToCapture->SetActorLocation(GetMesh()->GetComponentLocation());
 	CoreToCapture->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepWorldTransform,"root");
@@ -233,7 +232,7 @@ void AStormCore::OnRep_CoreToCapture()
 	//客户端Capture
 	if (CoreToCapture)
 	{
-		CaptureCore();
+		CaptureTeamCore();
 	}
 }
 
@@ -241,12 +240,12 @@ void AStormCore::GoalReached(int WiningTeam)
 {
 	OnGoalReachedDelegate.Broadcast(this,WiningTeam);
 
-	//服务端获取Core,Rep到客户端
+	//服务端确定CaptureCore
 	if (!HasAuthority()) return ;
 
 	MaxMoveSpeed=0.f;
 	CoreToCapture=WiningTeam==0 ? TeamTwoCore : TeamOneCore;
 
 	//服务端Capture
-	CaptureCore();
+	CaptureTeamCore();
 }

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//兵营，主要功能 1：具有一个阵营ID，将其赋予其SpawnSpot生成的所有Minion 2：维护一个Pool，从中取出Minion
 
 #pragma once
 
@@ -6,8 +6,6 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/Actor.h"
 #include "MinionBarrack.generated.h"
-
-
 
 UCLASS()
 class AMinionBarrack : public AActor
@@ -30,12 +28,11 @@ private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	AActor* Goal;
 	
-	//池化机制：由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
-	//的所有AI类，只在开始时生成一批，后续的销毁和生成都是基于这些存储好的AI实例来操作，显著减小了CPU负担。
+	//Pool机制：由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
+	//的所有AI类，只在开始时生成一批，后续的Dead和Spawn都是基于这些存储好的Minion实例来操作，减小CPU负担。
 	UPROPERTY()
 	TArray<class AMinion*> MinionPool;
 
-	//传入具体的Minion类
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	TSubclassOf<AMinion> MinionClass;
 
@@ -47,6 +44,8 @@ private:
 
 	int NextSpawnSpotIndex=-1;
 
+	FTimerHandle SpawnIntervalTimerHandle;
+	
 	//记录在Barrack中的PlayerStart，根据Index获得位置
 	const APlayerStart* GetNextSpawnSpot();
 
@@ -58,7 +57,4 @@ private:
 
 	//生成Amt个Minion对象
 	void SpawnNewMinion(int Amt);
-
-	//多少秒SpawnNewGroup
-	FTimerHandle SpawnIntervalTimerHandle;
 };

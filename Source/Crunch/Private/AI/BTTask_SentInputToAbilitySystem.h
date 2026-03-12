@@ -1,6 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//行为树中节点，通过InputID触发GA
 
 #pragma once
+
 #include "GAS/CGameplayAbilitiesType.h"
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
@@ -8,7 +9,7 @@
 
 
 /**
- *  BTTask 实现BT通过InputID为AI触发GA
+ *
  */
 UCLASS()
 class UBTTask_SentInputToAbilitySystem : public UBTTaskNode

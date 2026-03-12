@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//提供一个通用的Gauge模板，传入两个属性值即可实现Bar的Percent计算，属性值更改监听，文本设置等。
 
 #pragma once
 
@@ -9,15 +9,16 @@
 #include "ValueGauge.generated.h"
 
 class UAbilitySystemComponent;
+
 /**
- * ValueGauge  属性条UI
+ * 
  */
 UCLASS()
 class UValueGauge : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	//相当于Widget的构造函数，初始化Widget
+	//在UI生成之前就设置好一些变量参数
 	virtual void NativePreConstruct() override;
 	
 	//在指定ASC中找到两个Value，绑定属性值变化委托回调函数，根据值变化更新Percent

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//LobbyGameMode不处理逻辑，纯粹的UI交互，只执行无缝切换关卡
 
 #pragma once
 

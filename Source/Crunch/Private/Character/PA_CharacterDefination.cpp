@@ -13,38 +13,17 @@ FPrimaryAssetType UPA_CharacterDefination::GetCharacterDefinitionAssetType()
 
 UTexture2D* UPA_CharacterDefination::LoadIcon() const
 {
-	UTexture2D* Icon=CharacterIcon.LoadSynchronous();
-	if (!Icon) return nullptr;
-	
-	if (CharacterIcon.IsValid())
-	{
-		return CharacterIcon.Get();
-	}
-
-	return nullptr;
+	return CharacterIcon.LoadSynchronous();
 }
 
 TSubclassOf<ACCharacter> UPA_CharacterDefination::LoadCharacterClass() const
 {
-	TSubclassOf<ACharacter> Character = CharacterClass.LoadSynchronous();
-	if (!Character) return nullptr;
-	
-	if (CharacterClass.IsValid()) return CharacterClass.Get();
-
-	return TSubclassOf<ACCharacter>();
+	return CharacterClass.LoadSynchronous();
 }
 
 TSubclassOf<UAnimInstance> UPA_CharacterDefination::LoadDisplayAnimationBP() const
 {
-	TSubclassOf<UAnimInstance> DisplayAnim = DisplayAnimBP.LoadSynchronous();
-	if (!DisplayAnim) return nullptr;
-	
-	if (DisplayAnimBP.IsValid())
-	{
-		return DisplayAnimBP.Get();
-	}
-
-	return TSubclassOf<UAnimInstance>();
+	return DisplayAnimBP.LoadSynchronous();
 }
 
 USkeletalMesh* UPA_CharacterDefination::LoadDisplayMesh() const
@@ -60,11 +39,11 @@ USkeletalMesh* UPA_CharacterDefination::LoadDisplayMesh() const
 
 const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>* UPA_CharacterDefination::GetAbilities() const
 {
-	TSubclassOf<ACCharacter> LoadedCharaterClass = LoadCharacterClass();
-	if (!LoadedCharaterClass)
+	TSubclassOf<ACCharacter> LoadedCharacterClass = LoadCharacterClass();
+	if (!LoadedCharacterClass)
 		return nullptr;
 
-	ACCharacter* Character = Cast<ACCharacter>(LoadedCharaterClass.GetDefaultObject());
+	ACCharacter* Character = Cast<ACCharacter>(LoadedCharacterClass.GetDefaultObject());
 	if (!Character)
 		return nullptr;
 

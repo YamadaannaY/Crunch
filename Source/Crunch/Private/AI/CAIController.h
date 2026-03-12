@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//为Minion配置的AIController，主要对Sense、黑板等进行逻辑配置
 
 #pragma once
 
@@ -10,7 +10,7 @@ struct FGameplayTag;
 struct FAIStimulus;
 
 /**
- * AI
+ * 
  */
 
 UCLASS()
@@ -21,13 +21,12 @@ class CRUNCH_API ACAIController : public AAIController
 public:
 	ACAIController();
 	
-	//只在服务端执行
+	//在Pawn的PossessedBy函数调用之后调用，处理AI行为和控制逻辑，且同步PawnID
 	virtual void OnPossess(APawn* InPawn) override;
 	
 	virtual void BeginPlay() override;
 
 private:
-	//通过KeyName为对应Key赋值
 	UPROPERTY(EditDefaultsOnly,Category="AI Behavior")
 	FName TargetBlackboardKeyName="Target" ;
 	
@@ -40,11 +39,13 @@ private:
 	UPROPERTY(VisibleDefaultsOnly,Category="Perception")
 	class UAISenseConfig_Sight* SightConfig;
 
-	//PerceptionUpdate的回调，对感知对象进行逻辑处理
+	bool bIsPawnDead;
+	
+	//PerceptionUpdate的回调，对新感知对象进行逻辑处理
 	UFUNCTION()
 	void TargetPerceptionUpdated(AActor* TargetActor,FAIStimulus Stimulus);
 
-	//OnTargetPerceptionForgotten的回调，MaxAge结束时才改变当前目标，符合现实逻辑
+	//OnTargetPerceptionForgotten的回调，MaxAge结束时才改变当前目标，即不立刻忘记，更加符合逻辑
 	UFUNCTION()
 	void TargetGetForgotten(AActor* ForgottenActor);
 
@@ -58,17 +59,16 @@ private:
 	AActor* GetNextPerceivedActor() const;
 
 	//虽然Character类中在Dead状态设置取消AI感知注册，但是MaxAge仍然作用，需要立刻忘记Actor
-	void ForgetActorIfDead(AActor* ActorToForget);
+	void ForgetActorIfDead(AActor* ActorToForget) const ;
 
 	//DeadTag添加时调用，清除所有感知
 	void ClearAndDisabledAllSenses();
 	//DeadTag被移除时调用，重新开启所有感知
-	void EnableAllSenses();
+	void EnableAllSenses() const ;
 
 	//监听AI的DeadTag
 	void PawnDeadTagUpdated(const FGameplayTag Tag,int32 Count);
-	void PawnStunTagUpdated(const FGameplayTag Tag,int32 Count);
-
-	//DeadTag回调函数中改变的bool
-	bool bIsPawnDead;
+	
+	//监听AI的StunTag
+	void PawnStunTagUpdated(const FGameplayTag Tag,int32 Count) const ;
 };

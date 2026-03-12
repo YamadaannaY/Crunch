@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//在Montage中配置此Notify可以将一个带有Tag的GameplayEvent发送给Actor，让监听此Tag的Event触发回调
 
 #pragma once
 
@@ -10,6 +10,7 @@
 /**
  * 
  */
+
 UCLASS()
 class UAN_SendGameplayEvent : public UAnimNotify
 {

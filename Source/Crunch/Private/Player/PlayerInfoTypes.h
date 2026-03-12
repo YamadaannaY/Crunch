@@ -1,3 +1,5 @@
+//这是一个Type类，实现了用于Player存储Info的结构体数据
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,20 +12,26 @@ USTRUCT()
 struct FPlayerSelection
 {
 	GENERATED_BODY()
-public:
+	
 	FPlayerSelection();
 	FPlayerSelection(uint8 InSlot , const APlayerState* InPlayerState);
-	
-	FORCEINLINE void SetSlot(uint8 InSlot) {Slot = InSlot;}
+
+	//Set
+	FORCEINLINE void SetSlot(uint8 InSlot) {UE_LOG(LogTemp,Warning,TEXT("slot:%d"),InSlot); Slot = InSlot;}
+	FORCEINLINE void SetCharacterDefinition(const UPA_CharacterDefination* InCharacterDefinition) {  CharacterDefinition = InCharacterDefinition;}
+	//Get
 	FORCEINLINE uint8 GetPlayerSlot() const { return Slot;}
 	FORCEINLINE FUniqueNetIdRepl GetPlayerUniqueId() const {return PlayerUniqueId;}
 	FORCEINLINE FString GetPlayerNickName() const {return PlayerNickName;}
 	FORCEINLINE const UPA_CharacterDefination* GetCharacterDefinition() const {return CharacterDefinition;}
-	FORCEINLINE void SetCharacterDefinition(const UPA_CharacterDefination* InCharacterDefinition) {  CharacterDefinition = InCharacterDefinition;}
 	
+	//PlayerSelection中存储了PlayerNickName,将参数State的PlayerName与其对应进行判断
 	bool IsForPlayer(const APlayerState* PlayerState) const ;
+	
+	//主要判断Slot是否处于合法边界内
 	bool IsValid() const ; 
 	
+	//int8->255
 	static uint8 GetInvalidSlot();
 	
 private:

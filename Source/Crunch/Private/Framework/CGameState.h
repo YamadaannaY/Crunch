@@ -1,3 +1,9 @@
+//保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
+//还有一个关键的PlayerArray存储了所有的APlayerState
+//存在于客户端和服务端，自动复制，客户端也能调用以制作UI等
+
+//在这里，GameState主要存储了一个PlayerSelectionArray以及配置对应的交互逻辑，主要是因为所有客户端都需要用来更新UI，而GameState即全局存储类
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -38,7 +44,7 @@ public:
 	//当所有Player都已经选择了Slot创建SelectionArray则true否则false
 	bool CanStartHeroSelection() const ;
 
-	//在当前Definition未被其他Player选中的情况下为调用Player赋值
+	//将Def传入PlayerState中，根据此Def更新对应Slot的UI
 	void SetCharacterSelected(const APlayerState* SelectingPlayer , const UPA_CharacterDefination* SelectedDefinition);
 	
 	//是否所有玩家选择Hero可以开始比赛

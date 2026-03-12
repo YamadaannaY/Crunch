@@ -1,8 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "CAIController.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "BrainComponent.h"
@@ -12,7 +8,6 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
-// Sets default values
 ACAIController::ACAIController()
 {
 	AIPerceptionComponent=CreateDefaultSubobject<UAIPerceptionComponent>("AI Perception Component");
@@ -21,8 +16,10 @@ ACAIController::ACAIController()
 	SightConfig->DetectionByAffiliation.bDetectEnemies=true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies=false;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals=false;
+	
 	SightConfig->SightRadius=1000.f;
 	SightConfig->LoseSightRadius=1200.f;
+	//超过LoseSight开始计时
 	SightConfig->SetMaxAge(5.f);
 	SightConfig->PeripheralVisionAngleDegrees=180.f;
 
@@ -40,7 +37,7 @@ void ACAIController::OnPossess(APawn* InPawn)
 	{
 		SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
 
-		//refresh Senses
+		//刷新Senses
 		ClearAndDisabledAllSenses();
 		EnableAllSenses();
 	}
@@ -113,13 +110,14 @@ void ACAIController::SetCurrenTarget(AActor* NewTarget)
 	}
 	else
 	{
+		//null
 		BlackboardComponent->ClearValue(TargetBlackboardKeyName);
 	}
 }
 
 AActor* ACAIController::GetNextPerceivedActor() const
 {
-	//存储所有感知到的敌对Actor并返回第一个，如果没有返回null，此时Target为None
+	//存储所有当前感知到的敌对Actor(包括MaxAge期间的)并返回第一个，如果没有返回null，此时Target为None
 	if (PerceptionComponent)
 	{
 		TArray<AActor*> Actors;
@@ -133,7 +131,7 @@ AActor* ACAIController::GetNextPerceivedActor() const
 	return nullptr;
 }
 
-void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
+void ACAIController::ForgetActorIfDead(AActor* ActorToForget) const 
 {
 	//获得ASC，通过ASC判断是否含有DeadTag
 	const UAbilitySystemComponent* ActorASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(ActorToForget);
@@ -141,18 +139,17 @@ void ACAIController::ForgetActorIfDead(AActor* ActorToForget)
 
 	if (ActorASC->HasMatchingGameplayTag(UCAbilitySystemStatics::GetDeadStatTag()))
 	{
-		//这个Container保存了所有AI感知过的Actor和他们最新的Stimuli（sight、hear、etc）
+		//这个Container保存了所有AI当前感知的Actor和他们最新的Stimuli（sight、hear）
 		for (UAIPerceptionComponent::TActorPerceptionContainer::TIterator Iter=AIPerceptionComponent->GetPerceptualDataIterator();Iter;++Iter)
 		{
-			//找到当前需要遗忘的对象
 			if (Iter->Key!=ActorToForget)
 			{
 				continue;
 			}
+			
 			//遍历其所有Stimuli,设置其Age直接为最大
 			for (FAIStimulus& Stimulus : Iter->Value.LastSensedStimuli)
 			{
-				//把这个刺激的“Age”设为无限大，让AI认为它已经过期到不能再过期。
 				Stimulus.SetStimulusAge(TNumericLimits<float>::Max());
 			}
 		}
@@ -175,7 +172,7 @@ void ACAIController::ClearAndDisabledAllSenses()
 	}
 }
 
-void ACAIController::EnableAllSenses()
+void ACAIController::EnableAllSenses() const
 {
 	for (auto SenseConfigIt=AIPerceptionComponent->GetSensesConfigIterator();SenseConfigIt;++SenseConfigIt)
 	{
@@ -185,7 +182,6 @@ void ACAIController::EnableAllSenses()
 
 void ACAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
 {
-	//根据Tag调用两个Sense操控函数
 	if (Count!=0)
 	{
 		GetBrainComponent()->StopLogic("Dead");
@@ -200,7 +196,7 @@ void ACAIController::PawnDeadTagUpdated(const FGameplayTag Tag, int32 Count)
 	}
 }
 
-void ACAIController::PawnStunTagUpdated(const FGameplayTag Tag, int32 Count)
+void ACAIController::PawnStunTagUpdated(const FGameplayTag Tag, int32 Count) const 
 {
 	if (bIsPawnDead) return ;
 
