@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -27,10 +25,8 @@ public:
 	//只在碰撞发生的一端被调用，由于设计上Shoot的碰撞建立在Tick修改客户端服务器上Projectile的位置实现，所以两端都会在Overlap时调用此函数
 	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 
-public:
 	virtual void Tick(float DeltaTime) override;
 
-	void TraveMaxDistanceReached();
 private:
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamId;
@@ -53,9 +49,8 @@ private:
 
 	FGameplayEffectSpecHandle HitEffectSpecHandle;
 
-private:
 	void TravelMaxDistanceReached();
 
-	void SendLocalGameplayCue(AActor* CueTargetActor,const FHitResult& HitResult);
+	void SendLocalGameplayCue(AActor* CueTargetActor,const FHitResult& HitResult) const ;
 };
 

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//发射可持续的激光
 
 #pragma once
 

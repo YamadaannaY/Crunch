@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 
 /*
  *	角色组件：处理ShopWidget相关的逻辑，处理Inventory和Shop之间的Item逻辑
@@ -34,6 +31,7 @@ public:
 	//作为Input触发的回调，这个函数发生在客户端，利用RPC服务端尝试激活Item，应用GE或者赋予GA
 	void TryActivateItem(const FInventoryItemHandle& ItemHandle);
 
+	//出售Item
 	void SellItem(const FInventoryItemHandle& ItemHandle);
 	
 	// Sets default values for this component's properties
@@ -45,10 +43,13 @@ public:
 	//获取当前GoldAttribute值
 	float GetGold() const;
 
+	//容量值
 	FORCEINLINE int GetCapacity() const { return Capacity; }
 	
+	//当Item位置改变时修改Slot值，这个Slot用于键盘激活Item
 	void ItemSlotChange(const FInventoryItemHandle Handle,int NewSlotNumber);
 
+	//利用Handle从Map中找到Item
 	UInventoryItem* GetInventoryItemByHandle(const FInventoryItemHandle Handle) const ;
 
 	//判断仓库是否已经存满（包括Slot容量判断在内），即不可以存放当前Item 
@@ -90,13 +91,15 @@ private:
 
 	/******************* Server **********************/
 
-	//购买，出售逻辑应该在服务端执行，修改属性值，自动同步到客户端
+	//购买Item，减少Gold，生成Item
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_Purchase(const UPA_ShopItem* ItemToPurchase);
 
+	//激活GA或消耗Item
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_ActivateItem(FInventoryItemHandle ItemHandle);
-
+	
+	//卖掉所有Item，增加Gold
 	UFUNCTION(Server, Reliable,WithValidation)
 	void Server_SellItem(FInventoryItemHandle ItemHandle);
 
@@ -112,7 +115,6 @@ private:
 	//判断当前生成的Item是否满足合成条件
 	bool TryItemCombination(const UPA_ShopItem* NewItem);
 	
-private:
 	//在客户端也生成一个与服务端相同的InventoryItem
 	UFUNCTION(Client,Reliable)
 	void Client_ItemAdded(FInventoryItemHandle AssignHandle,const UPA_ShopItem* Item,FGameplayAbilitySpecHandle GrantedAbilitySpecHandle);
@@ -124,5 +126,4 @@ private:
 	//在客户端也进行StackCount广播委托修改Widget的StackText值
 	UFUNCTION(Client,Reliable)
 	void Client_ItemStackCountChangeAdded(FInventoryItemHandle Handle,int NewCount);
-		
 };

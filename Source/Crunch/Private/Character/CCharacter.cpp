@@ -18,7 +18,6 @@
 #include "GAS/CHeroAttributeSet.h"
 #include "Widgets/OverHeadStatsGauge.h"
 
-// Sets default values
 ACCharacter::ACCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -192,7 +191,7 @@ void ACCharacter::FocusTagUpdated(const FGameplayTag Tag, int32 NewCount)
 
 void ACCharacter::SetIsAiming(bool bIsAiming)
 {
-	//让角色跟随视角进行旋转而不是跟随输入旋转，调用具体逻辑
+	//让角色跟随视角进行旋转而不是普通状态下跟随输入旋转
 	bUseControllerRotationYaw=bIsAiming;
 	GetCharacterMovement()->bOrientRotationToMovement  =!bIsAiming;
 	

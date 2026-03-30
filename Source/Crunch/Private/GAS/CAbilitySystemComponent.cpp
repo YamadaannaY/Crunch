@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GAS/CAbilitySystemComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "CHeroAttributeSet.h"
@@ -67,7 +65,7 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 		SetNumericAttributeBase(UCHeroAttributeSet::GetAccelerationAttribute(),2048);
 	}
 
-	//一个曲线表Table存储了所有等级的经验数值
+	//曲线表Table存储了所有等级的经验数值
 	const FRealCurve* ExperienceCurve=AbilitySystemGeneric->GetExperienceCurve();
 	if (ExperienceCurve)
 	{
@@ -263,7 +261,8 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetManaEmptyStatTag());
 		}
 	}
-	else RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
+	else
+		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
 }
 
 void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& ChangeData)
@@ -288,8 +287,7 @@ void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& C
 	float PrevLevelExp=0;
 	float NextLevelExp=0;
 	float NewLevel=1;
-
-	//遍历Key的Iter迭代器
+	
 	for (auto Iter=ExperienceCurve->GetKeyHandleIterator();Iter;++Iter)
 	{
 		//当前等级对应的具体经验值

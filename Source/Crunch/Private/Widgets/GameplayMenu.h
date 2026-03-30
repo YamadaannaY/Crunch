@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,6 +18,7 @@ public:
 	//Button->OnClicked的委托获取，外部调用绑定回调
 	FOnButtonClickedEvent& GetResumeButtonClickedEventDelegate();
 
+	//显示胜利/失败信息
 	void SetTitleText(const FString& NewTitle);
 private:
 	UPROPERTY(meta=(BindWidget))

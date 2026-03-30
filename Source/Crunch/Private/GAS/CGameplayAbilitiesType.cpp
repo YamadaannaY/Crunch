@@ -1,9 +1,6 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/CGameplayAbilitiesType.h"
 
-FGenericDamageEffectDef::FGenericDamageEffectDef():DamageEffect{nullptr},PushVelocity{0}
+FGenericDamageEffectDef::FGenericDamageEffectDef():DamageEffect(nullptr),PushVelocity(0)
 {
 }
 

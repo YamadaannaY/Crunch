@@ -1,4 +1,4 @@
-//这是一个Type类，实现了用于Player存储Info的结构体数据
+//Type类，实现了用于Player存储Info的结构体数据
 
 #pragma once
 

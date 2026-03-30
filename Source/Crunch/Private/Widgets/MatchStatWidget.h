@@ -34,9 +34,14 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Match Stat");
 	FName ProgressDynamicMaterialParaName="Progress";
 	
+	//更新Team人数文本
 	void UpdateTeamInfluence(int TeamOneCount ,int TeamTwoCount);
+	
+	//比赛完成时处理定时器，最后设置一次进度条值以更好显示
 	void MatchFinished(AActor* ViewTarget,int WinnerTeam);
 
 	FTimerHandle UpdateProgressTimerHandle;
+	
+	//循环定时器0.5s更新一次进度条
 	void UpdateProgress();
 };

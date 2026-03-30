@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//以Sphere组件绑定在当前视角朝向末端，每帧调用Trace检测Channel，
 
 #pragma once
 

@@ -1,3 +1,5 @@
+/**	检测TA周围对象并加入Array，用于Dash的拳头之上		**/
+
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,7 +22,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//利用GA自定义的数据配置TA
+	//封装好配置逻辑，在GA中调用
 	void ConfigureAroundActor(float DetectionRadius,const FGenericTeamId TeamId , const FGameplayTag& InLocalGameplayCueTag);
 
 private:
@@ -31,7 +33,6 @@ private:
 	USphereComponent* AroundSphereComponent;
 
 	//即使Configure在客户端服务端都调用，Rep还是必要的，这能保证服务端的值才是权威值，一旦出现不同以服务端为准
-	
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamID;
 	
@@ -41,6 +42,7 @@ private:
 	UPROPERTY(Replicated)
 	FGameplayTag LocalGameplayCueTag;
 
+	//将服务端确定的Radius赋予客户端
 	UFUNCTION()
 	void OnRep_TargetDetectionRadiusReplicated();
 

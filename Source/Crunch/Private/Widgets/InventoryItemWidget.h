@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -25,13 +23,14 @@ public:
 	FOnButtonClick OnLeftButtonClick;
 	FOnButtonClick OnRightButtonClick;
 
-	//当左右键点击时触发的函数回调
+	virtual void NativeConstruct() override;
 	
+	//当右键点击时触发的函数回调
 	virtual void RightButtonClicked() override;
+	
+	//当右键点击时触发的函数回
 	virtual void LeftButtonClicked() override;
 	
-	virtual void NativeConstruct() override;
-
 	//在Inventory中传入Item，调用这个函数接收，进行文本赋值和Icon显示
 	void UpdateInventoryItem(const UInventoryItem* Item);
 
@@ -53,12 +52,13 @@ public:
 	UTexture2D* GetIconTexture() const;
 
 	FORCEINLINE const UInventoryItem* GetInventoryItem() const {return InventoryItem;}
-
+	
 	FInventoryItemHandle GetItemHandle() const;
 private:
+	//监听Mana、Level等判断是否可以释放GA
 	void UpdateCanCast(bool bCanCast);
 	
-	//格子为空时显示的Texture
+	//格子为空时显示的默认Texture
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	UTexture2D* EmptyTexture;
 
@@ -84,7 +84,8 @@ private:
 
 	//对应Slot的序号
 	int SlotNumber;
-
+	
+	//更新Item的时候绑定GA能否Cast的委托回调
 	void BindCanCastAbilityDelegate();
 	void UnBindCanCastAbilityDelegate();
 	
@@ -102,14 +103,20 @@ private:
 
 	/********************* GAS *************************/
 public:
+	//冷却开始时Widget的显示逻辑
 	void StartCoolDown(float CooldownDuration,float TimeRemaining);
 
 private:
 	UPROPERTY(EditDefaultsOnly,category="Cooldown")
 	float CooldownUpdateInterval=0.1f;
 
+	//冷却完成时回调函数
 	void CooldownFinished();
+	
+	//更新冷却时间
 	void UpdateCooldown();
+	
+	//冷却结束调用
 	void ClearCooldown();
 
 	FTimerHandle CooldownDurationTimerHandle;

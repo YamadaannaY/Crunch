@@ -25,7 +25,6 @@ struct FInventoryItemHandle
 {
 	GENERATED_BODY()
 
-public:
 	FInventoryItemHandle();
 	
 	//利用有参构造函数调用ID生成函数创建一个Handle
@@ -34,8 +33,10 @@ public:
 	//提供一个InvalidHandle
 	static FInventoryItemHandle InvalidHandle();
 	
+	//判断是否等于定义的不合法ID
 	bool IsValid() const;
 	
+	//封装ID
 	uint32 GetHandleId() const;
 	
 private:
@@ -70,6 +71,7 @@ class UInventoryItem : public UObject
 {
 	GENERATED_BODY()
 public:
+	//更新Widget
 	FOnAbilityCanCastUpdateDelegate OnAbilityCanCastUpdated;
 
 	UInventoryItem();
@@ -92,8 +94,13 @@ public:
 	//为新创建的InventoryItem赋值
 	void InitItem(const FInventoryItemHandle& NewHandle,const UPA_ShopItem* NewShopItem,UAbilitySystemComponent* ASC);
 
+	//获取剩余冷却时间
 	float GetAbilityCooldownTimeRemaining() const;
+	
+	//获取冷却持续时间
 	float GetAbilityCooldownDuration() const ;
+	
+	//获取Mana消耗
 	float GetManaCost() const ;
 
 	const UPA_ShopItem* GetShopItem() const {return ShopItem;}
@@ -102,6 +109,7 @@ public:
 	int GetItemSlot() const {return Slot;}
 	FGameplayAbilitySpecHandle GetGrantedAbilitySpecHandle() const {return GrantedAbilitySpecHandle;}
 
+	//判断是否可以释放GA
 	bool CanCastAbility() const ;
 
 	//GrantedAbility激活的服务端RPC函数上调用
@@ -110,19 +118,25 @@ public:
 	//ConsumeEffect应用
 	void ApplyConsumeEffect();
 	
+	//ShopItem指针是否有效
 	bool IsValid() const;
 
 	//为ASC应用GE
 	void RemoveGASModifications();
 
+	//是否具有GA
 	bool IsGrantingAnyAbility() const ;
-	bool IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const;
+	
+	//判断参数GA是否就是ItemGA
+	bool IsGrantingAbility(TSubclassOf<UGameplayAbility> AbilityClass) const;
 
 	//更新Slot
 	void SetSlot(int NewSlot);
 	
+	//保存GA句柄用于删除
 	void SetGrantedAbilitySpecHandle(FGameplayAbilitySpecHandle NewHandle);
 private:
+	//在Item生成并进行初始化操作时应用GE或注册GA
 	void ApplyGASModifications();
 
 	void ManaUpdated(const FOnAttributeChangeData& ChangeData) const ;
@@ -146,7 +160,7 @@ private:
 	//为了移除Effect保留其Handle
 	FActiveGameplayEffectHandle ApplyEquippedEffectHandle;
 
-	//如果这个Item为角色赋予了GA，则为这个GA创建Handle进行保留
+	//为了移除GA保留其Handle
 	FGameplayAbilitySpecHandle GrantedAbilitySpecHandle;
 
 	UPROPERTY()

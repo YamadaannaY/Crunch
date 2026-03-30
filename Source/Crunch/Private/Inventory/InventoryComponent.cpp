@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "InventoryComponent.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
@@ -256,12 +253,13 @@ void UInventoryComponent::GrantItem(const UPA_ShopItem* NewItem)
 	//占用Stack满或者没有这个Item，需要占用新Slot
 	else
 	{
+		//先尝试合成
 		if (TryItemCombination(NewItem)) return;
 		
-		//创建InventoryItem,对应分配一个ID
+		//创建InventoryItem,对应分配一个Handle，注册到ASC中
 		UInventoryItem* InventoryItem=NewObject<UInventoryItem>();
 		FInventoryItemHandle NewHandle=FInventoryItemHandle::CreateHandle();
-
+		
 		InventoryItem->InitItem(NewHandle,NewItem,OwnerASC);
 
 		//存到哈希表中

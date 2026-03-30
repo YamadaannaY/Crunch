@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "ProjectileActor.h"
 #include "GenericTeamAgentInterface.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -103,7 +100,7 @@ void AProjectileActor::TravelMaxDistanceReached()
 	Destroy();
 }
 
-void AProjectileActor::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult)
+void AProjectileActor::SendLocalGameplayCue(AActor* CueTargetActor, const FHitResult& HitResult) const 
 {
 	FGameplayCueParameters CueParam;
 	CueParam.Location=HitResult.ImpactPoint;

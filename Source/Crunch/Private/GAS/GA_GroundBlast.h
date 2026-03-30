@@ -1,6 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
- #pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GAS/CGameplayAbilitiesType.h"
@@ -50,7 +48,7 @@ private:
 	UFUNCTION()
 	void TargetConfirmed(const FGameplayAbilityTargetDataHandle& Handle);
 
-	//取消技能释放
+	//取消技能释放结束GA
 	UFUNCTION()
 	void TargetCancelled(const FGameplayAbilityTargetDataHandle& Handle);
 };

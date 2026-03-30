@@ -1,4 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "GAS/UCAbilitySystemStatics.h"
 #include "AbilitySystemComponent.h"
@@ -223,7 +222,7 @@ float UCAbilitySystemStatics::GetCoolDownDurationFor(const UGameplayAbility* Abi
 }
 
 float UCAbilitySystemStatics::GetCoolDownRemainingFor(const UGameplayAbility* AbilityCDO,
-	const UAbilitySystemComponent&ASC)
+	const UAbilitySystemComponent& ASC)
 {
 	if (!AbilityCDO)
 	{

@@ -139,6 +139,7 @@ public:
 	//直接移除DeadTag
 	void ReSpawnImmediative() const ;
 
+	void PlayHitReactMontage(int Index);
 private:
 	//Mesh相对Capsule的变换，用于换Mesh，RagDoll复位等情景下保持新的Mesh变换与最开始相同
 	FTransform MeshRelativeTransform;
@@ -169,7 +170,7 @@ private:
 	//Dead / Respawn 函数调用时进行的逻辑，根据不同的Character子类执行不同的逻辑
 	virtual void OnDead();
 	virtual void OnRespawn();
-
+	
 	/******************************* Team ***********************************/
 public:
 	/** Assigns Team Agent to given TeamID 在Controller OnPossess时调用*/
@@ -206,6 +207,9 @@ private:
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Stun")
 	UAnimMontage* StunMontage;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Montage")
+	TMap<int32,UAnimMontage*> MontageMap ; 
 
 	//RegisterTagEvent对StunTag的回调
 	virtual void OnStun();

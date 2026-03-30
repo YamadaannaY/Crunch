@@ -1,5 +1,3 @@
-//Controller类决定了UI交互逻辑和生成Widget
-
 #pragma once
 
 #include "CoreMinimal.h"

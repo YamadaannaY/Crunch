@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//PA类，记录所有角色通用的GA、GE、LevelRow等
 
 #pragma once
 

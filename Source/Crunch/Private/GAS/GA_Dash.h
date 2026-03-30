@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -23,6 +21,9 @@ public:
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
 	UAnimMontage* DashMontage;
+	
+	UPROPERTY(EditDefaultsOnly,Category="Montage")
+	TMap<int,UAnimMontage*> MontageMap ; 
 
 	UPROPERTY(EditDefaultsOnly,Category="Effects")
 	TSubclassOf<UGameplayEffect> DamageEffect;
@@ -48,18 +49,18 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Targeting")
 	FName TargetActorAttachSocketName="TargetDashCenter";
 
-	//等待Montage的Tag调用Dash逻辑
+	UPROPERTY()
+	UCharacterMovementComponent* OwnerCharacterMovementComponent;
+
+	FTimerHandle DashForwardTimerHandle;
+
+	//等待NotifyTag触发Dash
 	UFUNCTION()
 	void StartDashing(FGameplayEventData PayLoad);
 
 	//对TargetActor应用DamageGE
 	UFUNCTION()
 	void TargetReceived(const FGameplayAbilityTargetDataHandle& Data);
-
-	UPROPERTY()
-	UCharacterMovementComponent* OwnerCharacterMovementComponent;
-
-	FTimerHandle DashForwardTimerHandle;
 
 	//具体的Dash逻辑，获取前向向量，定时器递归AddInputVector
 	void DashForward();

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,8 +18,8 @@ enum class ECAbilityInputID:uint8
 	AbilityFour		UMETA(DisplayName="Ability Four"),
 	AbilityFive		UMETA(DisplayName="Ability Five"),
 	AbilitySix		UMETA(DisplayName="Ability Six"),
-	Confirm			UMETA(DisplayName="Confirm"),
-	Cancel			UMETA(DisplayName="Cancel"),
+	Confirm			UMETA(DisplayName="Confirm"), //重写GenericConfirmInputID
+	Cancel			UMETA(DisplayName="Cancel"),  //重写GenericCancelInputID
 };
 
 //将GE与PushVel在编辑器中对应配置，调用这个Def来PushTarget可以根据配置的Vel为DamageGE施加作用力
@@ -29,7 +27,7 @@ USTRUCT(BlueprintType)
 struct FGenericDamageEffectDef
 {
 	GENERATED_BODY()
-public:
+	
 	FGenericDamageEffectDef();
 	
 	UPROPERTY(EditAnywhere)
@@ -42,7 +40,6 @@ public:
 USTRUCT(BlueprintType)
 struct FHeroBaseStats :public FTableRowBase
 {
-public:
 	FHeroBaseStats();
 	
 	GENERATED_BODY()

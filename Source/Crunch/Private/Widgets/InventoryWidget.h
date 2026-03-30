@@ -1,5 +1,3 @@
- // Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -70,11 +68,15 @@ private:
 	//当一个Item可以StackCount时广播委托的回调函数
 	void ItemStackCountChanged(const FInventoryItemHandle& Handle , int NewCount);
 
+	//遍历找到第一个空Slot
 	UInventoryItemWidget* GetNextAvailableSlot() const ;
 
+	//处理两个交换的ItemWidget的各种信息交换
 	void HandleItemDragDrop(UInventoryItemWidget* DestinationWidget,UInventoryItemWidget* SourceWidget);
 
+	//清空当前Item对应Slot，从数组中移除Handle
 	void ItemRemoved(const FInventoryItemHandle& ItemHandle);
 
+	//当Item对应GA被调用时，激活Widget的冷却逻辑
 	void ItemAbilityCommitted(const FInventoryItemHandle& ItemHandle, float CooldownDuration, float CooldownTimeRemaining);
 };

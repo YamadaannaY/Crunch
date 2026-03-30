@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//被动GA，利用GameplayEvent触发，为一个击飞效果
 
 #pragma once
 
@@ -19,6 +19,6 @@ public:
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
-	//工具函数：获得激活这个GA的Tag
+	//通过此Tag激活GAP
 	static FGameplayTag GetLaunchedAbilityActivationTag();
 };

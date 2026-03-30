@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//从摄像机原点和朝向开始进行一次射线检测，如果没找到则向下检测，如果还是没有则保持原点，检测后更新TA位置，并对其周围进行一次射线检测，返回ImpactPoint
 
 #pragma once
 #include "CoreMinimal.h"

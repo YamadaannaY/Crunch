@@ -21,12 +21,15 @@ public:
 	//只在客户端和监听服务器的PlayerController上调用
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
 	
+	//配置ID
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
+	//获取ID，服务端Controller的ID在Spawn的时候确定，并被Rep到客户端，处理ControllerClient端的UI交互所需的ID变量
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//Controller的Input主要是处理UI输入交互，方便与Character的Input区别
 	virtual void SetupInputComponent() override;
 
 	//游戏结束调用的逻辑
@@ -48,7 +51,7 @@ private:
 	UPROPERTY()
 	UGameplayWidget* GameplayWidget;
 
-	//这个TeamID是由位于服务端的ServerPC权威设置的，设置Replicated的目的是把ID同步给ClientPC
+	//这个TeamID是由位于服务端的ServerPC权威设置的，设置Replicated的目的是把ID同步给ClientPC，再由PC赋予Character
 	UPROPERTY(Replicated)
 	FGenericTeamId TeamID;
 
@@ -70,8 +73,8 @@ private:
 
 	//作为IA绑定的回调，每次输入在Menu和GameplayWidget之间切换
 	UFUNCTION()
-	void ToggleGameplayMenu();
+	void ToggleGameplayMenu() ;
 
 	//直接将Switcher切换到Menu
-	void ShowWinLoseState();
+	void ShowWinLoseState() const ;
 };

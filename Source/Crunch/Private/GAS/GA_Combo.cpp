@@ -1,15 +1,10 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GA_Combo.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GameplayTagsManager.h"
 #include "UCAbilitySystemStatics.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
-
 
 UGA_Combo::UGA_Combo() : ComboMontage(nullptr)
 {
@@ -48,6 +43,7 @@ void UGA_Combo::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		UAbilityTask_WaitGameplayEvent* WaitTargetEventTask=UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,GetComboTargetEventTag());
 		WaitTargetEventTask->EventReceived.AddDynamic(this,&ThisClass::DoDamage);
 		WaitTargetEventTask->ReadyForActivation();
+		
 	}
 
 	//处理第一次输入
@@ -104,7 +100,7 @@ TSubclassOf<UGameplayEffect> UGA_Combo::GetDamageEffectForCurrentCombo() const
 		{
 			return *FoundEffectPtr;
 		}
-	}
+	} 
 	return DefaultDamageEffect;
 }
 
@@ -114,7 +110,7 @@ void UGA_Combo::ComboChangedEventReceived(FGameplayEventData InPayLoad)
 
 	if (EventTag==GetComboChangedEventEndTag())
 	{
-		//此时到Section末尾，需要重置NextComboName（因为逻辑上设置只要不是空就执行Name对应的Section）
+		//此时到Section末尾，需要重置NextComboName
 		NextComboName=NAME_None;
 		return;
 	}

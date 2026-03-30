@@ -8,7 +8,6 @@ UMMC_LevelBased::UMMC_LevelBased()
 	//获取Level值
 	LevelCaptureDefinition.AttributeToCapture=UCHeroAttributeSet::GetLevelAttribute();
 	LevelCaptureDefinition.AttributeSource=EGameplayEffectAttributeCaptureSource::Target;
-
 	RelevantAttributesToCapture.Add(LevelCaptureDefinition);
 }
 

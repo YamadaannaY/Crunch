@@ -1,6 +1,3 @@
-	// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GAS/GAP_Dead.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
@@ -35,7 +32,8 @@ void UGAP_Dead::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		//检测范围内的Reward对象
 		TArray<AActor*> RewardTargets=GetRewardTargets();
 
-		//单位死亡但不进行奖励结算的情况：Killer和RewardTarget都不存在，如果只有Killer存在则说明单位被Killer全局技能击杀，附近没有其他Killer友方单位，所以
+		//单位死亡但不进行奖励结算的情况：Killer和RewardTarget都不存在，如果只有Killer存在则说明单位被Killer全局技能击杀，
+		//附近没有其他Killer友方单位，所以
 		//只奖励Killer，如果只有RewardTarget存在说明单位是因为其他因素死亡，也会结算奖励
 
 		if (RewardTargets.Num()==0 && !Killer)

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GAS/CAttributeSet.h"
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffectExtension.h"
@@ -10,7 +8,7 @@ void UCAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	
 	//用于在类中注册所有需要网络同步的变量：定义引擎对变量复制的规则：哪些变量需要被复制，如何复制，什么时候复制
 
-	//如下规则表明：无条件且一直来自这个类的这些属性
+	//如下规则表明：无条件且一直复制这些属性
 	
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,Health,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MaxHealth,COND_None,REPNOTIFY_Always);

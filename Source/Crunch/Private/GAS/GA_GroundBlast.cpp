@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GA_GroundBlast.h"
 #include "GAS/TargetActor_GrounPick.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -71,11 +69,9 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 	//CueParam
 	FGameplayCueParameters BlastingCueParams;
 	BlastingCueParams.Location=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,1).ImpactPoint;
-
-	//这是一个参数存储变量，起到桥接的作用，在编辑器的Cue中进一步利用
 	BlastingCueParams.RawMagnitude=TargetAreaRadius;
 
-	//由于TargetActor存在于服务端和客户端，所以本地能看到，而服务器也调用意味着可以广播给附近所有网络相关的客户端
+	//GC所有客户端可见
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(BlastGameplayCueTag,BlastingCueParams);
 	GetAbilitySystemComponentFromActorInfo()->ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag(),BlastingCueParams);
 

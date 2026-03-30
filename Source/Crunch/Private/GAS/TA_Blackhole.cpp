@@ -1,6 +1,4 @@
-
 #include "TA_Blackhole.h"
-
 #include "NiagaraComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Components/SphereComponent.h"
@@ -21,7 +19,7 @@ ATA_Blackhole::ATA_Blackhole()
 	DetectionSphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 	DetectionSphereComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
 	DetectionSphereComponent->OnComponentBeginOverlap.AddDynamic(this,&ThisClass::ActorInBlackholeRange);
-	DetectionSphereComponent->OnComponentEndOverlap.AddDynamic(this,&ThisClass::ActorLeftBlackholeRanege);
+	DetectionSphereComponent->OnComponentEndOverlap.AddDynamic(this,&ThisClass::ActorLeftBlackholeRange);
 
 	VFXComponent=CreateDefaultSubobject<UParticleSystemComponent>("VFX Component");
 	VFXComponent->SetupAttachment(RootComp);
@@ -107,7 +105,7 @@ void ATA_Blackhole::ActorInBlackholeRange(UPrimitiveComponent* OverlappedCompone
 	TryAddTarget(OtherActor);
 }
 
-void ATA_Blackhole::ActorLeftBlackholeRanege(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ATA_Blackhole::ActorLeftBlackholeRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	RemoveTarget(OtherActor);

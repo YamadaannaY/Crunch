@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ItemTreeWidget.h"
 
 #include "SplineWidget.h"
@@ -25,7 +23,8 @@ void UItemTreeWidget::DrawFromNode(const ITreeNodeInterface* NodeInterface)
 	TArray<UCanvasPanelSlot*> LowerStreamSlots,UpperStreamSlots;
 
 	//调用递归回调，将IngredientMap递归一次
-	DrawStream(false,NodeInterface,CenterWidget,CenterWidgetPanelSlot,0,NextLeafXPos,LowerStreamSlots);
+	DrawStream(false,
+		NodeInterface,CenterWidget,CenterWidgetPanelSlot,0,NextLeafXPos,LowerStreamSlots);
 
 	float LowerStreamXMax=NextLeafXPos-NodeSize.X-NodeGap.X;
 	float LowerMoveAmt=0.f-LowerStreamXMax/2.0f;

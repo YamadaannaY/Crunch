@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -46,5 +44,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Visual")
 	FName CharacterEmptyMatParamName="Empty";
 	
+	//鼠标悬停的时候修改文本为HeroName，移除时恢复为PlayerName
 	void UpdateNameText();
 };

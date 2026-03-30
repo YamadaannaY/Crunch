@@ -107,8 +107,7 @@ void ATargetActor_Line::DoTargetCheckReport()
 	FGameplayAbilityTargetData_ActorArray* ActorArray=new FGameplayAbilityTargetData_ActorArray;
 	ActorArray->SetActors(OverlappingActors);
 	TargetDataHandle.Add(ActorArray);
-
-	//触发ValidData回调
+	
 	TargetDataReadyDelegate.Broadcast(TargetDataHandle);
 }
 
@@ -122,7 +121,9 @@ void ATargetActor_Line::UpdateTargetTrace()
 		AvatarActor->GetActorEyesViewPoint(ViewLocation,ViewRotation);
 	}
 
-	//这里的思路是：EndPoint是摄像机的视角延伸到无限远的位置，但是由于AimStat使得摄像机相对角色有偏移，所以调用函数计算得到一个Rot向量,将ActorMesh的朝向修改为这个Rot
+	//这里的思路是：EndPoint是摄像机的视角延伸到无限远的位置，
+	//但是由于AimStat使得摄像机相对角色有偏移，所以调用函数计算
+	//得到一个Rot向量,将ActorMesh的朝向修改为这个Rot
 	FVector LookEndPoint=ViewLocation + ViewRotation.Vector()* 100000;
 	FRotator LookRotation=UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),LookEndPoint);
 	SetActorRotation(LookRotation);
@@ -166,12 +167,11 @@ void ATargetActor_Line::UpdateTargetTrace()
 		}
 	}
 
-	//对EndLoc位置的Actors进行Collision检测
 	TargetEndDetectionSphere->SetWorldLocation(LineEndLocation);
 	
 	if (LazerVFX)
 	{
-		//设置Length长度，需要进两位的单位换算，因此除以100
+		//设置Length长度，需要进两位的单位换算除以100
 		LazerVFX->SetVariableFloat(LazerVFXLengthParamName,LineLength/100);
 	}
 }

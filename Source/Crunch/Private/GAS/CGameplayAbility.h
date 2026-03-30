@@ -15,6 +15,7 @@ class CRUNCH_API UCGameplayAbility : public UGameplayAbility
 public:
 	UCGameplayAbility();
 	
+	//重写拓展GA激活条件
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 
 protected:
@@ -59,14 +60,14 @@ protected:
 
 	//将GE赋予HitResult中存储的Actor对象
 	void ApplyGameplayEffectToHitResultActor(const FHitResult HitResult,TSubclassOf<UGameplayEffect> GameplayEffect,int Level);
-
+	
 	//客户端本地执行Tag对应的GameplayEvent
 	void SendLocalGameplayEvent(const FGameplayTag& EventTag,const FGameplayEventData& EventData);
 
 	//AnimInstance播放Montage，在客户端本地播放
 	void PlayMontageLocally(UAnimMontage* MontageToPlay);
 
-	//在当前Section播放完毕后暂停Montage
+	//在当前Section播放完毕后停止Montage
 	void StopMontageAfterCurrentSection(UAnimMontage* MontageToStop);
 
 	//获得AvaActor的Id
@@ -74,6 +75,7 @@ protected:
 
 	//判断TeamAttitude关系
 	bool IsActorTeamAttitudeIs(const AActor* OtherActor,ETeamAttitude::Type TeamAttitude) const ;
+	
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Debug")
 	bool bShouldDrawDebug=false;

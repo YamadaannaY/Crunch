@@ -1,12 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "GAS/GA_Shoot.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "CAbilitySystemComponent.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "UCAbilitySystemStatics.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
-#include "Crunch/DebugHelper.h"
 #include "GAS/ProjectileActor.h"
 #include "GameplayTagsManager.h"
 
@@ -148,7 +145,8 @@ void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
 		AProjectileActor* Projectile=GetWorld()->SpawnActor<AProjectileActor>(ProjectileClass,SocketLocation,OwnerAvatarActor->GetActorRotation(),SpawnParams);
 		if (Projectile)
 		{
-			Projectile->ShootProjectile(ShootProjectileSpeed,ShootProjectileRange,GetAimTargetIfValid(),GetOwnerTeamId(),MakeOutgoingGameplayEffectSpec(ProjectileEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo)));
+			Projectile->ShootProjectile(ShootProjectileSpeed,ShootProjectileRange,GetAimTargetIfValid(),GetOwnerTeamId(),
+			MakeOutgoingGameplayEffectSpec(ProjectileEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo)));
 		}
 	}
 }

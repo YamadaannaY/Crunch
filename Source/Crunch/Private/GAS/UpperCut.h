@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -45,6 +43,8 @@ private:
 	//根据当前SectionName找到对应的DamageGE+PushVel
 	const FGenericDamageEffectDef* GetDamageEffectDefForCurrentCombo() const ;
 
+	FName NextComboName;
+	
 	//具体Launch逻辑
 	UFUNCTION()
 	void StartLaunching(FGameplayEventData EventData);
@@ -61,5 +61,4 @@ private:
 	UFUNCTION()
 	void HandleComboDamageEvent(FGameplayEventData EventData);
 	
-	FName NextComboName;
 };

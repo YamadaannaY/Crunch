@@ -38,18 +38,14 @@ AMinion* AMinionBarrack::GetNextAvailableMinion() const
 
 void AMinionBarrack::SpawnNewGroup()
 {
-	//一次生成多少Minion
 	int i =MinionPerGroup;
-
 	while (i>0)
 	{
 		FTransform SpawnTransform = GetActorTransform();
-		
 		if (const APlayerStart* NextSpawnSpot=GetNextSpawnSpot())
 		{
 			SpawnTransform=NextSpawnSpot->GetActorTransform();
 		}
-		
 		//找到Pool中DeadTag下的Minion进行ReSpawn
 		AMinion* NextAvailableMinion=GetNextAvailableMinion();
 		if (!NextAvailableMinion) break;
@@ -57,7 +53,6 @@ void AMinionBarrack::SpawnNewGroup()
 		NextAvailableMinion->Activate();
 		--i;
 	}
-
 	if (i != 0 && MinionPool.Num()<MaxSpawnNums)
 	{
 		//意味着当前没有足够数量DeadTag下的Minion存在，这种情况下新生成Minion，但是不超出Max限制)

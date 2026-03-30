@@ -25,7 +25,7 @@ public:
 	UFUNCTION(Server ,Reliable , WithValidation)
 	void Server_RequestSlotSelectionChange(uint8 NewSlotID);
 
-	//服务端遍历所有PlayerState并对其Cast然后调用此函数处理对所有客户端的逻辑
+	//服务端遍历所有PlayerController调用进入Hero选择界面的函数
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_StartHeroSelection();
 

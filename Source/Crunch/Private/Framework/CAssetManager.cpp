@@ -109,8 +109,10 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
 	//如果在合成表中找到Ingredient对应的集合，就从中添加合成Item，否则创建此集合
 	if (Combinations)
 	{
-		
-		if (!Combinations->Contains(CombinationItem))   Combinations->AddItem(CombinationItem);
+		if (!Combinations->Contains(CombinationItem))
+		{
+			Combinations->AddItem(CombinationItem);
+		}
 	}
 	else
 	{

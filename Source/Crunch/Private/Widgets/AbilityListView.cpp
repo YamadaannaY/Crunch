@@ -28,7 +28,7 @@ void UAbilityListView::AbilityGaugeGenerated(UUserWidget& Widget)
 
 	if (AbilityGauge)
 	{
-		//找到GA对应的WidgetData，从中找到Icon并加载
+		//从数据池中取出Item，从DT中找到匹配的WidgetData，加载Icon
 		AbilityGauge->ConfigureWithWidgetData(FindWidgetDataForAbility(AbilityGauge->GetListItem<UGameplayAbility>()->GetClass()));
 	}
 }

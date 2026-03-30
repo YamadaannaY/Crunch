@@ -62,7 +62,7 @@ public:
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE float GetLookPitchOffset() const {return LookRotOffset.Pitch;}
 
-	//在静止非瞄准下才使用FullBody，如果静止但是处于AimStat，还是使用UpperBody（没有过滤下半部分的Anim，使角色在原地移动）
+	//静止并且非瞄准下才使用UpperBody当做FullBody，其他情况还是使用UpperBody与Locomotion的混合，使得Aim下即使静止下半身也是跟随转向运动的
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	bool bShouldDoFullBody() const ;
 

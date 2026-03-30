@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GA_Blackhole.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
@@ -134,7 +131,6 @@ void UGA_Blackhole::FinalTargetsReceived(const FGameplayAbilityTargetDataHandle&
 	else
 	{
 		PlayMontageLocally(FinalBlowMontage);
-		
 		GetAbilitySystemComponentFromActorInfo() -> ExecuteGameplayCue(UCAbilitySystemStatics::GetCameraShakeCueTag() , FinalBlowCueParams);
 	}
 	

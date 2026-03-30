@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//Hero属性值，进行Rep标记
 
 #pragma once
 

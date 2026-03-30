@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "GA_Dash.h"
 #include "ATargetActor_Around.h"
 #include "AbilitySystemBlueprintLibrary.h"

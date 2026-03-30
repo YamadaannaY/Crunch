@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "InventoryItem.h"
 #include "PA_ShopItem.h"
 #include "GAS/CAttributeSet.h"
@@ -54,7 +52,6 @@ uint32 GetTypeHash(const FInventoryItemHandle& Key)
 
 UInventoryItem::UInventoryItem():ShopItem(nullptr),StackCount(1),Slot(0),OwnerASC(nullptr)
 {
-	
 }
 
 bool UInventoryItem::AddStackCount()
@@ -93,7 +90,7 @@ bool UInventoryItem::IsForItem(const UPA_ShopItem* Item) const
 	return GetShopItem()==Item;
 }
 
-float  UInventoryItem::GetAbilityCooldownTimeRemaining() const
+float UInventoryItem::GetAbilityCooldownTimeRemaining() const
 {
 	if (!IsGrantingAnyAbility()) return 0.f;
 
@@ -211,7 +208,7 @@ bool UInventoryItem::IsGrantingAnyAbility() const
 	return ShopItem->GetGrantedAbility() !=nullptr;
 }
 
-bool UInventoryItem::IsGrantingAbility(TSubclassOf<class UGameplayAbility> AbilityClass) const
+bool UInventoryItem::IsGrantingAbility(TSubclassOf<UGameplayAbility> AbilityClass) const
 {
 	if (!ShopItem) return false;
 

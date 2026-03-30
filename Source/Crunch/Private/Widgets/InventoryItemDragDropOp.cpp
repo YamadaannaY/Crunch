@@ -18,7 +18,6 @@ void UInventoryItemDragDropOp::SetDraggedItem(UInventoryItemWidget* DraggedItem)
 			DragItemWidget->SetIcon(DraggedItem->GetIconTexture());
 
 			//UUserWidget类型的变量。当OnDragDetected时，创建的Widget赋值给这个属性后，它会自动跟随鼠标移动，直到松开按键。
-			//即我们自定义的VisualClassWidget
 			DefaultDragVisual=DragItemWidget;
 		}
 	}

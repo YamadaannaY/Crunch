@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//被动GA，Event触发+ServerOnly
 
 #pragma once
 

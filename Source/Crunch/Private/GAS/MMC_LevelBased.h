@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//等级越高此MMC数值计算结果越高
 
 #pragma once
 

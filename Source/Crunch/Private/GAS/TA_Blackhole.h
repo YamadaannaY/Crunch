@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//用TA进行范围Overlap检测记录到TargetDataHandle，并添加绑定添加一个VFX牵引特效显示
 
 #pragma once
 
@@ -17,21 +17,24 @@ class CRUNCH_API ATA_Blackhole : public AGameplayAbilityTargetActor , public IGe
 public:
 	ATA_Blackhole();
 
-	//配置黑洞数据
+	//配置黑洞变量
 	void ConfigureBlackhole(float InBlackholeRange,float InPullSpeed,float InBlackholeDuration,const FGenericTeamId& InTeamId);
-
+	
 	virtual void SetGenericTeamId(const FGenericTeamId& InTeamID) override;
 	
-	virtual FGenericTeamId GetGenericTeamId() const {return TeamId; }
+	virtual FGenericTeamId GetGenericTeamId() const override {return TeamId; }
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	virtual void Tick(float DeltaTime) override;
 
-	virtual auto StartTargeting(UGameplayAbility* Ability) -> void override;
+	//TargetActor创建时调用
+	virtual void StartTargeting(UGameplayAbility* Ability) override;
 
+	//Confirm
 	virtual void ConfirmTargetingAndContinue() override;
 
+	//Cancel
 	virtual void CancelTargeting() override;
 	
 private:
@@ -65,7 +68,6 @@ private:
 	UPROPERTY()
 	TMap<AActor* , class UNiagaraComponent*> ActorsInRangeMap;
 
-	//客户端配置SphereRadius
 	UFUNCTION()
 	void OnRep_BlackholeRange();
 
@@ -75,14 +77,14 @@ private:
 
 	//SphereComponent的EndOverlap回调
 	UFUNCTION()
-	void ActorLeftBlackholeRanege(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void ActorLeftBlackholeRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	//BeginOverlap检测到Tagret时进行Add
+	//BeginOverlap检测到Target时创建VFX组件并添加到Map中
 	void TryAddTarget(AActor* OtherTarget);
 
-	//EndOverlap检测到Target时进行Remove
+	//EndOverlap时对Target的VFX组件销毁并从Map中移除
 	void RemoveTarget(AActor* OtherTarget);
 
-	//Blackhole持续时间结束时调用函数
+	//存储所有Overlap对象，销毁Niagara组件
 	void StopBlackhole();
 };

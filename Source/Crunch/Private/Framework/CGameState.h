@@ -53,7 +53,7 @@ private:
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerSelectionArray)
 	TArray<FPlayerSelection> PlayerSelectionArray;
 	
-	//在服务端更新数据，Rep到客户端并触发UpdatedDelegate
+	//在服务端更新数据，Rep到GameState客户端并触发UpdatedDelegate
 	UFUNCTION()
 	void OnRep_PlayerSelectionArray() const ;
 };

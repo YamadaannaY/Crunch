@@ -30,7 +30,6 @@ public:
 	const TArray<const UPA_ShopItem*>& GetItems() const;
 	
 private:
-	//PAItem数组
 	UPROPERTY()
 	TArray<const UPA_ShopItem*> Items;
 };
@@ -62,9 +61,10 @@ public:
 	TSubclassOf<UGameplayAbility> GetGrantedAbility() const {return GrantAbility;}
 	const TArray<TSoftObjectPtr<UPA_ShopItem>>& GetIngredients() const {return IngredientItems;}
 	
-	//加载Icon
+	//立即加载Icon
 	UTexture2D* GetIcon() const ;
-	//获取GrantAbility的GetDefaultObject
+	
+	//获取GrantAbility的类模板实例
 	UGameplayAbility* GetGrantedAbilityCDO() const;
 	
 private:

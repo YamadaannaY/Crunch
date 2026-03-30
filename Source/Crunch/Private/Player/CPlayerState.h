@@ -22,6 +22,7 @@ public:
 	
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	//绑定监听委托
 	virtual void BeginPlay() override;
 	
 	//服务端调用的Copy函数，用于SeamlessTravel中继承当前Level中PlayerState的特定对象，其余会被重置

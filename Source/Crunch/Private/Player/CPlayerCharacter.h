@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//玩家类，具有本地输入，
 
 #pragma once
 
@@ -21,13 +21,13 @@ class ACPlayerCharacter : public ACCharacter
 public:
 	ACPlayerCharacter();
 
-	//在客户端的Pawn发生改变时或者客户端ClientTravel进入关卡后调用，会启用输入，重新初始化AbilityInput
+	//在客户端的Pawn发生改变时或者ClientTravel进入关卡后调用，会启用输入，重新初始化AbilityInput
 	virtual void PawnClientRestart() override;
 
-	//只在本地客户端执行，处理用户输入（这也是不在服务端执行的原因，服务端不需要知道输入是什么），只是处理输入后要调用的逻辑
+	//只在本地客户端执行，处理用户输入（这也是不在服务端执行的原因，服务端不需要知道输入是什么）
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
     
-    //修改Eyes概念，以Camera为标准
+    //修改Eyes概念，以Camera位置为标准，
 	virtual void GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const override;
 private:
 	UPROPERTY()

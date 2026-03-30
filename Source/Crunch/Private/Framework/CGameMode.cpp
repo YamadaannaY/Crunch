@@ -9,12 +9,11 @@
 #include "Player/CPlayerController.h"
 #include "Player/CPlayerState.h"
 
-	APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
+APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
 	//获得生成的Controller
 	APlayerController* NewPlayerController = Super::SpawnPlayerController(InRemoteRole, Options);
-
-	//获取Controller的TeamInterface接口处理TeamID
+		
 	IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayerController);
 		
 	//为Controller分配ID
@@ -25,7 +24,7 @@
 	{
 		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
 	}
-	
+		
 	//为当前生成的Controller对应的Pawn指定一个PlayerStart生成点
 	NewPlayerController->StartSpot = FindNextStartSpotTeam(TeamId);
 	
@@ -35,6 +34,7 @@
 void ACGameMode::StartPlay()
 {
 	Super::StartPlay();
+		
 	AStormCore* StormCore=GetStormCore();
 	if (StormCore)
 	{
@@ -51,24 +51,14 @@ UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController*
 	{
 		return CPlayerState->GetSelectedPawnClass();
 	}
-	
-	return BackupPawn;
-}
-
-APawn* ACGameMode::SpawnDefaultPawnFor_Implementation(AController* NewPlayer, AActor* StartSpot)
-{
-	IGenericTeamAgentInterface* NewPlayerTeamInterface=Cast<IGenericTeamAgentInterface>(NewPlayer);
-	const FGenericTeamId TeamId = GetTeamIDForPlayer(NewPlayer);
 		
-	if (NewPlayerTeamInterface)
+	IGenericTeamAgentInterface*  TeamAgent  = Cast<IGenericTeamAgentInterface>(InController);
+	if ( TeamAgent && TeamAgent->GetGenericTeamId()==FGenericTeamId(1))
 	{
-		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
+		return BackupPawn2;
 	}
-	
-	StartSpot = FindNextStartSpotTeam(TeamId);
-	NewPlayer->StartSpot = StartSpot;
 		
-	return Super::SpawnDefaultPawnFor_Implementation(NewPlayer, StartSpot);
+	return BackupPawn1;
 }
 
 FGenericTeamId ACGameMode::GetTeamIDForPlayer(const AController* InController) const
@@ -80,7 +70,7 @@ if (CPlayerState && CPlayerState->GetSelectedPawnClass())
 	return CPlayerState->GetTeamIdBaseOnSlot();
 }
 		
-//轮流分配
+//轮流分配，在测试环境下使用
 static int PlayerCount=0;
 ++PlayerCount;
 return FGenericTeamId(PlayerCount%2);
@@ -122,7 +112,7 @@ AStormCore* ACGameMode::GetStormCore() const
 	return nullptr;
 }
 
-void ACGameMode::MatchFinished(AActor* ViewTarget,int WinningTeam)
+void ACGameMode::MatchFinished(AActor* ViewTarget,int WinningTeam) const 
 	{
 		UWorld* World = GetWorld();
 		if (World)

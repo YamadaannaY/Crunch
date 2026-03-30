@@ -1,4 +1,3 @@
-
 #include "GA_Lazer.h"
 #include "AbilitySystemComponent.h"
 #include "CAttributeSet.h"
@@ -81,7 +80,6 @@ void UGA_Lazer::ShootLazer(FGameplayEventData PayLoad)
 
 	if (LineTargetActor)
 	{
-		//将Root绑定到Socket
 		LineTargetActor->AttachToComponent(GetOwningComponentFromActorInfo(),FAttachmentTransformRules::SnapToTargetNotIncludingScale,TargetActorAttachSocketName);
 	}
 }

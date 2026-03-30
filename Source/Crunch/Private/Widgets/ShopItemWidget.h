@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -24,6 +22,8 @@ class UShopItemWidget : public UItemWidget ,public IUserObjectListEntry ,public 
 	GENERATED_BODY()
 public:
 	//重写接口函数，用于绘制样条线,存储所有Ingredient和Combination的ItemInterface
+	
+	
 	virtual UUserWidget* GetWidget() const override;
 	virtual TArray<const ITreeNodeInterface*> GetInputs() const override;
 	virtual TArray<const ITreeNodeInterface*> GetOutputs() const override;
@@ -40,7 +40,10 @@ public:
 	FORCEINLINE const UPA_ShopItem* GetShopItem() const {return ShopItem;}
 private:
 
+	//获取一个与自身Widget类信息一样的Widget实例
 	void CopyFromOther(const UShopItemWidget* OtherWidget);
+	
+	//修改当前Widget对应Item为新Item
 	void InitWithShopItem(const UPA_ShopItem* NewShopItem);
 
 	TArray<const ITreeNodeInterface*> ItemsToInterfaces(const TArray<const UPA_ShopItem*>& Items) const ;

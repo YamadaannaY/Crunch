@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/CPlayerCharacter.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
@@ -16,12 +13,11 @@
 
 ACPlayerCharacter::ACPlayerCharacter()
 {
+	//相机臂跟随Controller(AddInput的变化)一起旋转
+	//只有对SpringArmBlock的对象才会阻挡摄像机
 	CameraBoom=CreateDefaultSubobject<USpringArmComponent>("CameraBoom");
 	CameraBoom->SetupAttachment(GetRootComponent());
-	//相机臂跟随Controller(鼠标)一起旋转
 	CameraBoom->bUsePawnControlRotation=true;
-	
-	//只有对SpringArmBlock的对象才会阻挡摄像机
 	CameraBoom->ProbeChannel=ECC_SpringArm;
 		
 	ViewCamera=CreateDefaultSubobject<UCameraComponent>("ViewCamera");
@@ -62,22 +58,21 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	if (EnhancedInputComp)
 	{
-		//Trigger
-		//Jump是内置的基础跳跃函数
+		//Trigger作为触发，具有瞬时性
 		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::Jump);
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
 		EnhancedInputComp->BindAction(MoveInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleMoveInput);
+		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
 
-		//使用Down作为Trigger，具有持续性，有开始和结束两个阶段，分别对应两段逻辑
-		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Started,this,&ThisClass::LearnAbilityLeaderDown);
+		//使用Down作为触发，具有持续性，有开始和结束两个回调，分别对应两段逻辑
+		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Triggered,this,&ThisClass::LearnAbilityLeaderDown);
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Completed,this,&ThisClass::LearnAbilityLeaderUp);
 		
 		for (const TPair<ECAbilityInputID,UInputAction*>& InputActionPair:GameplayAbilityInputAction)
 		{
-			EnhancedInputComp->BindAction(InputActionPair.Value,ETriggerEvent::Triggered,this,&ThisClass::HandleAbilityInput,InputActionPair.Key);
+			EnhancedInputComp->BindAction(InputActionPair.Value,ETriggerEvent::Triggered,
+				this,&ThisClass::HandleAbilityInput,InputActionPair.Key);
 		}
-
-		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
 	}
 }
 
@@ -99,8 +94,8 @@ void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValu
 {
 	if (GetIsInFocusMode()) return ;
 	
+	//W+D 组合输入时会是 (1,1)，向量长度 √2,也就是输入值比直线更快，通过归一化获取单位向量进行避免
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
-	//W+D 组合时输入会是 (1,1)，长度 √2,也就是输入值比直线更快，通过归一化获取单位向量避免
 	InputVal.Normalize();
 
 	//将摄像机的坐标系作为位移方向参考，添加映射实现位移
@@ -121,7 +116,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 {
 	const bool bPressed=InputActionValue.Get<bool>();
 
-	//对于拥有等级的Abilities，配合Leader按键进行触发的结果是升级此GA
+	//对于拥有等级的Abilities，配合Leader按键进行技能触发的操作是升级此GA
 	if (bPressed && bIsLearnAbilityLeaderDown)
 	{
 		UpgradeAbilityWithInputID(InputID);
@@ -142,8 +137,6 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	if (InputID==ECAbilityInputID::BasicAttacks)
 	{
 		//这个Tag只在UpperCut监听Event中被应用，正常Attack除非主动调用此Tag否则不会触发
-
-		//BasicAttack由Pressed/Released两种Triggers，对应触发两种Tag的回调函数
 		FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
 		
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag,FGameplayEventData());
@@ -248,12 +241,12 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 	//使用真实帧时间，Alpha即一帧内打算靠近目标多少
 	const float LerpAlpha=FMath::Clamp(GetWorld()->GetDeltaSeconds() * CameraLerpSpeed,0.f,1.f);
 
-	//Lerp::  New=Current+(Goal-Current)*Alpha ，插值的意义在于补全移动过程，而Alpha决定了其强度
+	//Lerp::  New=Current+(Goal-Current)*Alpha ，插值补全移动过程
 	const FVector NewLocalOffset=FMath::Lerp(CurrentLocalOffset,Goal,LerpAlpha);
 
 	
 	//更新Loc
-	/*ViewCamera->SetRelativeLocation(NewLocalOffset);*/
+	/*ViewCamera->(NewLocalOffset);*/
 
 	CameraBoom->SocketOffset = NewLocalOffset;
 	ViewCamera->SetRelativeLocation(FVector::ZeroVector);

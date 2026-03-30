@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -16,6 +14,7 @@ class UAbilityToolTip : public UUserWidget
 {
 	GENERATED_BODY()
 public:
+	//配置ToolTip数据
 	void SetAbilityInfo(const FName& AbilityName , UTexture2D* AbilityTexture , const FText& AbilityDescription , float AbilityCooldown , float AbilityCost);
 private:
 	UPROPERTY(meta=(BindWidget))

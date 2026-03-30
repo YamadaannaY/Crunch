@@ -6,7 +6,7 @@ void ACGameState::RequestPlayerSelectionChange(const APlayerState* RequestingPla
 	//服务端进行Slot的修改操作
 	if (!HasAuthority() || IsSlotOccupied(DesiredSlot)) return ;
 
-	//将规则应用到Array中，有则返回，否则nullptr
+	//根据PlayerName在Array中查询，有则返回，否则nullptr
 	FPlayerSelection* PlayerSelectionPtr = PlayerSelectionArray.FindByPredicate
 	([&](const FPlayerSelection& PlayerSelection){return PlayerSelection.IsForPlayer(RequestingPlayer);});
 	

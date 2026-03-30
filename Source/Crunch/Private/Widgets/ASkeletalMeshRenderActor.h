@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,6 +10,7 @@ class CRUNCH_API AASkeletalMeshRenderActor : public ARenderActor
 	GENERATED_BODY()
 
 public:
+	//配置组件，设置照明Channel
 	AASkeletalMeshRenderActor();
 
 	//配置RenderActor的Mesh和Anim

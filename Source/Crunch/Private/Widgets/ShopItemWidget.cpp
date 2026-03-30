@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Widgets/ShopItemWidget.h"
 #include "Inventory/PA_ShopItem.h"
 #include "Components/ListView.h"

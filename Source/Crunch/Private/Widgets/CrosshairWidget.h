@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -30,18 +28,23 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	class UImage* CrosshairImage;
 
-	void CrosshairTagUpdated(const FGameplayTag Tag,int32 NewCount);
 
 	UPROPERTY()
 	UCanvasPanelSlot* CrosshairCanvasSlot;
 
 	UPROPERTY()
 	APlayerController* CachedPlayerController;
-
-	void UpdateCrosshairPosition();
+	
 
 	UPROPERTY()
 	const AActor* AimTarget;
+	
+	//更新可见性
+	void CrosshairTagUpdated(const FGameplayTag Tag,int32 NewCount);
 
+	//更新准星位置，保持在屏幕中心
+	void UpdateCrosshairPosition();
+
+	//更新目标，改变准星颜色
 	void TargetUpdated(const FGameplayEventData* EventData);
 };

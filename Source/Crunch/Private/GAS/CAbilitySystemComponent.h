@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+/** 根据属性表配置属性集，绑定特定属性的变化回调函数，对ASC进行GA、GE的配置 **/
 
 #pragma once
 
@@ -28,7 +28,7 @@ public:
 	//遍历InitGE并应用
 	void ApplyFullStatsEffectSelf();
 
-	//获得Character特有的GA，不包括BasicGA
+	//获得Character的GA映射
 	const TMap<ECAbilityInputID,TSubclassOf<UGameplayAbility>>& GetAbilities() const ;
 
 	//判断当前是否处于MaxLevel
@@ -42,20 +42,6 @@ public:
 	UFUNCTION(Client,Reliable)
 	void Client_AbilitySpecLevelUpdated(FGameplayAbilitySpecHandle Handle,int Level);
 private:
-	//应用初始GE
-	void ApplyInitialEffects();
-
-	//对所有GA调用GiveAbility注册到ASC
-	void GiveInitialAbilities();
-
-	//将GE应用给自身的调用函数
-	void AuthApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect>GameplayEffect,int Level=1);
-
-	//监听Health、Mana属性值，变化时调用函数
-	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
-	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
-	void ExperienceUpdated(const FOnAttributeChangeData& ChangeData);
-	
 	/***********	GA会带有一个ID，激活能力时依据ID找到要激活的GA，其中PassiveGA不需要ID，直接用None，表示不能主动触发	****************/
 
 	//技能
@@ -70,4 +56,18 @@ private:
 	//为了加强复用性用一个PA存储起来，创建新角色直接赋予这个PA。
 	UPROPERTY(EditDefaultsOnly,Category="Gameplay Abilities")
 	class UPA_AbilitySystemGeneric* AbilitySystemGeneric;
+	
+	//应用初始GE
+	void ApplyInitialEffects();
+
+	//对所有GASpec绑定InputID并调用GiveAbility注册到ASC
+	void GiveInitialAbilities();
+
+	//将GE应用给自身的调用函数
+	void AuthApplyGameplayEffectToSelf(TSubclassOf<UGameplayEffect>GameplayEffect,int Level=1);
+
+	//监听Health、Mana属性值，变化时调用函数
+	void HealthUpdated(const FOnAttributeChangeData& ChangeData);
+	void ManaUpdated(const FOnAttributeChangeData& ChangeData);
+	void ExperienceUpdated(const FOnAttributeChangeData& ChangeData);
 };

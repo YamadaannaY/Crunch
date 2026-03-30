@@ -123,7 +123,7 @@ void ACPlayerController::ToggleShop()
 	}
 }
 
-void ACPlayerController::ToggleGameplayMenu()
+void ACPlayerController::ToggleGameplayMenu() 
 {
 	if (GameplayWidget)
 	{
@@ -132,7 +132,7 @@ void ACPlayerController::ToggleGameplayMenu()
 	}
 }
 
-void ACPlayerController::ShowWinLoseState()
+void ACPlayerController::ShowWinLoseState() const 
 {
 	if (GameplayWidget)
 	{
