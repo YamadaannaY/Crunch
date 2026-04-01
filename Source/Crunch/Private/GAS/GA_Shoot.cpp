@@ -8,7 +8,7 @@
 #include "GameplayTagsManager.h"
 
 
-UGA_Shoot::UGA_Shoot() : ShootMontage(nullptr),AimTarget(nullptr),AimTargetAbilitySystemComponent(nullptr)
+UGA_Shoot::UGA_Shoot() : ShootMontage(nullptr),AimTarget(nullptr),AimTargetAbilitySystemComponent(nullptr),bInputLocked(false)
 {
 	ActivationOwnedTags.AddTag(UCAbilitySystemStatics::GetAimStatTag());
 	ActivationOwnedTags.AddTag(UCAbilitySystemStatics::GetCrosshairTag());
@@ -42,6 +42,8 @@ void UGA_Shoot::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	bInputLocked = false;
+	
 	if (AimTargetAbilitySystemComponent)
 	{
 		AimTargetAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).RemoveAll(this);
@@ -96,27 +98,56 @@ bool UGA_Shoot::HasValidTarget() const
 
 void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 {
-	if (HasAuthority(&CurrentActivationInfo))
+	if (bInputLocked) return; // 锁定期间禁止开始
+
+	if (UAnimInstance* AnimInst = GetOwnerAnimInstance())
 	{
-		UAbilityTask_PlayMontageAndWait* PlayShootMontage=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,ShootMontage);
-		PlayShootMontage->ReadyForActivation();
-	}
-	else
-	{
-		PlayMontageLocally(ShootMontage);
+		if (ShootMontage && AnimInst->Montage_IsPlaying(ShootMontage))
+		{
+			return;
+		}
 	}
 	
+	UAbilityTask_PlayMontageAndWait* PlayShootMontage=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,ShootMontage);
+	PlayShootMontage->ReadyForActivation();
+
 	FindAimTarget();
 	StartAimTargetCheckTimer();
 }
 
+	
 void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 {
-	if (ShootMontage)
-	{
-		StopMontageAfterCurrentSection(ShootMontage);
-	}
+	if (bInputLocked) return; // 如果已经在停止，忽略重复调用
+
+	bInputLocked = true; // 锁定，禁止开始
+
+	// 停止瞄准相关逻辑
 	StopAimTargetCheckTimer();
+
+	if (UAnimInstance* AnimInst = GetOwnerAnimInstance())
+	{
+		if (ShootMontage && AnimInst->Montage_IsPlaying(ShootMontage))
+		{
+			FOnMontageEnded EndDelegate;
+			EndDelegate.BindUObject(this, &UGA_Shoot::OnShootMontageEnded);
+			AnimInst->Montage_SetEndDelegate(EndDelegate, ShootMontage);
+			// 设置下一节为 None，当前 section 结束后自然停止
+			FName CurrentSection = AnimInst->Montage_GetCurrentSection(ShootMontage);
+			AnimInst->Montage_SetNextSection(CurrentSection, NAME_None, ShootMontage);
+			return; // 等待异步回调，不立即执行后续解锁
+		}
+	}
+
+	// 如果没有正在播放的蒙太奇，直接解锁
+	bInputLocked = false;
+}
+
+
+void UGA_Shoot::OnShootMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	// 蒙太奇已停止（无论是自然结束还是被打断），解锁输入
+	bInputLocked = false;
 }
 
 void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)

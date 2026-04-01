@@ -19,6 +19,7 @@ class UGA_Shoot : public UCGameplayAbility
 	
 	//在LocalInputReleased（ID）触发的时候调用，即松开按键时
 	virtual void InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) override;
+
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Anim")
 	UAnimMontage* ShootMontage;
@@ -56,6 +57,8 @@ private:
 	UAbilitySystemComponent* AimTargetAbilitySystemComponent;
 
 	FTimerHandle AimTargetCheckTimerHandle;
+	
+	FVector SpawnLocation;
 
 	void FindAimTarget();
 
@@ -70,4 +73,8 @@ private:
 	bool IsTargetInRange() const;
 
 	void TargetDeadTagUpdated(const FGameplayTag Tag,int32 NewCount);
+	
+	void OnShootMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+	
+	bool bInputLocked;
 };
