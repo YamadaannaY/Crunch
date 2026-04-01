@@ -6,6 +6,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "GAS/ProjectileActor.h"
 #include "GameplayTagsManager.h"
+#include "Kismet/GameplayStatics.h"
 
 
 UGA_Shoot::UGA_Shoot() : ShootMontage(nullptr),AimTarget(nullptr),AimTargetAbilitySystemComponent(nullptr),bInputLocked(false)
@@ -193,8 +194,18 @@ AActor* UGA_Shoot::GetAimTargetIfValid() const
 
 void UGA_Shoot::FindAimTarget()
 {
-	if (HasValidTarget()) return ;
-
+	if (HasValidTarget())
+	{
+		AController* Controller = Cast<APawn>(GetAvatarActorFromActorInfo())->GetController();
+		if (Controller)
+		{
+			APlayerController* PlayerController = Cast<APlayerController>(Controller);
+			if (IsActorInCameraFrustum(AimTarget,PlayerController))
+			{
+				return;
+			}
+		}	
+	}
 	if (AimTargetAbilitySystemComponent)
 	{
 		//每次调用都重新寻找AimTarget，需要重置ASC
@@ -232,4 +243,27 @@ bool UGA_Shoot::IsTargetInRange() const
 	const float Dist=FVector::Distance(AimTarget->GetActorLocation(),GetAvatarActorFromActorInfo()->GetActorLocation());
 
 	return Dist<=ShootProjectileRange;
+}
+
+bool UGA_Shoot::IsActorInCameraFrustum(AActor* Actor, APlayerController* PlayerController)
+{
+	if (!Actor || !PlayerController || !PlayerController->PlayerCameraManager)
+		return false;
+
+	// 获取摄像机视图
+	FMinimalViewInfo ViewInfo = PlayerController->PlayerCameraManager->GetCameraCacheView();
+    
+	// 获取矩阵
+	FMatrix ViewMatrix, ProjectionMatrix, ViewProjectionMatrix;
+	UGameplayStatics::GetViewProjectionMatrix(ViewInfo, ViewMatrix, ProjectionMatrix, ViewProjectionMatrix);
+    
+	// 构建视锥体
+	FConvexVolume Frustum;
+	GetViewFrustumBounds(Frustum, ViewProjectionMatrix, true, true);
+    
+	// 获取Actor包围盒
+	FBoxSphereBounds Bounds = Actor->GetRootComponent()->Bounds;
+    
+	// 检测是否在视锥体内
+	return Frustum.IntersectBox(Bounds.Origin, Bounds.BoxExtent);
 }

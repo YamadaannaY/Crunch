@@ -76,5 +76,7 @@ private:
 	
 	void OnShootMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	
+	bool IsActorInCameraFrustum(AActor* Actor, APlayerController* PlayerController);
+	
 	bool bInputLocked;
 };

@@ -59,24 +59,63 @@ void UCrosshairWidget::UpdateCrosshairPosition()
 
 	if (!AimTarget)
 	{
-		const FVector2D ViewportSize=FVector2D{(float)SizeX,(float)SizeY};
+		/*const FVector2D ViewportSize=FVector2D{(float)SizeX,(float)SizeY};
 
 		//除以2获取中心
-		CrosshairCanvasSlot->SetPosition(ViewportSize/2.f/ViewportScale);
-		return ;
-	}
+		CrosshairCanvasSlot->SetPosition(ViewportSize/2.f/ViewportScale);*/
+		FVector CameraLocation;
+	    FRotator CameraRotation;
+	    CachedPlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
-	FVector2D TargetScreenPosition;
-	CachedPlayerController->ProjectWorldLocationToScreen(AimTarget->GetActorLocation(),TargetScreenPosition);
-	if (TargetScreenPosition.X>0 && TargetScreenPosition.X<SizeX && TargetScreenPosition.Y>0 && TargetScreenPosition.Y<SizeY)
+	    // 2. 射线检测参数
+	    FVector TraceEnd = CameraLocation + CameraRotation.Vector() * 10000.0f; // 最大距离
+	    FHitResult HitResult;
+	    FCollisionQueryParams QueryParams;
+	    QueryParams.AddIgnoredActor(CachedPlayerController->GetPawn()); // 忽略自己
+
+	    bool bHit = GetWorld()->LineTraceSingleByChannel(
+	        HitResult,
+	        CameraLocation,
+	        TraceEnd,
+	        ECC_Visibility,
+	        QueryParams
+	    );
+
+	    // 3. 确定目标点
+	    FVector TargetPoint;
+	    if (bHit)
+	    {
+	        TargetPoint = HitResult.Location;
+	    }
+	    else
+	    {
+	        TargetPoint = TraceEnd;
+	    }
+
+	    // 4. 将世界坐标转换为屏幕坐标
+	    FVector2D ScreenPosition;
+	    CachedPlayerController->ProjectWorldLocationToScreen(TargetPoint, ScreenPosition);
+			
+	    // 5. 考虑 DPI 缩放
+	    ScreenPosition /= ViewportScale;
+
+	    // 6. 设置准星位置
+	    CrosshairCanvasSlot->SetPosition(ScreenPosition);
+	}
+	else
 	{
-		CrosshairCanvasSlot->SetPosition(TargetScreenPosition/ViewportScale);
+		FVector2D TargetScreenPosition;
+		CachedPlayerController->ProjectWorldLocationToScreen(AimTarget->GetActorLocation(),TargetScreenPosition);
+		if (TargetScreenPosition.X>0 && TargetScreenPosition.X<SizeX && TargetScreenPosition.Y>0 && TargetScreenPosition.Y<SizeY)
+		{
+			CrosshairCanvasSlot->SetPosition(TargetScreenPosition/ViewportScale);
+		}
 	}
 }
 
 void UCrosshairWidget::TargetUpdated(const FGameplayEventData* EventData)
 {
 	AimTarget=EventData->Target;
-
+	
 	CrosshairImage->SetColorAndOpacity(AimTarget ? HasTargetColor : NoTargetColor);
 }

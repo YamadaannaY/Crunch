@@ -22,17 +22,28 @@ void AProjectileActor::ShootProjectile(float InSpeed, float InMaxDistance, const
 	
 	ProjectileSpeed=InSpeed;
 
-	FRotator OwnerViewRot=GetActorRotation();
 	SetGenericTeamId(InTeamId);
 
 	if (GetOwner())
 	{
-		//目的是投射物朝向Actor视角的方向而不是Actor的朝向射出
-		FVector OwnerViewLoc;
-		GetOwner()->GetActorEyesViewPoint(OwnerViewLoc,OwnerViewRot);
-	}
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		GetOwner()->GetActorEyesViewPoint(CameraLocation,CameraRotation);
+		
+		float MaxDistance = InMaxDistance; // 最大射程
+		FVector TraceEnd = CameraLocation + CameraRotation.Vector() * MaxDistance;
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this); // 忽略自己
 
-	MoveDir=OwnerViewRot.Vector();
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, CameraLocation, TraceEnd, ECC_Visibility, QueryParams);
+
+		// 4. 确定目标点
+		FVector TargetPoint = bHit ? HitResult.Location : TraceEnd;
+		
+		MoveDir=(TargetPoint-GetActorLocation()).GetSafeNormal();
+	}
+	
 	HitEffectSpecHandle=HitEffectHandle;
 
 	const float TravelMaxTime=InMaxDistance / InSpeed;

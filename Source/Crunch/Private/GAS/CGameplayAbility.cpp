@@ -5,6 +5,7 @@
 #include "UCAbilitySystemStatics.h"
 #include "Character/CCharacter.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Logging/LogTrace.h"
 
 UCGameplayAbility::UCGameplayAbility(): AvatarCharacter(nullptr)
 {

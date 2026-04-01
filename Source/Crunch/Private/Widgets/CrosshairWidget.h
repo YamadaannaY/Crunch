@@ -35,8 +35,6 @@ private:
 	UPROPERTY()
 	APlayerController* CachedPlayerController;
 	
-	FVector TargetPoint;
-	
 	UPROPERTY()
 	const AActor* AimTarget;
 	
