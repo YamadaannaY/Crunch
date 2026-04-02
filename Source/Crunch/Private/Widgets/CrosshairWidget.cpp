@@ -51,7 +51,6 @@ void UCrosshairWidget::UpdateCrosshairPosition()
 {
 	if (!CachedPlayerController || !CrosshairCanvasSlot) return ;
 
-	//DPI缩放比例，因为UI会根据分辨率不同而产生Scale作为放缩倍率，需要在计算位置的时候消除这个Scale
 	const float ViewportScale=UWidgetLayoutLibrary::GetViewportScale(this);
 	//获取Size
 	int32 SizeX , SizeY;

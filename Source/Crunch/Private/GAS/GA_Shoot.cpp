@@ -123,9 +123,24 @@ void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 
 	bInputLocked = true; // 锁定，禁止开始
 
-	// 停止瞄准相关逻辑
 	StopAimTargetCheckTimer();
-
+	
+	AimTarget = nullptr;
+	FGameplayEventData EventData;
+	EventData.Target = AimTarget;
+	SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),EventData);
+	
+	AController* Controller = Cast<APawn>(GetAvatarActorFromActorInfo())->GetController();
+	if (Controller)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(Controller);
+		if (!IsActorInCameraFrustum(AimTarget,PlayerController))
+		{
+			return;
+		}
+	}	
+	
+	
 	if (UAnimInstance* AnimInst = GetOwnerAnimInstance())
 	{
 		if (ShootMontage && AnimInst->Montage_IsPlaying(ShootMontage))
@@ -214,6 +229,7 @@ void UGA_Shoot::FindAimTarget()
 	}
 	
 	AimTarget=GetAimTarget(ShootProjectileRange,ETeamAttitude::Hostile);
+
 	if (AimTarget)
 	{
 		AimTargetAbilitySystemComponent=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(AimTarget);

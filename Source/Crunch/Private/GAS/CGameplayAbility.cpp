@@ -47,15 +47,12 @@ AActor* UCGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type T
 			DrawDebugLine(GetWorld(),Location,AimEnd,FColor::Red,false,2.f,0U,3.f);
 		}
 		
-		TArray<FHitResult> HitResults;
-		if (GetWorld()->LineTraceMultiByObjectType(HitResults,Location,AimEnd,CollisionObjectQueryParams,CollisionQueryParams))
+		FHitResult HitResult;
+		if (GetWorld()->LineTraceSingleByObjectType(HitResult,Location,AimEnd,CollisionObjectQueryParams,CollisionQueryParams))
 		{
-			for (FHitResult& HitResult : HitResults)
+			if (IsActorTeamAttitudeIs(HitResult.GetActor(),TeamAttitude))
 			{
-				if (IsActorTeamAttitudeIs(HitResult.GetActor(),TeamAttitude))
-				{
-					return HitResult.GetActor();
-				}
+				return HitResult.GetActor();
 			}
 		}
 	}
