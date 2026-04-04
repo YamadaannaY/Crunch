@@ -54,6 +54,7 @@ void UGA_Shoot::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGamep
 	SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),FGameplayEventData());
 
 	StopShooting(FGameplayEventData());
+	StopAimValidCheckTimer();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
@@ -88,6 +89,43 @@ void UGA_Shoot::StopAimTargetCheckTimer()
 	}
 }
 
+void UGA_Shoot::StartAimValidCheckTimer()
+{
+	UWorld* World = GetWorld();
+	if (World && AimTarget)
+	{
+		World->GetTimerManager().SetTimer(AimTargetValidTimerHandle,this,&ThisClass::CheckTargetValidStopShoot,0.1f,true);
+	}
+}
+
+void UGA_Shoot::StopAimValidCheckTimer()
+{
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		World->GetTimerManager().ClearTimer(AimTargetValidTimerHandle);
+	}
+}
+
+void UGA_Shoot::CheckTargetValidStopShoot()
+{
+	
+	AController* Controller = Cast<APawn>(GetAvatarActorFromActorInfo())->GetController();
+	if (Controller)
+	{
+		APlayerController* PlayerController = Cast<APlayerController>(Controller);
+		if (!IsActorInCameraFrustum(AimTarget,PlayerController))
+		{
+			AimTarget = nullptr;
+			FGameplayEventData EventData;
+			EventData.Target = AimTarget;
+			SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),EventData);
+			
+			StopAimValidCheckTimer();
+		}
+	}	
+}
+
 bool UGA_Shoot::HasValidTarget() const 
 {
 	if (!AimTarget) return false;
@@ -113,7 +151,9 @@ void UGA_Shoot::StartShooting(FGameplayEventData PayLoad)
 	PlayShootMontage->ReadyForActivation();
 
 	FindAimTarget();
+	StopAimValidCheckTimer();
 	StartAimTargetCheckTimer();
+	
 }
 
 	
@@ -125,22 +165,7 @@ void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 
 	StopAimTargetCheckTimer();
 	
-	AimTarget = nullptr;
-	FGameplayEventData EventData;
-	EventData.Target = AimTarget;
-	SendLocalGameplayEvent(UCAbilitySystemStatics::GetTargetUpdatedTag(),EventData);
-	
-	AController* Controller = Cast<APawn>(GetAvatarActorFromActorInfo())->GetController();
-	if (Controller)
-	{
-		APlayerController* PlayerController = Cast<APlayerController>(Controller);
-		if (!IsActorInCameraFrustum(AimTarget,PlayerController))
-		{
-			return;
-		}
-	}	
-	
-	
+	StartAimValidCheckTimer();
 	if (UAnimInstance* AnimInst = GetOwnerAnimInstance())
 	{
 		if (ShootMontage && AnimInst->Montage_IsPlaying(ShootMontage))

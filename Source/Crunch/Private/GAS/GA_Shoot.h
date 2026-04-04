@@ -57,6 +57,7 @@ private:
 	UAbilitySystemComponent* AimTargetAbilitySystemComponent;
 
 	FTimerHandle AimTargetCheckTimerHandle;
+	FTimerHandle AimTargetValidTimerHandle;
 	
 	FVector SpawnLocation;
 
@@ -67,7 +68,10 @@ private:
 
 	void StartAimTargetCheckTimer();
 	void StopAimTargetCheckTimer();
+	void StartAimValidCheckTimer();
+	void StopAimValidCheckTimer();
 
+	void CheckTargetValidStopShoot();
 	bool HasValidTarget() const ; 
 
 	bool IsTargetInRange() const;
