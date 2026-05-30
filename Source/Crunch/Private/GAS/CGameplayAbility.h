@@ -81,5 +81,5 @@ private:
 	bool bShouldDrawDebug=false;
 
 	UPROPERTY()
-	ACharacter* AvatarCharacter;
+	TObjectPtr<ACharacter> AvatarCharacter;
 };

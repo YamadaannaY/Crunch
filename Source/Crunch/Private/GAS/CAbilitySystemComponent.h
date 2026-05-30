@@ -22,7 +22,7 @@ public:
 	//找到DT中对应ASC拥有者的Class并获取其数据，为属性集赋值
 	void InitializeBaseAttribute();
 
-	//在CPlayerController的Possess函数中调用，即在服务端实现ASC的Init,对于AIC，在Character类的PossessedBy中专门判断调用
+	//在CPlayerController的Possess函数中调用，再服务端实现对ASC的Init
 	void ServerSideInit();
 
 	//遍历InitGE并应用
@@ -34,7 +34,7 @@ public:
 	//判断当前是否处于MaxLevel
 	bool IsAtMaxLevel() const;
 
-	//服务端调用RPC，在触发Upgrade的IA输入时执行技能升级逻辑，由于IA是本地的，所以需要一个RPC使得这个函数在服务端调用。
+	//客户端发送向服务端RPC，在触发Upgrade的IA输入时执行技能升级逻辑，由于IA是本地的，所以需要一个RPC使得这个函数在服务端调用。
 	UFUNCTION(Server,Reliable,WithValidation)
 	void Server_UpgradeAbilityWithID(ECAbilityInputID InputID);
 

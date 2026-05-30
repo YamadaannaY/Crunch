@@ -18,7 +18,7 @@ bool UCGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Hand
 {
 	FGameplayAbilitySpec* AbilitySpec=ActorInfo->AbilitySystemComponent->FindAbilitySpecFromHandle(Handle);
 
-	//为GA添加激活条件，没有GA或者GA是0级不能激活
+	//为GA添加激活条件，GA是0级不能激活
 	if (AbilitySpec && AbilitySpec->Level<=0) return false;
 
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
@@ -158,7 +158,7 @@ void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
 }
 
 void UCGameplayAbility::PushTargets(const TArray<AActor*>& Targets, const FVector PushVel)
-{
+{   
 	for (AActor* Target : Targets)
 	{
 		PushTarget(Target,PushVel);

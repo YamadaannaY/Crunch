@@ -13,8 +13,7 @@ UCAssetManager& UCAssetManager::Get()
 
 void UCAssetManager::LoadShopItems(const FStreamableDelegate& LoadFinishedCallback)
 {
-	LoadPrimaryAssetsWithType(UPA_ShopItem::GetShopItemAssetType(),TArray<FName>(),
-		FStreamableDelegate::CreateUObject(this,&ThisClass::ShopItemLoadFinished,LoadFinishedCallback));
+	LoadPrimaryAssetsWithType(UPA_ShopItem::GetShopItemAssetType(),TArray<FName>(),FStreamableDelegate::CreateUObject(this,&ThisClass::ShopItemLoadFinished,LoadFinishedCallback));
 }
 
 void UCAssetManager::LoadCharacterDefinition(const FStreamableDelegate& LoadFinishedCallback)
@@ -79,7 +78,7 @@ void UCAssetManager::BuildItemMaps()
 {
 	TArray<const UPA_ShopItem*> LoadedItems;
 
-	//获取已经记载的所有Item
+	//获取所有ShopItems
 	if (GetLoadedShopItem(LoadedItems))
 	{
 		//对这些Item遍历，再遍历其子Item，为子Item填充CombinationMap,为Item填充IngredientMap
@@ -94,9 +93,20 @@ void UCAssetManager::BuildItemMaps()
 			{
 				//将子Item加载到Items
 				const UPA_ShopItem* IngredientItem = Ingredient.LoadSynchronous();
-				Items.Add(IngredientItem);
-				AddToCombinationMap(IngredientItem,Item);
+				if (IngredientItem)
+				{
+					//记录编辑器中手动存储的Ingredient并写入IngredientMap
+					Items.Add(IngredientItem);
+				
+					//更新CombinationMap
+					AddToCombinationMap(IngredientItem,Item);
+				}
+				else
+				{
+					UE_LOG(LogTemp,Warning,TEXT("Failed to load ingredient for item :%s"),*Item->GetName());
+				}
 			}
+			
 			IngredientMap.Add(Item,FItemCollection{Items});
 		}
 	}
@@ -114,6 +124,7 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
 			Combinations->AddItem(CombinationItem);
 		}
 	}
+	//第一次记录此Combination，Map中还没有存储此映射，需要手动Add一次
 	else
 	{
 		CombinationMap.Add(Ingredient,FItemCollection{TArray<const UPA_ShopItem*>{CombinationItem}});

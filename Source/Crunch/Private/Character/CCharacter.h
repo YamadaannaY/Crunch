@@ -31,7 +31,7 @@ public:
 	void ClientSideInit();
 
 	//这个函数用在客户端上，判断由客户端控制的玩家角色，因为在客户端上有很多模拟代理，但是只有一个本地Controller，即玩家拥有的Controller
-	bool IsLocallyControlledByPlayer();
+	bool IsLocallyControlledByPlayer() const ;
 
 	//被Controller控制时在服务端调用，此时进行ServerSideInit
 	virtual void PossessedBy(AController* NewController) override;
@@ -139,7 +139,6 @@ public:
 	//直接移除DeadTag
 	void ReSpawnImmediative() const ;
 
-	void PlayHitReactMontage(int Index);
 private:
 	//Mesh相对Capsule的变换，用于换Mesh，RagDoll复位等情景下保持新的Mesh变换与最开始相同
 	FTransform MeshRelativeTransform;

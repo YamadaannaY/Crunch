@@ -7,7 +7,7 @@ class UGameplayEffect;
 
 //定义InputID,通过ID触发GA
 UENUM(BlueprintType)
-enum class ECAbilityInputID:uint8
+enum class ECAbilityInputID:uint8    //可拓展的自定义InputID，用于作为LocalInput函数的参数激活对应的GA
 {
 	None			UMETA(DisplayName="None"),
 	BasicAttacks	UMETA(DisplayName="Basic Attack"),
@@ -18,8 +18,8 @@ enum class ECAbilityInputID:uint8
 	AbilityFour		UMETA(DisplayName="Ability Four"),
 	AbilityFive		UMETA(DisplayName="Ability Five"),
 	AbilitySix		UMETA(DisplayName="Ability Six"),
-	Confirm			UMETA(DisplayName="Confirm"), //重写GenericConfirmInputID
-	Cancel			UMETA(DisplayName="Cancel"),  //重写GenericCancelInputID
+	Confirm			UMETA(DisplayName="Confirm"), //ASC初始化中重写为GenericConfirmInputID
+	Cancel			UMETA(DisplayName="Cancel"),  //ASC初始化中重写GenericCancelInputID
 };
 
 //将GE与PushVel在编辑器中对应配置，调用这个Def来PushTarget可以根据配置的Vel为DamageGE施加作用力

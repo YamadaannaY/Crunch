@@ -1,7 +1,8 @@
 #include "CPlayerState.h"
-#include  "Framework/CGameState.h"
+#include "Framework/CGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/CCharacter.h"
+#include  "Character/PA_CharacterDefination.h"
 #include "Net/UnrealNetwork.h"
 #include "NetWork/NetStatics.h"
 

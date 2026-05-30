@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Character/CCharacter.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/CapsuleComponent.h"
@@ -53,7 +50,7 @@ void ACCharacter::ClientSideInit()
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
 }
 
-bool ACCharacter::IsLocallyControlledByPlayer()
+bool ACCharacter::IsLocallyControlledByPlayer() const 
 {
 	//判断LocalController从而找到当前客户端的主Player
 	return GetController() && GetController()->IsLocalPlayerController();
@@ -63,6 +60,7 @@ void ACCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	
+	//AI的Init
 	if (NewController && !NewController->IsPlayerController())
 	{
 		ServerSideInit();
@@ -353,7 +351,7 @@ void ACCharacter::Respawn()
 	//重新复活在最开始生成的位置
 	if (HasAuthority() && GetController())
 	{
-		//弱指针保证PlayerStart不会悬空
+		//保证PlayerStart不会悬空
 		TWeakObjectPtr<AActor> StartSpot=GetController()->StartSpot;
 
 		if (StartSpot.IsValid())

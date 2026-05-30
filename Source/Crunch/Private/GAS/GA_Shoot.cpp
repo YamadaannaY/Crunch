@@ -162,7 +162,7 @@ void UGA_Shoot::StopShooting(FGameplayEventData PayLoad)
 	if (bInputLocked) return; // 如果已经在停止，忽略重复调用
 
 	bInputLocked = true; // 锁定，禁止开始
-
+	
 	StopAimTargetCheckTimer();
 	
 	StartAimValidCheckTimer();
@@ -280,7 +280,7 @@ void UGA_Shoot::TargetDeadTagUpdated(const FGameplayTag Tag, int32 NewCount)
 bool UGA_Shoot::IsTargetInRange() const
 {
 	if (!AimTarget) return false;
-
+	
 	const float Dist=FVector::Distance(AimTarget->GetActorLocation(),GetAvatarActorFromActorInfo()->GetActorLocation());
 
 	return Dist<=ShootProjectileRange;

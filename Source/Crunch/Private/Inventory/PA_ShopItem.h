@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+//PA类，作为一个Item，记录了商店中物品的所有必要信息
+//Struct类，FItemCollection，在Item数组情况下使用，拓展了对数组的基本操作，如添加，删除
 
 #pragma once
 
@@ -59,6 +60,8 @@ public:
 	TSubclassOf<UGameplayEffect> GetEquippedEffect() const {return EquippedEffect;}
 	TSubclassOf<UGameplayEffect> GetConsumeEffect() const {return ConsumeEffect;}
 	TSubclassOf<UGameplayAbility> GetGrantedAbility() const {return GrantAbility;}
+	
+	//此原料Item需要在编辑器的各PA资产中手动写入
 	const TArray<TSoftObjectPtr<UPA_ShopItem>>& GetIngredients() const {return IngredientItems;}
 	
 	//立即加载Icon

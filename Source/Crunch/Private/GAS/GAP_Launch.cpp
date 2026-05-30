@@ -10,11 +10,10 @@ UGAP_Launch::UGAP_Launch()
 	FAbilityTriggerData TriggerData;
 	TriggerData.TriggerSource=EGameplayAbilityTriggerSource::GameplayEvent;
 	TriggerData.TriggerTag=GetLaunchedAbilityActivationTag();
-
-	ActivationBlockedTags.RemoveTag(UCAbilitySystemStatics::GetStunStatTag());
 	
 	//添加到Triggers中
 	AbilityTriggers.Add(TriggerData);
+	ActivationBlockedTags.RemoveTag(UCAbilitySystemStatics::GetStunStatTag());
 }
 
 void UGAP_Launch::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

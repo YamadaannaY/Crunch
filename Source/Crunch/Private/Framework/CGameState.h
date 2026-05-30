@@ -7,7 +7,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/PA_CharacterDefination.h"
 #include "GameFramework/GameStateBase.h"
 #include "Player/PlayerInfoTypes.h"
 #include "CGameState.generated.h"

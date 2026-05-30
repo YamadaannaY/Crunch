@@ -123,7 +123,6 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 		return ;
 	}
 	
-	//触发对应ID下的GA
 	if (bPressed)
 	{
 		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
@@ -148,7 +147,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 
 void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& InputActionValue)
 {
-	//在IA设置中定义了Scaler,这里获得Input对应的Int值（1-6）
+	//在IA设置中定义了Scaler,可以直接获得Input对应的Int值（1-6）
 	int Value=FMath::RoundToInt(InputActionValue.Get<float>());
 
 	//激活对应Slot的Item

@@ -42,7 +42,7 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 
 		//获得具体蓝图生成类对象数据行
 		if (BaseStats && BaseStats->Class==GetOwner()->GetClass())
-		{	
+	 	{	
 			break;
 		}
 	}
@@ -101,7 +101,7 @@ void UCAbilitySystemComponent::GiveInitialAbilities()
 	//GA等级从0开始，可以升级
 	for (const TPair<ECAbilityInputID, TSubclassOf<UGameplayAbility>> AbilityPair: Abilities)
 	{
-		GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,0,(int32)AbilityPair.Key,nullptr));
+		FGameplayAbilitySpecHandle handle = GiveAbility(FGameplayAbilitySpec(AbilityPair.Value,0,(int32)AbilityPair.Key,nullptr));
 	}
 
 	//基础GA固定等级为1，不进行升级
