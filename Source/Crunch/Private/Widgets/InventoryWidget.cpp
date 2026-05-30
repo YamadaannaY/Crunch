@@ -110,6 +110,19 @@ void UInventoryWidget::ToggleContextMenu(const FInventoryItemHandle& ItemHandle)
 	FVector2D ItemAbsPos=ItemWidget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D{1.f,0.5f});
 	FVector2D ItemWidgetPixelPos,ItemWidgetViewportPos;
 	USlateBlueprintLibrary::AbsoluteToViewport(this,ItemAbsPos,ItemWidgetPixelPos,ItemWidgetViewportPos);
+
+	// 如果Menu超出屏幕底部，将其向上调整，保证Menu完整显示在视口内
+	const FVector2D ContextMenuSize=ContextMenuWidget->GetDesiredSize();
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+		if (ItemWidgetPixelPos.Y + ContextMenuSize.Y > ViewportSize.Y)
+		{
+			ItemWidgetPixelPos.Y = FMath::Max(0.f, ViewportSize.Y - ContextMenuSize.Y);
+		}
+	}
+
 	ContextMenuWidget->SetPositionInViewport(ItemWidgetPixelPos);
 }
 

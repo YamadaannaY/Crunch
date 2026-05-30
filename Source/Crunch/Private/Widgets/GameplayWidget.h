@@ -73,10 +73,7 @@ private:
 
 	UPROPERTY(Transient,meta=(BindWidgetAnim))
 	UWidgetAnimation* ShopPopupAnimation;
-
-	UPROPERTY(meta=(BindWidget))
-	UInventoryWidget* InventoryWidget;
-
+	
 	UPROPERTY(meta=(BindWidget))
 	USkeletalMeshRenderWidget* HeadShotWidget;
 
@@ -97,7 +94,12 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	UCanvasPanel* GameplayMenuRootPanel;
+	
+public:
+	UPROPERTY(meta=(BindWidget))
+	UInventoryWidget* InventoryWidget;
 
+private:
 	//播放动画
 	void PlayShopPopupAnimation(bool bPlayForward);
 	

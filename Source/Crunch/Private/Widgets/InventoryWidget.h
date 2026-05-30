@@ -57,8 +57,6 @@ private:
 	//右键点击绑定的回调。切换Menu，如果已经点击过再点击->取消 如果点击另一个->切换，如果第一次点击->显示
 	void ToggleContextMenu(const FInventoryItemHandle& ItemHandle);
 
-	//重置Menu
-	void ClearContextMenu();
 
 	FInventoryItemHandle CurrentFocusedItemHandle;
 	
@@ -79,4 +77,8 @@ private:
 
 	//当Item对应GA被调用时，激活Widget的冷却逻辑
 	void ItemAbilityCommitted(const FInventoryItemHandle& ItemHandle, float CooldownDuration, float CooldownTimeRemaining);
+
+public:
+	//重置Menu
+	void ClearContextMenu();
 };

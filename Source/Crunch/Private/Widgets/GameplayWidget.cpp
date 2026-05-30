@@ -54,6 +54,7 @@ void UGameplayWidget::ToggleShop()
 		SetOwningPawnInputEnabled(true);
 		SetShowMouseCursor(false);
 		SetFocusToGameOnly();
+		
 	}
 }
 

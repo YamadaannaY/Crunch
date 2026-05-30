@@ -4,6 +4,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Widgets/GameplayWidget.h"
 #include "net/UnrealNetwork.h"
+#include "Widgets/InventoryWidget.h"
 
 void ACPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -120,6 +121,7 @@ void ACPlayerController::ToggleShop()
 	if (GameplayWidget)
 	{
 		GameplayWidget->ToggleShop();
+		GameplayWidget->InventoryWidget->ClearContextMenu();
 	}
 }
 
