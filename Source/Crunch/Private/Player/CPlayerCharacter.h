@@ -63,10 +63,13 @@ private:
 	UInputAction* UseInventoryITemAction;
 	
 	UPROPERTY(EditDefaultsOnly,Category="Input")
-	TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputAction; 
-	
+	TMap<ECAbilityInputID, UInputAction*> GameplayAbilityInputAction;
+
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputMappingContext* GameplayInputMappingContext;
+
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	UInputAction* CameraZoomInputAction;
 	
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
@@ -74,7 +77,8 @@ private:
 	void LearnAbilityLeaderUp(const FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
 	void UseInventoryItem(const FInputActionValue& InputActionValue);
-	
+	void HandleCameraZoomInput(const FInputActionValue& InputActionValue);
+
 	void SetInputEnabledFromPlayerController(bool bEnabled);
 
 	FVector GetLookRightDir() const ;
@@ -109,6 +113,37 @@ private:
 
 	//递归使Camera的位置逼近Goal，实现插值移动
 	void TickCameraLocalOffsetLerp(FVector Goal);
+
+	/******************* Camera Zoom **************************/
+
+	//弹簧臂最小长度
+	UPROPERTY(EditDefaultsOnly,Category="View|Zoom")
+	float MinArmLength=200.f;
+
+	//弹簧臂最大长度
+	UPROPERTY(EditDefaultsOnly,Category="View|Zoom")
+	float MaxArmLength=800.f;
+
+	//鼠标滚轮每格的缩放步长
+	UPROPERTY(EditDefaultsOnly,Category="View|Zoom")
+	float ZoomStepSize=50.f;
+
+	//缩放的Lerp速度
+	UPROPERTY(EditDefaultsOnly,Category="View|Zoom")
+	float ZoomLerpSpeed=10.f;
+
+	//是否处于瞄准状态
+	bool bIsAim;
+	
+	//目标臂长
+	float TargetArmLength;
+
+	FTimerHandle ArmLengthLerpTimerHandle;
+
+	//维护一个定时器，作为递归的入口函数
+	void LerpArmLength(float Goal);
+	//递归函数
+	void TickArmLengthLerp(float Goal);
 
 	/************************Inventory *********************************/
 private:

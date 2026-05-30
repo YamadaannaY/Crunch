@@ -31,6 +31,8 @@ ACPlayerCharacter::ACPlayerCharacter()
 
 	HeroAttributesSet=CreateDefaultSubobject<UCHeroAttributeSet>("Hero Attributes Set ");
 	InventoryComponent=CreateDefaultSubobject<UInventoryComponent>("Inventory Component");
+
+	TargetArmLength=CameraBoom->TargetArmLength;
 }
 
 void ACPlayerCharacter::PawnClientRestart()
@@ -63,6 +65,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
 		EnhancedInputComp->BindAction(MoveInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleMoveInput);
 		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
+		EnhancedInputComp->BindAction(CameraZoomInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleCameraZoomInput);
 
 		//使用Down作为触发，具有持续性，有开始和结束两个回调，分别对应两段逻辑
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Triggered,this,&ThisClass::LearnAbilityLeaderDown);
@@ -210,6 +213,7 @@ void ACPlayerCharacter::OnRecoveryFromStun()
 
 void ACPlayerCharacter::OnAimStatChanged(bool bIsAiming)
 {
+	bIsAim=bIsAiming;
 	LerpCameraToLocalOffset(bIsAiming ? CameraAimLocalOffset : FVector{0.f});	
 }
 
@@ -252,4 +256,41 @@ void ACPlayerCharacter::TickCameraLocalOffsetLerp(FVector Goal)
 
 	//使用一个帧执行一次的一次性定时器进行函数递归调用逼近Goal位置
 	CameraLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickCameraLocalOffsetLerp,Goal));
+}
+
+void ACPlayerCharacter::HandleCameraZoomInput(const FInputActionValue& InputActionValue)
+{
+	if (bIsAim) return ;
+	
+	const float ZoomValue=InputActionValue.Get<float>();
+	TargetArmLength=FMath::Clamp(TargetArmLength + ZoomValue * ZoomStepSize, MinArmLength, MaxArmLength);
+
+	LerpArmLength(TargetArmLength);
+}
+
+void ACPlayerCharacter::LerpArmLength(float Goal)
+{
+	GetWorldTimerManager().ClearTimer(ArmLengthLerpTimerHandle);
+	ArmLengthLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickArmLengthLerp,Goal));
+}
+
+void ACPlayerCharacter::TickArmLengthLerp(float Goal)
+{
+	const float CurrentArmLength=CameraBoom->TargetArmLength;
+
+	//值太小不用递归
+	if (FMath::Abs(CurrentArmLength - Goal) < 1.f)
+	{
+		CameraBoom->TargetArmLength=Goal;
+		return;
+	}
+
+	//一帧内移动的速度
+	const float LerpAlpha=FMath::Clamp(GetWorld()->GetDeltaSeconds() * ZoomLerpSpeed, 0.f, 1.f);
+	const float NewArmLength=FMath::Lerp(CurrentArmLength, Goal, LerpAlpha);
+
+	CameraBoom->TargetArmLength=NewArmLength;
+
+	//递归
+	ArmLengthLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickArmLengthLerp,Goal));
 }
