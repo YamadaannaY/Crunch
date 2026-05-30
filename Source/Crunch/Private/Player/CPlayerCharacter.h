@@ -87,6 +87,15 @@ private:
 
 	bool bIsLearnAbilityLeaderDown=false;
 
+	/******************* Movement Smoothing **************************/
+
+	//平滑后的移动输入（当前实际使用的输入值）
+	FVector2D SmoothedMoveInput;
+
+	//输入平滑速度，值越大响应越快，越小转向越平滑
+	UPROPERTY(EditDefaultsOnly, Category="Movement")
+	float MoveInputSmoothingSpeed = 8.f;
+
 	/******************* Death and Respawn **************************/
 	virtual void OnDead() override;
 	virtual void OnRespawn() override;

@@ -101,8 +101,12 @@ void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValu
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
 	InputVal.Normalize();
 
-	//将摄像机的坐标系作为位移方向参考，添加映射实现位移
-	AddMovementInput(GetMoveFwdDir()*InputVal.Y+GetLookRightDir()*InputVal.X);
+	// 对输入做平滑插值，避免方向瞬间跳变导致角色旋转和动画生硬
+	const float DeltaTime=GetWorld()->GetDeltaSeconds();
+	SmoothedMoveInput=FMath::Vector2DInterpTo(SmoothedMoveInput,InputVal,DeltaTime,MoveInputSmoothingSpeed);
+
+	//将摄像机的坐标系作为位移方向参考，使用平滑后的输入实现位移
+	AddMovementInput(GetMoveFwdDir()*SmoothedMoveInput.Y+GetLookRightDir()*SmoothedMoveInput.X);
 }
 
 void ACPlayerCharacter::LearnAbilityLeaderDown(const FInputActionValue& InputActionValue)
