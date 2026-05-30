@@ -27,12 +27,17 @@ ACPlayerCharacter::ACPlayerCharacter()
 	bUseControllerRotationYaw=false;
 	
 	GetCharacterMovement()->bOrientRotationToMovement=true;
-	GetCharacterMovement()->RotationRate=FRotator(0,720.f,0.0f);
+	GetCharacterMovement()->RotationRate=FRotator(0,TurnRotationRate,0.0f);
 
 	HeroAttributesSet=CreateDefaultSubobject<UCHeroAttributeSet>("Hero Attributes Set ");
 	InventoryComponent=CreateDefaultSubobject<UInventoryComponent>("Inventory Component");
 
 	TargetArmLength=CameraBoom->TargetArmLength;
+
+	// 二段跳初始化
+	JumpMaxCount=MaxJumpCount;
+	GetCharacterMovement()->JumpZVelocity=FirstJumpZVelocity;
+	GetCharacterMovement()->AirControl=DefaultAirControl;
 }
 
 void ACPlayerCharacter::PawnClientRestart()
@@ -61,7 +66,7 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (EnhancedInputComp)
 	{
 		//Trigger作为触发，具有瞬时性
-		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::Jump);
+		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleJumpInput);
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
 		EnhancedInputComp->BindAction(MoveInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleMoveInput);
 		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
@@ -297,4 +302,33 @@ void ACPlayerCharacter::TickArmLengthLerp(float Goal)
 
 	//递归
 	ArmLengthLerpTimerHandle=GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateUObject(this,&ThisClass::TickArmLengthLerp,Goal));
+}
+
+void ACPlayerCharacter::HandleJumpInput()
+{
+	UCharacterMovementComponent* MovementComp=GetCharacterMovement();
+	if (!MovementComp) return;
+	if (!CanJump()) return;
+
+	if (JumpCurrentCount == 0)
+	{
+		// 地面第一段跳
+		MovementComp->JumpZVelocity=FirstJumpZVelocity;
+	}
+	else
+	{
+		// 空中二段跳：使用较低的跳跃速度和更高的空中控制
+		MovementComp->JumpZVelocity=SecondJumpZVelocity;
+		MovementComp->AirControl=DoubleJumpAirControl;
+	}
+
+	Jump();
+}
+
+void ACPlayerCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	// 落地时恢复默认空中控制系数
+	GetCharacterMovement()->AirControl=DefaultAirControl;
 }

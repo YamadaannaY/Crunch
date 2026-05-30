@@ -78,6 +78,7 @@ private:
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
 	void UseInventoryItem(const FInputActionValue& InputActionValue);
 	void HandleCameraZoomInput(const FInputActionValue& InputActionValue);
+	void HandleJumpInput();
 
 	void SetInputEnabledFromPlayerController(bool bEnabled);
 
@@ -95,6 +96,35 @@ private:
 	//输入平滑速度，值越大响应越快，越小转向越平滑
 	UPROPERTY(EditDefaultsOnly, Category="Movement")
 	float MoveInputSmoothingSpeed = 8.f;
+
+	//角色转身速率（°/s），值越小转身越平滑
+	UPROPERTY(EditDefaultsOnly, Category="Movement")
+	float TurnRotationRate = 360.f;
+
+	/******************* Double Jump **************************/
+
+	// 最大跳跃次数（映射到 CharacterMovement->JumpMaxCount）
+	UPROPERTY(EditDefaultsOnly, Category="Jump")
+	int MaxJumpCount = 2;
+
+	// 第一段跳跃的Z轴速度
+	UPROPERTY(EditDefaultsOnly, Category="Jump")
+	float FirstJumpZVelocity = 600.f;
+
+	// 第二段跳跃的Z轴速度
+	UPROPERTY(EditDefaultsOnly, Category="Jump")
+	float SecondJumpZVelocity = 450.f;
+
+	// 默认空中控制系数
+	UPROPERTY(EditDefaultsOnly, Category="Jump")
+	float DefaultAirControl = 0.2f;
+
+	// 二段跳时的空中控制系数（值越大空中转向越灵活）
+	UPROPERTY(EditDefaultsOnly, Category="Jump")
+	float DoubleJumpAirControl = 0.5f;
+
+	// 落地时重置跳跃和空中控制状态
+	virtual void Landed(const FHitResult& Hit) override;
 
 	/******************* Death and Respawn **************************/
 	virtual void OnDead() override;

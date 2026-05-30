@@ -54,6 +54,10 @@ private:
 
 	FTimerHandle DashForwardTimerHandle;
 
+	// 记录空中Dash前的重力系数，Dash结束后恢复
+	bool bGravityDisabled = false;
+	float OriginalGravityScale = 1.f;
+
 	//等待NotifyTag触发Dash
 	UFUNCTION()
 	void StartDashing(FGameplayEventData PayLoad);

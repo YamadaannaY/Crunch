@@ -62,7 +62,6 @@ void UGA_Dash::StartDashing(FGameplayEventData PayLoad)
 		{
 			DashForwardTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this,&ThisClass::DashForward);
 			OwnerCharacterMovementComponent=GetAvatarActorFromActorInfo()->GetComponentByClass<UCharacterMovementComponent>();
-		}
 	}
 
 		UAbilityTask_WaitTargetData* WaitDashAroundTargetData =UAbilityTask_WaitTargetData::WaitTargetData(this,NAME_None,EGameplayTargetingConfirmation::CustomMulti,TargetActorClass);
