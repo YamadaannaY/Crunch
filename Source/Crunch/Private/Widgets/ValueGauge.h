@@ -26,6 +26,9 @@ public:
 
 	//属性值变化后回调调用，计算并更新Percent，更新Text
 	void SetValue(float NewValue,float NewMaxValue);
+
+	//运行时动态修改进度条填充颜色
+	void SetFillColor(FLinearColor NewColor);
 private:
 	//SetAndBoundToGameplayAttribute中两个值绑定的回调
 	void ValueChanged(const FOnAttributeChangeData& ChangeData);

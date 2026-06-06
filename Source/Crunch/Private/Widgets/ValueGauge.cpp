@@ -75,3 +75,12 @@ void UValueGauge::MaxValueChanged(const FOnAttributeChangeData& ChangeData)
 {
 	SetValue(CacheValue,ChangeData.NewValue);
 }
+
+void UValueGauge::SetFillColor(FLinearColor NewColor)
+{
+	BarColor = NewColor;
+	if (ProgressBar)
+	{
+		ProgressBar->SetFillColorAndOpacity(NewColor);
+	}
+}
