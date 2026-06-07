@@ -228,6 +228,7 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 		//监听Health/Mana
 		OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
 		OverHeadStatsGauge->SetBarColorsByTeam(GetGenericTeamId());
+			OverHeadWidgetComponent->SetHiddenInGame(false);
 		
 		UpdateHeadGaugeVisibility();
 

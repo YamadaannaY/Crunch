@@ -32,6 +32,8 @@ public:
 
 	//游戏结束调用的逻辑
 	void MatchFinished(AActor* ViewTarget,int WinningTeam);
+	
+	void ClearContextMenuInInventory();
 private:
 	//MatchFinish在客户端主要处理UI显示和将镜头从角色摄像机过渡到StormCore摄像机上
 	UFUNCTION(Client,Reliable)

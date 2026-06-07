@@ -77,6 +77,11 @@ void ACPlayerController::MatchFinished(AActor* ViewTarget, int WinningTeam)
 	Client_MatchFinished(ViewTarget,WinningTeam);
 }
 
+void ACPlayerController::ClearContextMenuInInventory()
+{
+	GameplayWidget->InventoryWidget->ClearContextMenu();
+}
+
 void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinningTeam)
 {
 	CPlayerCharacter->DisableInput(this);
@@ -117,7 +122,6 @@ void ACPlayerController::ToggleShop()
 	if (GameplayWidget)
 	{
 		GameplayWidget->ToggleShop();
-		GameplayWidget->InventoryWidget->ClearContextMenu();
 	}
 }
 

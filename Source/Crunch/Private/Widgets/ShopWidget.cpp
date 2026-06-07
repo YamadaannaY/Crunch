@@ -4,6 +4,7 @@
 #include "ShopItemWidget.h"
 #include "Framework/CAssetManager.h"
 #include "Components/TileView.h"
+#include "Player/CPlayerController.h"
 
 void UShopWidget::NativeConstruct()
 {
@@ -65,6 +66,11 @@ void UShopWidget::ShowItemCombination(const UShopItemWidget* ItemWidget)
 	if (CombinationTree)
 	{
 		CombinationTree->DrawFromNode(ItemWidget);
+		ACPlayerController* OwningController = Cast<ACPlayerController>(GetOwningPlayer());
+		if (OwningController)
+		{
+			OwningController->ClearContextMenuInInventory();
+		}
 	}
 }
 
