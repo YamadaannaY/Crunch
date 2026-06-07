@@ -1,5 +1,3 @@
-//游戏核心角色类，Hero和Minion都是继承于此，实现共同的基础逻辑
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,12 +8,14 @@
 #include "Widgets/RenderActorTargetInterface.h"
 #include "CCharacter.generated.h"
 
-struct FOnAttributeChangeData;
-enum class ECAbilityInputID : uint8;
 class UGameplayAbility;
+enum class ECAbilityInputID : uint8;
+
+struct FOnAttributeChangeData;
 struct FGameplayEventData;
 struct FGameplayTag;
 
+/**游戏核心角色类，Hero和Minion都是继承于此，实现基础逻辑和子类集成逻辑    **/
 UCLASS()
 class ACCharacter : public ACharacter, public IAbilitySystemInterface, public IGenericTeamAgentInterface,public IRenderActorTargetInterface
 {
@@ -27,7 +27,7 @@ public:
 	//处理了对ASC组件的初始化，并且应用初始化基础属性的函数（仅在客户端初始化）
 	void ServerSideInit();
 
-	//只处理对ASC组件的初始化，对属性的初始化交给权威端
+	//客户端只处理对ASC组件的初始化
 	void ClientSideInit();
 
 	//这个函数用在客户端上，判断由客户端控制的玩家角色，因为在客户端上有很多模拟代理，但是只有一个本地Controller，即玩家拥有的Controller
@@ -41,7 +41,8 @@ public:
 	//将ASC上的GetAbilities()进一步包装，使得Abilities的获取与ASC解耦
 	const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>& GetAbilities() const;
 
-	//获取Capture Vector/Rotator
+	/**获取Capture Vector/Rotator**/
+	
 	virtual FVector GetCaptureLocalPosition() const override;
 	virtual FRotator GetCaptureLocalRotation() const override;
 
@@ -66,7 +67,7 @@ public:
 	//获取ASC
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
-	//用于客户端本地输入触发Event的情况：将GameplayEvent发送这一行为也传递给服务端，在服务端执行逻辑，触发WaitEvent回调
+	//用于客户端本地输入触发Event的情况：将Event同步发送给服务端，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendGameplayEventToSelf(const FGameplayTag EventTag, const FGameplayEventData& EventData);
 	
@@ -75,7 +76,7 @@ public:
 	
 protected:
 	//升级ID对应的GA
-	void UpgradeAbilityWithInputID(ECAbilityInputID InputID);
+	void UpgradeAbilityWithInputID(ECAbilityInputID InputID) const ;
 	
 private:
 	//通过RegisterGameplayTagEvent监听特定Tag的更新并绑定回调函数
@@ -125,7 +126,7 @@ private:
 	//配置Gauge可视组件，将Component转为配置好的GaugeWidget类，并为其绑定委托
 	void ConfigureOverHeadStatusWidget();
 
-	//客户端调用，Timer绑定的回调，对客户端中的每一个此角色实例调用，根据与本地客户端角色实例的距离判断是否要显示自己的OverheadUI是否显示
+	//客户端调用，Timer绑定的回调，对客户端的本地Actor调用，根据与本地客户端角色实例的距离判断是否要显示自己的OverheadUI
 	void UpdateHeadGaugeVisibility() const ;
 
 	//Death状态下在客户端调用，判断是否显示OverHeadWidget
@@ -136,7 +137,7 @@ public:
 	//通过DeadTag判断DeadStat
 	bool IsDead() const;
 
-	//直接移除DeadTag
+	//移除DeathGE，即移除DeathTag，触发DeathTagUpdated解除Deat状态
 	void ReSpawnImmediative() const ;
 
 private:

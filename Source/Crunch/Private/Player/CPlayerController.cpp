@@ -8,7 +8,6 @@
 
 void ACPlayerController::OnPossess(APawn* NewPawn)
 {
-	//这里判断了当前是服务端的PlayerController
 	Super::OnPossess(NewPawn);
 
 	//获取服务端中权威的PlayerCharacter，对其进行初始化。这样做而不是在客户端进行初始化有效防止了作弊
@@ -23,7 +22,6 @@ void ACPlayerController::OnPossess(APawn* NewPawn)
 
 void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
 {
-	//这里判断了是在客户端的PlayerController
 	Super::AcknowledgePossession(NewPawn);
 	
 	CPlayerCharacter=Cast<ACPlayerCharacter>(NewPawn);
@@ -31,7 +29,7 @@ void ACPlayerController::AcknowledgePossession(APawn* NewPawn)
 	{
 		CPlayerCharacter->ClientSideInit();
 		
-		//在客户端渲染。也因此Widget相关所有函数都是只在客户端执行的
+		//在客户端渲染
 		SpawnGameplayWidget();
 	}
 }
@@ -49,6 +47,7 @@ FGenericTeamId ACPlayerController::GetGenericTeamId() const
 void ACPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
 	DOREPLIFETIME(ACPlayerController, TeamID);
 }
 
@@ -56,16 +55,13 @@ void ACPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	
-	UEnhancedInputLocalPlayerSubsystem* InputSubsystem=GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
-
-	if (InputSubsystem)
+	if (UEnhancedInputLocalPlayerSubsystem* InputSubsystem=GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 	{
 		InputSubsystem->RemoveMappingContext(UIInputMapping);
 		InputSubsystem->AddMappingContext(UIInputMapping,1);
 	}
 	
-	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(InputComponent);
-	if (EnhancedInputComp)
+	if (UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(InputComponent))
 	{
 		EnhancedInputComp->BindAction(ShopToggleInputAction,ETriggerEvent::Triggered,this,&ThisClass::ToggleShop);
 		EnhancedInputComp->BindAction(ToggleGameplayMenuAction,ETriggerEvent::Triggered,this,&ThisClass::ToggleGameplayMenu);
@@ -74,7 +70,7 @@ void ACPlayerController::SetupInputComponent()
 
 void ACPlayerController::MatchFinished(AActor* ViewTarget, int WinningTeam)
 {
-	//在GameMode中调用，因此需要具有权威端
+	//在GameMode中调用，需要具有权威端权限
 	if (!HasAuthority()) return ;
 
 	//显示UI并修改Title
@@ -93,11 +89,11 @@ void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget,
 	{
 		WinLoseMsg="You Lose ...." ;
 	}
-	
 	GameplayWidget->SetGameplayMenuTitle(WinLoseMsg);
+	
 	FTimerHandle ShowWinLoseStateTimerHandle;
 
-	//在镜头过渡完毕后调用，显示Menu
+	//在镜头过渡完毕后调用，显示GameMenu
 	GetWorldTimerManager().SetTimer(ShowWinLoseStateTimerHandle,this,&ThisClass::ShowWinLoseState,MatchFinishedViewBlendTimeDuration);
 }
 

@@ -1,5 +1,3 @@
-//这是一个全局单例的管理类，主要处理了PA类型的数据的加载和处理，通过Type标记PA进行特定加载，通过Get获取此管理类进行Load函数调用
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,8 +6,9 @@
 #include "CAssetManager.generated.h"
 
 class UPA_CharacterDefination;
+
 /**
- * 
+  * 这是一个全局单例的管理类，主要处理了PA类型的数据的加载和处理，通过Type标记PA进行特定加载，通过Get获取此管理类进行Load函数调用 
  */
 UCLASS()
 class CRUNCH_API UCAssetManager : public UAssetManager

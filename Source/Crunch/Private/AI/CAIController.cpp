@@ -11,16 +11,18 @@
 ACAIController::ACAIController()
 {
 	AIPerceptionComponent=CreateDefaultSubobject<UAIPerceptionComponent>("AI Perception Component");
+	
 	SightConfig=CreateDefaultSubobject<UAISenseConfig_Sight>("Sight Config");
-
 	SightConfig->DetectionByAffiliation.bDetectEnemies=true;
 	SightConfig->DetectionByAffiliation.bDetectFriendlies=false;
 	SightConfig->DetectionByAffiliation.bDetectNeutrals=false;
 	
 	SightConfig->SightRadius=1000.f;
 	SightConfig->LoseSightRadius=1200.f;
-	//超过LoseSight开始计时
+	
+	//超过LoseSightRadius开始对Age进行计时
 	SightConfig->SetMaxAge(5.f);
+	//Sight角度
 	SightConfig->PeripheralVisionAngleDegrees=180.f;
 
 	AIPerceptionComponent->ConfigureSense(*SightConfig);
@@ -32,19 +34,17 @@ void ACAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
-	IGenericTeamAgentInterface* PawnTeamInterface=Cast<IGenericTeamAgentInterface>(InPawn);
-	if (PawnTeamInterface)
+	if (IGenericTeamAgentInterface* PawnTeamInterface=Cast<IGenericTeamAgentInterface>(InPawn))
 	{
 		SetGenericTeamId(PawnTeamInterface->GetGenericTeamId());
 
-		//刷新Senses
+		//刷新一次所有Sense
 		ClearAndDisabledAllSenses();
 		EnableAllSenses();
 	}
 
 	//监听DeadTag，根据Tag状态添加或者清理所有Sense
-	UAbilitySystemComponent* PawnASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InPawn);
-	if (PawnASC)
+	if (UAbilitySystemComponent* PawnASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(InPawn))
 	{
 		PawnASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::PawnDeadTagUpdated);
 		PawnASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::PawnStunTagUpdated);
@@ -93,14 +93,13 @@ const UObject* ACAIController::GetCurrentTarget() const
 	const UBlackboardComponent* BlackboardComponent=GetBlackboardComponent();
 	if (BlackboardComponent)
 	{
-		return GetBlackboardComponent()->GetValueAsObject(TargetBlackboardKeyName);
+		return BlackboardComponent->GetValueAsObject(TargetBlackboardKeyName);
 	}
 	return nullptr;
 }
 
 void ACAIController::SetCurrenTarget(AActor* NewTarget)
 {
-	//将传入参数作为Target的值，如果传入参数为空则将ClearValue
 	UBlackboardComponent* BlackboardComponent=GetBlackboardComponent();
 	if (!BlackboardComponent) return;
 	
@@ -133,7 +132,6 @@ AActor* ACAIController::GetNextPerceivedActor() const
 
 void ACAIController::ForgetActorIfDead(AActor* ActorToForget) const 
 {
-	//获得ASC，通过ASC判断是否含有DeadTag
 	const UAbilitySystemComponent* ActorASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(ActorToForget);
 	if (!ActorASC) return ;
 

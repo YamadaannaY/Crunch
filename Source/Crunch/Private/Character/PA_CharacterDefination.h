@@ -10,7 +10,7 @@ class ACCharacter;
 /**
  * 
  */
-UCLASS()
+UCLASS(MinimalAPI)
 class UPA_CharacterDefination : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

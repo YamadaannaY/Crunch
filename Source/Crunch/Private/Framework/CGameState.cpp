@@ -60,12 +60,11 @@ bool ACGameState::CanStartHeroSelection() const
 	return PlayerSelectionArray.Num() == PlayerArray.Num();
 }
 
-void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
-	const UPA_CharacterDefination* SelectedDefinition)
+void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,const UPA_CharacterDefination* SelectedDefinition)
 {
 	if (IsDefinitionSelected(SelectedDefinition)) return ;
 
-	//找到当前玩家对应的Selection并传入
+	//找到当前玩家对应的Selection
 	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
 	{
 		return PlayerSelection.IsForPlayer(SelectingPlayer);
@@ -73,8 +72,8 @@ void ACGameState::SetCharacterSelected(const APlayerState* SelectingPlayer,
 
 	if (FoundPlayerSelection)
 	{
-		//Widget中响应此回调，根据Def更新HeroSlot
 		FoundPlayerSelection->SetCharacterDefinition(SelectedDefinition);
+		
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 }
@@ -103,7 +102,6 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* Definiti
 	{
 		FoundPlayerSelection->SetCharacterDefinition(nullptr);
 		
-		//Widget中响应此回调，更新HeroSlot
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 
@@ -111,6 +109,5 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* Definiti
 
 void ACGameState::OnRep_PlayerSelectionArray() const
 {
-	////Widget中响应此回调
 	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
-}
+} 

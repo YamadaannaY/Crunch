@@ -62,7 +62,7 @@ void UGA_Dash::StartDashing(FGameplayEventData PayLoad)
 		{
 			DashForwardTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this,&ThisClass::DashForward);
 			OwnerCharacterMovementComponent=GetAvatarActorFromActorInfo()->GetComponentByClass<UCharacterMovementComponent>();
-	}
+		}
 
 		UAbilityTask_WaitTargetData* WaitDashAroundTargetData =UAbilityTask_WaitTargetData::WaitTargetData(this,NAME_None,EGameplayTargetingConfirmation::CustomMulti,TargetActorClass);
 		WaitDashAroundTargetData->ValidData.AddDynamic(this,&ThisClass::TargetReceived);
@@ -82,27 +82,28 @@ void UGA_Dash::StartDashing(FGameplayEventData PayLoad)
 		{
 			TargetAroundActor->AttachToComponent(GetOwningComponentFromActorInfo(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TargetActorAttachSocketName);
 		}
+	}
 }
 
-void UGA_Dash::TargetReceived(const FGameplayAbilityTargetDataHandle&  Data)
-{
-	if (K2_HasAuthority())
+	void UGA_Dash::DashForward()
 	{
-		if (DamageEffect)
+		if (OwnerCharacterMovementComponent)
 		{
-			BP_ApplyGameplayEffectToTarget(Data,DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
-			PushTargetsFromOwningLocation(Data,HitPushSpeed);
+			FVector ForwardVector = GetAvatarActorFromActorInfo()->GetActorForwardVector();
+			OwnerCharacterMovementComponent->AddInputVector(ForwardVector);
+		
+			DashForwardTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this,&ThisClass::DashForward);
 		}
 	}
-}
 
-void UGA_Dash::DashForward()
-{
-	if (OwnerCharacterMovementComponent)
+	void UGA_Dash::TargetReceived(const FGameplayAbilityTargetDataHandle&  Data)
 	{
-		FVector ForwardVector = GetAvatarActorFromActorInfo()->GetActorForwardVector();
-		OwnerCharacterMovementComponent->AddInputVector(ForwardVector);
-		
-		DashForwardTimerHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this,&ThisClass::DashForward);
+		if (K2_HasAuthority())
+		{
+			if (DamageEffect)
+			{
+				BP_ApplyGameplayEffectToTarget(Data,DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
+				PushTargetsFromOwningLocation(Data,HitPushSpeed);
+			}
+		}
 	}
-}

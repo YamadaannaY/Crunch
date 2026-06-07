@@ -19,7 +19,7 @@ ACPlayerCharacter::ACPlayerCharacter()
 	CameraBoom->SetupAttachment(GetRootComponent());
 	CameraBoom->bUsePawnControlRotation=true;
 	CameraBoom->ProbeChannel=ECC_SpringArm;
-		
+
 	ViewCamera=CreateDefaultSubobject<UCameraComponent>("ViewCamera");
 	ViewCamera->SetupAttachment(CameraBoom,USpringArmComponent::SocketName);
 
@@ -42,11 +42,11 @@ ACPlayerCharacter::ACPlayerCharacter()
 
 void ACPlayerCharacter::PawnClientRestart()
 {
-	//这段代码只会在本地客户端生效
+	//只在本地客户端生效
+	
 	Super::PawnClientRestart();
 	
-	APlayerController* OwningPlayerController=GetController<APlayerController>();
-	if (OwningPlayerController)
+	if (APlayerController* OwningPlayerController=GetController<APlayerController>())
 	{
 		UEnhancedInputLocalPlayerSubsystem* InputSubsystem=OwningPlayerController->GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 
@@ -62,17 +62,16 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
-	UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if (EnhancedInputComp)
+	if (UEnhancedInputComponent* EnhancedInputComp=Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		//Trigger作为触发，具有瞬时性
+		//Trigger作为触发，具有瞬时性,不处理Completed
 		EnhancedInputComp->BindAction(JumpInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleJumpInput);
 		EnhancedInputComp->BindAction(LookInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleLookInput);
 		EnhancedInputComp->BindAction(MoveInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleMoveInput);
 		EnhancedInputComp->BindAction(UseInventoryITemAction,ETriggerEvent::Triggered,this,&ACPlayerCharacter::UseInventoryItem);
 		EnhancedInputComp->BindAction(CameraZoomInputAction,ETriggerEvent::Triggered,this,&ThisClass::HandleCameraZoomInput);
 
-		//使用Down作为触发，具有持续性，有开始和结束两个回调，分别对应两段逻辑
+		//使用Down作为触发，具有持续性，有开始和结束两个回调
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Triggered,this,&ThisClass::LearnAbilityLeaderDown);
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Completed,this,&ThisClass::LearnAbilityLeaderUp);
 		
@@ -92,7 +91,7 @@ void ACPlayerCharacter::GetActorEyesViewPoint(FVector& OutLocation, FRotator& Ou
 
 void ACPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValue)
 {
-	FVector2D InputVal=InputActionValue.Get<FVector2d>();
+	const FVector2D InputVal=InputActionValue.Get<FVector2d>();
 
 	AddControllerPitchInput(-InputVal.Y);
 	AddControllerYawInput(InputVal.X);
@@ -106,11 +105,9 @@ void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValu
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
 	InputVal.Normalize();
 
-	// 对输入做平滑插值，避免方向瞬间跳变导致角色旋转和动画生硬
-	const float DeltaTime=GetWorld()->GetDeltaSeconds();
+	// 对输入做平滑插值添加，避免方向瞬间跳变导致角色旋转和动画生硬
+	float DeltaTime=GetWorld()->GetDeltaSeconds();
 	SmoothedMoveInput=FMath::Vector2DInterpTo(SmoothedMoveInput,InputVal,DeltaTime,MoveInputSmoothingSpeed);
-
-	//将摄像机的坐标系作为位移方向参考，使用平滑后的输入实现位移
 	AddMovementInput(GetMoveFwdDir()*SmoothedMoveInput.Y+GetLookRightDir()*SmoothedMoveInput.X);
 }
 
@@ -148,11 +145,11 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	if (InputID==ECAbilityInputID::BasicAttacks)
 	{
 		//这个Tag只在UpperCut监听Event中被应用，正常Attack除非主动调用此Tag否则不会触发
-		FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
+		const FGameplayTag BasicAttackTag=bPressed ? UCAbilitySystemStatics::GetBasicAttackInputPressedTag() : UCAbilitySystemStatics::GetBasicAttackInputReleasedTag();
 		
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(this,BasicAttackTag,FGameplayEventData());
-		
-		//SetUpInput及其回调函数只在客户端执行，所以这里只有客户端的ASC接受了GameplayEvent，需要特别定义Server端的SendGameplayEvent将SendEvent行为发送到服务端
+
+		//将Input触发的Event发送给服务端
 		Server_SendGameplayEventToSelf(BasicAttackTag,FGameplayEventData());
 	}
 }
@@ -160,7 +157,7 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 void ACPlayerCharacter::UseInventoryItem(const FInputActionValue& InputActionValue)
 {
 	//在IA设置中定义了Scaler,可以直接获得Input对应的Int值（1-6）
-	int Value=FMath::RoundToInt(InputActionValue.Get<float>());
+	const int Value=FMath::RoundToInt(InputActionValue.Get<float>());
 
 	//激活对应Slot的Item
 	InventoryComponent->TryActivateItemInSlot(Value-1);

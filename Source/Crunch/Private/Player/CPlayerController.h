@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,7 +6,7 @@
 #include "CPlayerController.generated.h"
 
 /**
- * 
+ * 项目用的PlayerController基类
  */
 UCLASS()
 class ACPlayerController : public APlayerController ,public IGenericTeamAgentInterface
@@ -21,7 +19,7 @@ public:
 	//只在客户端和监听服务器的PlayerController上调用
 	virtual void AcknowledgePossession(APawn* NewPawn) override;
 	
-	//配置ID
+	//在GM的SpawnPlayerController中配置ID
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
 	//获取ID，服务端Controller的ID在Spawn的时候确定，并被Rep到客户端，处理ControllerClient端的UI交互所需的ID变量

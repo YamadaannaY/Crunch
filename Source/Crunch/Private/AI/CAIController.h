@@ -1,5 +1,3 @@
-//为Minion配置的AIController，主要对Sense、黑板等进行逻辑配置
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,7 +8,7 @@ struct FGameplayTag;
 struct FAIStimulus;
 
 /**
- * 
+ * 为Minion配置的AIController  
  */
 
 UCLASS()

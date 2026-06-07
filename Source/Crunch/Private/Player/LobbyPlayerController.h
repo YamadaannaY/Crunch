@@ -1,5 +1,3 @@
-//在LobbyMap中配置了LobbyPlayerController用于处理Lobby的UI交互
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,7 +6,7 @@
 
 DECLARE_DELEGATE(FOnSwitchToHeroSelection);
 /**
- *
+ *在LobbyMap中配置了LobbyPlayerController用于处理Lobby的UI交互
  */
 
 UCLASS()

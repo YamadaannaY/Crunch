@@ -1,5 +1,3 @@
-//GameMode核心类之一，作为判定游戏胜利的关键被创建
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,12 +5,14 @@
 #include "GameFramework/Character.h"
 #include "StormCore.generated.h"
 
+class AAIController;
 class UCameraComponent;
 class USphereComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGoalReachedDelegate,AActor*,int);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTeamInfluenceCountUpdatedDelegate,int,int );
 
+//GameMode核心类之一，作为判定游戏胜利的关键被创建
 UCLASS()
 class CRUNCH_API AStormCore : public ACharacter
 {
@@ -28,6 +28,7 @@ public:
 
 	//获取Core相对于两个Gaol之间距离的位置，折算为Progress的比例
 	float GetProgress() const ;
+	
 protected:
 	virtual void BeginPlay() override;
 
@@ -46,36 +47,37 @@ private:
 	float MaxMoveSpeed=500.f;
 	
 	UPROPERTY(VisibleDefaultsOnly,Category="Detection")
-	USphereComponent* InfluenceRange;
+	TObjectPtr<USphereComponent> InfluenceRange;
 
 	UPROPERTY(VisibleDefaultsOnly,Category="Detection")
-	UDecalComponent* GroundDecalComponent;
+	TObjectPtr<UDecalComponent> GroundDecalComponent;
 
 	UPROPERTY(VisibleDefaultsOnly,Category="Detection")
-	UCameraComponent* ViewCam;
+	TObjectPtr<UCameraComponent> ViewCam;
 
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
-	UAnimMontage* ExpandMontage;
+	TObjectPtr<UAnimMontage> ExpandMontage;
 
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
-	UAnimMontage* CaptureMontage;
-	UPROPERTY(EditAnywhere,Category="Team")
-	AActor* TeamOneGoal;
-
-	UPROPERTY(EditAnywhere,Category="Team")
-	AActor* TeamTwoGoal;
+	TObjectPtr<UAnimMontage> CaptureMontage;
 	
 	UPROPERTY(EditAnywhere,Category="Team")
-	AActor* TeamOneCore;
+	TObjectPtr<AActor> TeamOneGoal;
 
 	UPROPERTY(EditAnywhere,Category="Team")
-	AActor* TeamTwoCore;
+	TObjectPtr<AActor> TeamTwoGoal;
+	
+	UPROPERTY(EditAnywhere,Category="Team")
+	TObjectPtr<AActor> TeamOneCore;
+
+	UPROPERTY(EditAnywhere,Category="Team")
+	TObjectPtr<AActor> TeamTwoCore;
 
 	UPROPERTY(ReplicatedUsing=OnRep_CoreToCapture)
-	AActor* CoreToCapture;
+	TObjectPtr<AActor> CoreToCapture;
 
 	UPROPERTY()
-	class AAIController* OwnerAIC;
+	TObjectPtr<AAIController> OwnerAIC;
 
 	float CoreCaptureSpeed;
 	
@@ -108,7 +110,7 @@ private:
 	void CaptureTeamCore();
 	
 	//捕捉完成后收缩
-	void ExpandFinished() const ;
+	void ExpandFinished();
 
 	//根据Team参数广播GoalReached委托为每一个玩家调用MatchFinish和调用CaptureCore
 	void GoalReached(int WiningTeam);

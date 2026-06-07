@@ -1,4 +1,3 @@
-/**	检测TA周围对象并加入Array，用于Dash的拳头之上		**/
 
 #pragma once
 
@@ -8,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "ATargetActor_Around.generated.h"
 
+/**	检测TA周围对象并加入ActorArray，存储到一个TargetData中，用于Dash的接触点，做碰撞检测		**/
 UCLASS()
 class CRUNCH_API AATargetActor_Around : public AGameplayAbilityTargetActor,public  IGenericTeamAgentInterface
 {

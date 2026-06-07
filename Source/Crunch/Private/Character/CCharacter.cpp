@@ -19,10 +19,10 @@ ACCharacter::ACCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Mesh本身没有碰撞，依赖Box进行碰撞判定
+	//Mesh本身没有碰撞，依赖CollisionBox进行碰撞判定
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 
-	//碰撞胶囊体忽略SpringArm和Target，避免Character类对象与SpringArm和Target的碰撞
+	//碰撞胶囊体忽略SpringArm和Target
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_SpringArm,ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Target,ECR_Ignore);
 
@@ -41,7 +41,6 @@ void ACCharacter::ServerSideInit()
 {
 	CAbilitySystemComponent->InitAbilityActorInfo(this,this);
 	
-	//在服务端对GA、GE、Attribute进行赋值
 	CAbilitySystemComponent->ServerSideInit();
 }
 
@@ -124,7 +123,7 @@ bool ACCharacter::Server_SendGameplayEventToSelf_Validate(const FGameplayTag Eve
 	return true;
 }
 
-void ACCharacter::UpgradeAbilityWithInputID(ECAbilityInputID InputID)
+void ACCharacter::UpgradeAbilityWithInputID(ECAbilityInputID InputID) const 
 {
 	//通过触发操作对应的触发ID调用升级逻辑
 	if (CAbilitySystemComponent)
@@ -214,7 +213,7 @@ void ACCharacter::OnAimStatChanged(bool bIsAiming)
 void ACCharacter::ConfigureOverHeadStatusWidget()
 {
 	if (!OverHeadWidgetComponent) return ;
-
+	
 	//本地客户端下Character不需要OverheadUI
 	if (IsLocallyControlledByPlayer())
 	{
@@ -228,8 +227,9 @@ void ACCharacter::ConfigureOverHeadStatusWidget()
 	{
 		//监听Health/Mana
 		OverHeadStatsGauge->ConfigureWithASC(GetAbilitySystemComponent());
+		OverHeadStatsGauge->SetBarColorsByTeam(GetGenericTeamId());
 		
-		OverHeadWidgetComponent->SetHiddenInGame(false);
+		UpdateHeadGaugeVisibility();
 
 		//每次配置重置UpdateTime
 		GetWorldTimerManager().ClearTimer(HeadStatGaugeVisibilityUpdateTimerHandle);

@@ -29,12 +29,14 @@ void AATargetActor_Around::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	
 	DOREPLIFETIME(AATargetActor_Around,TeamID);
 	DOREPLIFETIME(AATargetActor_Around,LocalGameplayCueTag);
+	DOREPLIFETIME(AATargetActor_Around,TargetDetectionRadius);
 }
 
 void AATargetActor_Around::ConfigureAroundActor(float DetectionRadius, const FGenericTeamId TeamId,
                                                 const FGameplayTag& InLocalGameplayCueTag)
 {
 	AroundSphereComponent->SetSphereRadius(DetectionRadius);
+	TargetDetectionRadius=DetectionRadius;
 	LocalGameplayCueTag=InLocalGameplayCueTag;
 	SetGenericTeamId(TeamId);
 }

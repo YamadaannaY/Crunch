@@ -14,7 +14,7 @@ EBTNodeResult::Type UBTTask_SentInputToAbilitySystem::ExecuteTask(UBehaviorTreeC
 		UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerAIC->GetPawn());
 		if (OwnerASC)
 		{
-			//ASC已经为InputID配置好GA并Give,直接Press即可触发
+			//激活对应ID的GA
 			OwnerASC->PressInputID((int32)InputID);
 			
 			return EBTNodeResult::Succeeded;

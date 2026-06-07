@@ -15,14 +15,12 @@ APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, cons
 		
 	//为Controller分配ID
 	const FGenericTeamId TeamId=GetTeamIDForPlayer(NewPlayerController);
-	
-	//将ID赋予Controller
 	if (NewPlayerTeamInterface)
 	{
 		NewPlayerTeamInterface->SetGenericTeamId(TeamId);
 	}
 		
-	//为当前生成的Controller对应的Pawn指定一个PlayerStart生成点
+	//基于ID选择一个阵营的生成点
 	NewPlayerController->StartSpot = FindNextStartSpotTeam(TeamId);
 	
 	return NewPlayerController;

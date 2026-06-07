@@ -1,6 +1,3 @@
-//GameMode是生成Controller的关键类
-//适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置 etc..
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -10,14 +7,15 @@
 
 struct FGenericTeamId;
 /**
- * 
- */
+* GameMode是生成Controller的关键类
+* 适合处理Controller在生成时应该具有的相关信息 eg：TeamID，生成位置，默认SpawnPawnClass etc..
+*/
 UCLASS()
 class ACGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
-	//在服务器端生成一个PlayerController实例,客户端会收到这个Controller的镜像（也是一个实例）
+	//在服务器端生成一个PlayerController实例,客户端会收到这个Controller的镜像（也是一个实例，经过复制和网络同步）
 	virtual APlayerController* SpawnPlayerController(ENetRole InRemoteRole, const FString& Options) override;
 
 	//GameMode的BeginPlay会在World开始Play时调用，比所有Actor早,适合确定需要在游戏开始就确定的逻辑

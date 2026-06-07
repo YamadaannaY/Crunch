@@ -1,5 +1,3 @@
-//兵营，主要功能 1：具有一个阵营ID，将其赋予其SpawnSpot生成的所有Minion 2：维护一个Pool，从中取出Minion
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -7,7 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "MinionBarrack.generated.h"
 
-UCLASS()
+//兵营，主要功能 1：具有一个阵营ID，将其赋予其SpawnSpot生成的所有Minion 2：维护一个MinionPool，从中取出Minion进行生成
+UCLASS(MinimalAPI)
 class AMinionBarrack : public AActor
 {
 	GENERATED_BODY()
@@ -28,8 +27,8 @@ private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	AActor* Goal;
 	
-	//Pool机制：由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
-	//的所有AI类，只在开始时生成一批，后续的Dead和Spawn都是基于这些存储好的Minion实例来操作，减小CPU负担。
+	//由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
+	//的所有AI类，只在开始时生成一次，后续的Dead和Spawn都是基于这些存储好的Minion实例来操作，减小CPU负担。
 	UPROPERTY()
 	TArray<class AMinion*> MinionPool;
 
@@ -39,9 +38,11 @@ private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	TArray<APlayerStart*> SpawnSpots;
 
-	UPROPERTY(EditDefaultsOnly,Category="Spawn")
+	//Max Limit
+	UPROPERTY(EditAnywhere,Category="Spawn")
 	int MaxSpawnNums = 15;
 
+	//StartSpotIndex
 	int NextSpawnSpotIndex=-1;
 
 	FTimerHandle SpawnIntervalTimerHandle;

@@ -7,6 +7,7 @@ void ALobbyPlayerController::Server_RequestSlotSelectionChange_Implementation(ui
 {
 	if (!GetWorld()) return ;
 	UE_LOG(LogTemp,Warning,TEXT("ServerSlotId : %d"),NewSlotID)
+	
 	ACGameState* CGameState = GetWorld()->GetGameState<ACGameState>();
 	if (!CGameState) return ;
 	CGameState->RequestPlayerSelectionChange(GetPlayerState<APlayerState>() , NewSlotID);
@@ -49,8 +50,7 @@ ALobbyPlayerController::ALobbyPlayerController()
 
 void ALobbyPlayerController::Server_RequestionStartMatch_Implementation()
 {
-	UCGameInstance* CGameInstance = Cast<UCGameInstance>(GetWorld()->GetGameInstance());
-	if (CGameInstance)
+	if (UCGameInstance* CGameInstance = Cast<UCGameInstance>(GetWorld()->GetGameInstance()))
 	{
 		CGameInstance->StartMatch();
 	}

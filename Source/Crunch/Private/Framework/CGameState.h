@@ -1,9 +1,3 @@
-//保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
-//还有一个关键的PlayerArray存储了所有的APlayerState
-//存在于客户端和服务端，自动复制，客户端也能调用以制作UI等
-
-//在这里，GameState主要存储了一个PlayerSelectionArray以及配置对应的交互逻辑，主要是因为所有客户端都需要用来更新UI，而GameState即全局存储类
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -13,19 +7,22 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSelectionUpdated , const TArray<FPlayerSelection>& )
 
-/**
- * 
- */
+/*
+ 保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
+ 还有一个关键的PlayerArray存储了所有的APlayerState，存在于客户端和服务端，自动复制，客户端也能调用以制作UI等，
+ 在这里，GameState主要存储了一个PlayerSelectionArray以及配置对应的交互逻辑，主要是因为所有客户端都需要用来更新SlotUI，
+*/
 UCLASS()
 class CRUNCH_API ACGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 public:
+	//用于更新PlayerSelectionArray时的响应回调委托，包括Slot、Def的变化，在UI中更新
 	FOnPlayerSelectionUpdated OnPlayerSelectionUpdated;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	//有点击操作进行，更新PlayerSelection
+	//有点击操作，更新PlayerSelection
 	void RequestPlayerSelectionChange(const APlayerState* RequestingPlayer , uint8 DesiredSlot);
 
 	//判断当前Id对应的Slot是否已经被占用
@@ -43,10 +40,10 @@ public:
 	//当所有Player都已经选择了Slot创建SelectionArray则true否则false
 	bool CanStartHeroSelection() const ;
 
-	//将Def传入PlayerState中，根据此Def更新对应Slot的UI
+	//有Def在PlayerState中被更新，将Array也中对应的PlayerSelection也更新一次
 	void SetCharacterSelected(const APlayerState* SelectingPlayer , const UPA_CharacterDefination* SelectedDefinition);
 	
-	//是否所有玩家选择Hero可以开始比赛
+	//是否所有玩家选择Hero，可以开始比赛
 	bool CanStartMatch() const ;
 private:
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerSelectionArray)

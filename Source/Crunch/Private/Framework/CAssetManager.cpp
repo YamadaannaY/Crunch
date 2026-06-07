@@ -6,7 +6,7 @@ UCAssetManager& UCAssetManager::Get()
 	UCAssetManager* Singleton = Cast<UCAssetManager>(GEngine->AssetManager.Get());
 	if (Singleton) return *Singleton;
 
-	UE_LOG(LogTemp,Fatal,TEXT("AssetManager needs to be of the type CAssetManager"));
+	UE_LOG(LogTemp,Fatal,TEXT("AssetManager needs to be of the type CAssetManager,now the Get return a NewObject pointer"));
 	
 	return (*NewObject<UCAssetManager>());
 }
@@ -67,7 +67,7 @@ const FItemCollection* UCAssetManager::GetIngredientForItem(const UPA_ShopItem* 
 
 void UCAssetManager::ShopItemLoadFinished(FStreamableDelegate Callback)
 {
-	//为调用者提供的异步回调函数
+	//执行调用者提供的异步回调函数
 	Callback.ExecuteIfBound();
 
 	//加载完Item对Map赋值
@@ -88,14 +88,13 @@ void UCAssetManager::BuildItemMaps()
 
 			TArray<const UPA_ShopItem*> Items;
 
-			//遍历其软引用ItemArray并同步加载其指针
+			//遍历其软引用ItemArray并同步加载
 			for (const TSoftObjectPtr<UPA_ShopItem>& Ingredient : Item->GetIngredients())
 			{
-				//将子Item加载到Items
 				const UPA_ShopItem* IngredientItem = Ingredient.LoadSynchronous();
 				if (IngredientItem)
 				{
-					//记录编辑器中手动存储的Ingredient并写入IngredientMap
+					//创建一个新的IngredientMap值
 					Items.Add(IngredientItem);
 				
 					//更新CombinationMap
@@ -107,6 +106,7 @@ void UCAssetManager::BuildItemMaps()
 				}
 			}
 			
+			//更新IngredientMap
 			IngredientMap.Add(Item,FItemCollection{Items});
 		}
 	}
@@ -114,10 +114,9 @@ void UCAssetManager::BuildItemMaps()
 
 void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const UPA_ShopItem* CombinationItem)
 {
-	FItemCollection* Combinations=CombinationMap.Find(Ingredient);
-
-	//如果在合成表中找到Ingredient对应的集合，就从中添加合成Item，否则创建此集合
-	if (Combinations)
+	
+	//如果在合成表中找到Ingredient对应的集合，就从中添加合成Item，否则是第一次对此Item创建CombinationMap创建此集合
+	if (FItemCollection* Combinations=CombinationMap.Find(Ingredient))
 	{
 		if (!Combinations->Contains(CombinationItem))
 		{

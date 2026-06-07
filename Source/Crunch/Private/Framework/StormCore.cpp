@@ -10,7 +10,7 @@
 
 AStormCore::AStormCore()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false; // 仅在Capture动画期间按需开启
 	InfluenceRange=CreateDefaultSubobject<USphereComponent>("Influence Range");
 	InfluenceRange->SetupAttachment(GetRootComponent());
 
@@ -122,6 +122,7 @@ void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, 
 				TeamTwoInfluencerCount++;
 			}
 		}
+		
 		UpdateTeamWeight();
 	}
 }
@@ -163,6 +164,7 @@ void AStormCore::InfluencerOutRange(UPrimitiveComponent* OverlappedComponent, AA
 				TeamTwoInfluencerCount=0;
 			}
 		}
+		
 		UpdateTeamWeight();
 	}
 }
@@ -201,12 +203,14 @@ void AStormCore::UpdateCore() const
 		OwnerAIC->MoveToActor(TeamTwoGoal);
 	}
 
-	float Speed=MaxMoveSpeed*FMath::Abs(TeamWeight);
+	const float Speed=MaxMoveSpeed*FMath::Abs(TeamWeight);
 	GetCharacterMovement()->MaxWalkSpeed=Speed;
 }
 
 void AStormCore::CaptureTeamCore()
 {
+	SetActorTickEnabled(true); // 捕捉动画期间需要Tick来移动CoreToCapture
+
 	const float ExpandDuration=GetMesh()->GetAnimInstance()->Montage_Play(ExpandMontage);
 
 	CoreCaptureSpeed=FVector::Distance(GetMesh()->GetComponentLocation(),CoreToCapture->GetActorLocation())/ExpandDuration;
@@ -219,12 +223,14 @@ void AStormCore::CaptureTeamCore()
 	GetWorldTimerManager().SetTimer(ExpandTimerHandle,this,&ThisClass::ExpandFinished,ExpandDuration);
 }
 
-void AStormCore::ExpandFinished() const 
+void AStormCore::ExpandFinished()
 {
 	CoreToCapture->SetActorLocation(GetMesh()->GetComponentLocation());
 	CoreToCapture->AttachToComponent(GetMesh(),FAttachmentTransformRules::KeepWorldTransform,"root");
 
 	GetMesh()->GetAnimInstance()->Montage_Play(CaptureMontage);
+
+	SetActorTickEnabled(false); // 捕捉完成，不再需要Tick
 }
 
 void AStormCore::OnRep_CoreToCapture()

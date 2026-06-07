@@ -76,7 +76,7 @@ private:
 	void LearnAbilityLeaderDown(const FInputActionValue& InputActionValue);
 	void LearnAbilityLeaderUp(const FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
-	void UseInventoryItem(const FInputActionValue& InputActionValue);
+	void UseInventoryItem(const FInputActionValue& InputActionValue); 
 	void HandleCameraZoomInput(const FInputActionValue& InputActionValue);
 	void HandleJumpInput();
 
@@ -140,7 +140,7 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="View")
 	FVector CameraAimLocalOffset;
 
-	//偏移强度，注意这里不是速度的意义，而是1s内靠近目标的比例
+	//偏移强度，注意这里不是速度的概念，而是1s内靠近目标的比例
 	UPROPERTY(EditDefaultsOnly,Category="View")
 	float CameraLerpSpeed=20.f;
 

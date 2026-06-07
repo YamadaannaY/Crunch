@@ -9,9 +9,9 @@
 class UPA_CharacterDefination;
 
 /**
- * 
+ * 项目用PlayerState基类，存储了一个PlayerSelection变量
+ * 配合GameState实现对PlayerSelectionArray的更新
  */
-
 UCLASS()
 class CRUNCH_API ACPlayerState : public APlayerState
 {
@@ -44,6 +44,6 @@ private:
 	UPROPERTY()
 	class ACGameState* CGameState;
 	
-	//将NewSelections中此Player存储的PlayerSelection更新
+	//遍历更新的PlayerSelectionArray，找到当前PlayerState对应的Selection并更新
 	void PlayerSelectionUpdated(const TArray<FPlayerSelection>& NewPlayerSelections);
 };

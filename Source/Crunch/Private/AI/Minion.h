@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -6,21 +5,21 @@
 #include "Minion.generated.h"
 
 /**
- * 
+ * Minion---普通小兵类 
  */
 UCLASS()
 class AMinion : public ACCharacter
 {
 	GENERATED_BODY()
 public:
-	//设置ID并调用皮肤选择函数
+	//设置ID，同时根据ID配置Skin
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	
 	//判断AI是否具有DeadTag
 	bool IsActive() const ;
 	
 	//移除DeadTag
-	void Activate();
+	void Activate() const ;
 	
 	//为Minion确定一个Goal进行MoveTo
 	void SetGoal(AActor* Goal) const ;

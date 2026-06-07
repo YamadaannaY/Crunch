@@ -13,7 +13,7 @@ bool AMinion::IsActive() const
 	return !IsDead();
 }
 
-void AMinion::Activate()
+void AMinion::Activate() const 
 {
 	ReSpawnImmediative();
 }
@@ -29,17 +29,15 @@ void AMinion::SetGoal(AActor* Goal) const
 	}
 }
 
-void AMinion::PickSkinBasedOnTeamID()
-{
-	USkeletalMesh** Skin=SkinMap.Find(GetGenericTeamId());
-	if (Skin)
-	{
-		GetMesh()->SetSkeletalMesh(*Skin);
-	}
-}
-
 void AMinion::OnRep_TeamID()
 {
 	PickSkinBasedOnTeamID();
 }
 
+void AMinion::PickSkinBasedOnTeamID()
+{
+	if (USkeletalMesh** Skin=SkinMap.Find(GetGenericTeamId()))
+	{
+		GetMesh()->SetSkeletalMesh(*Skin);
+	}
+}
