@@ -23,7 +23,6 @@ ATargetActor_Line::ATargetActor_Line() :AvatarActor(nullptr)
 	LazerVFX=CreateDefaultSubobject<UNiagaraComponent>("Lazer VFX");
 	LazerVFX->SetupAttachment(RootComp);
 
-	//BaseSetting
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates=true;
 	ShouldProduceTargetDataOnServer=true;

@@ -8,7 +8,6 @@
 #include "GameplayTagsManager.h"
 #include "Kismet/GameplayStatics.h"
 
-
 UGA_Shoot::UGA_Shoot() : ShootMontage(nullptr),AimTarget(nullptr),AimTargetAbilitySystemComponent(nullptr),bInputLocked(false)
 {
 	ActivationOwnedTags.AddTag(UCAbilitySystemStatics::GetAimStatTag());

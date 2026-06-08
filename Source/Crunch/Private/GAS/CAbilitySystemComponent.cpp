@@ -262,7 +262,7 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 		}
 	}
 	else
-		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
+		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetManaEmptyStatTag());
 }
 
 void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& ChangeData)

@@ -1,9 +1,5 @@
 #pragma once
 
-/*
- *	角色组件：处理ShopWidget相关的逻辑，处理Inventory和Shop之间的Item逻辑
- */
-
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Inventory/InventoryItem.h"
@@ -17,6 +13,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemRemoveDelegate, const FInventoryItemH
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnItemStackCountChangeDelegate, const FInventoryItemHandle&,int);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnItemAbilityCommitted, const FInventoryItemHandle&, float /*CooldownDuration*/, float /*CooldownTimeRemaining*/);
 
+/*
+ *	角色组件：处理ShopWidget相关的逻辑，处理Inventory和Shop之间的Item逻辑
+ */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class CRUNCH_API UInventoryComponent : public UActorComponent
 {

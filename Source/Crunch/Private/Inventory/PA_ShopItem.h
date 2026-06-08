@@ -1,6 +1,3 @@
-//PA类，作为一个Item，记录了商店中物品的所有必要信息
-//Struct类，FItemCollection，在Item数组情况下使用，拓展了对数组的基本操作，如添加，删除
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -36,9 +33,8 @@ private:
 };
 
 /**
- * 
- */
-
+  * PA类，作为一个ItemAsset存储，记录了商店中物品的所有必要信息
+  */
 UCLASS()
 class CRUNCH_API UPA_ShopItem : public UPrimaryDataAsset
 {

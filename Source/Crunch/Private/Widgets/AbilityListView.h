@@ -7,7 +7,7 @@
 class UGameplayAbility;
 enum class ECAbilityInputID : uint8;
 /**
- * 
+ * Ability的显示栏，其中每个显示Item就是AbilityGauge，利用数据池中的GACDO进行配置 
  */
 UCLASS()
 class UAbilityListView : public UListView

@@ -283,6 +283,7 @@ void ACCharacter::DeathMontageFinished()
 {
 	if (IsDead())
 	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
 		SetRagDollEnabled(true);
 	}
 }
@@ -331,8 +332,7 @@ void ACCharacter::StartDeathSequence()
 
 	//取消这个限制，使得目标因为LaunchCombo最后一段带有击飞效果的攻击死亡时能够正常被击飞
 	/*GetCharacterMovement()->SetMovementMode(MOVE_None);*/
-	
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::Type::NoCollision);
+	// 胶囊体碰撞禁用延后到DeathMontageFinished，防止死亡动画期间角色穿过地板
 	SetAIPerceptionStimuliSourceEnabled(false);
 }
 

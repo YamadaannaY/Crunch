@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "AbilityListView.h"
 #include "Abilities/GameplayAbility.h"
 #include "Widgets/AbilityGauge.h"

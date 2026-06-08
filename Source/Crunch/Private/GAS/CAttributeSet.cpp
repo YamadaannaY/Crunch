@@ -45,7 +45,6 @@ void UCAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCa
 	}
 }
 
-/**	GAMEPLAYATTRIBUTE_REPNOTIFY:主要触发OnAttributeChanged，广播当前属性和这个属性被修改前的值	 **/
 
 void UCAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 {

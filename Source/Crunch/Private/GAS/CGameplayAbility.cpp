@@ -26,8 +26,8 @@ bool UCGameplayAbility::CanActivateAbility(const FGameplayAbilitySpecHandle Hand
 
 AActor* UCGameplayAbility::GetAimTarget(float AimDistance, ETeamAttitude::Type TeamAttitude) const
 {
-	AActor* OwnerAvatarActor=GetAvatarActorFromActorInfo();
-	if (OwnerAvatarActor)
+	
+	if (AActor* OwnerAvatarActor=GetAvatarActorFromActorInfo())
 	{
 		//此函数被重写为以Camera的Loc和Rot参数，让Aim基于Camera进行LineTrace
 		FVector Location;
@@ -153,7 +153,7 @@ void UCGameplayAbility::PushTarget(AActor* Target, const FVector& PushVel)
 	HitData->HitResult=HitResult;
 	EventData.TargetData.Add(HitData);
 
-	//PassiveGA中设置了以GameplayEvent+EventTag，这里直接触发
+	//PassiveGA中设置了以GameplayEvent触发
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(Target,UGAP_Launch::GetLaunchedAbilityActivationTag(),EventData);
 }
 

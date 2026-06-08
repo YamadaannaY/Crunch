@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -14,7 +12,6 @@
  *当Purchase在服务端进行完毕后，服务端向客户端发送这个ID，客户端根据ID找到Handle对应的Item进行相同的操作
  *对应关系：PA_ShopItem+ItemHandle=InventoryItem
  */
-
 
 class UPA_ShopItem;
 
