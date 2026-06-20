@@ -13,7 +13,7 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 
 	if (!MeshComp) return ;
 
-	//1个Socket，没有ASC无法触发Group
+	//1个Socket/没有ASC无法触发Group
 	if (TargetSocketName.Num() <=1) return ;
 	if (!MeshComp->GetOwner() || !UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(MeshComp->GetOwner())) return ;
 
@@ -55,7 +55,7 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 			}
 			if (OwnerTeamInterface)
 			{
-				if (OwnerTeamInterface->GetTeamAttitudeTowards(*HitResult.GetActor()) !=TargetTeam)
+				if (OwnerTeamInterface->GetTeamAttitudeTowards(*HitResult.GetActor()) != TargetTeam)
 				{
 					continue;
 				}
@@ -64,11 +64,11 @@ void UAN_SendTargetGroup::Notify(USkeletalMeshComponent* MeshComp, UAnimSequence
 			//传递给EventReceivedTask的回调函数
 			FGameplayAbilityTargetData_SingleTargetHit* TargetHit=new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
 			Data.TargetData.Add(TargetHit);
+			
 			SendLocalGameplayCue(HitResult);
 		}
 	}
-
-	//将Data的所有HitResult发送给造成伤害者，回调执行ApplyDamageGE
+	
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(MeshComp->GetOwner(),EventTag,Data);
 }
 
@@ -80,7 +80,6 @@ void UAN_SendTargetGroup::SendLocalGameplayCue(const FHitResult& HitResult) cons
 
 	for (const FGameplayTag& GameplayCueTag : TriggerGameplayCueTag)
 	{
-		//local execute cue
 		UAbilitySystemGlobals::Get().GetGameplayCueManager()->HandleGameplayCue(HitResult.GetActor(),GameplayCueTag,EGameplayCueEvent::Executed,CueParams);
 	}
 }

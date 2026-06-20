@@ -123,7 +123,7 @@ void UCAssetManager::AddToCombinationMap(const UPA_ShopItem* Ingredient, const U
 			Combinations->AddItem(CombinationItem);
 		}
 	}
-	//第一次记录此Combination，Map中还没有存储此映射，需要手动Add一次
+	//第一次记录此Combination，需要手动Add一次此映射关系
 	else
 	{
 		CombinationMap.Add(Ingredient,FItemCollection{TArray<const UPA_ShopItem*>{CombinationItem}});

@@ -59,7 +59,7 @@ void ACCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 	
-	//AI的Init
+	//处理AI的Init相关部分
 	if (NewController && !NewController->IsPlayerController())
 	{
 		ServerSideInit();
@@ -136,7 +136,6 @@ void ACCharacter::BindGASChangeDelegates()
 {
 	if (CAbilitySystemComponent)
 	{
-		//应用GE附带的GrantedTag被添加到目标ASC的时候是默认Replicate的，所以函数也会在客户端被调用，执行相应的逻辑
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetDeadStatTag()).AddUObject(this,&ThisClass::DeadTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);

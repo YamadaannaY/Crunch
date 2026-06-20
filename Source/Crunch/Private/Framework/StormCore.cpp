@@ -10,11 +10,11 @@
 
 AStormCore::AStormCore()
 {
-	PrimaryActorTick.bCanEverTick = false; // 仅在Capture动画期间按需开启
+	PrimaryActorTick.bCanEverTick = false; //仅在CoreToCapture期间用到Tick逻辑，平时关闭
 	InfluenceRange=CreateDefaultSubobject<USphereComponent>("Influence Range");
 	InfluenceRange->SetupAttachment(GetRootComponent());
 
-	InfluenceRange->OnComponentBeginOverlap.AddDynamic(this,&ThisClass::NewInfluencerInRange);
+	InfluenceRange->OnComponentBeginOverlap.AddDynamic(this,&ThisClass::InfluencerInRange);
 	InfluenceRange->OnComponentEndOverlap.AddDynamic(this,&ThisClass::InfluencerOutRange);
 
 	ViewCam=CreateDefaultSubobject<UCameraComponent>("View Camera");
@@ -84,7 +84,7 @@ void AStormCore::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	}
 }
 
-void AStormCore::NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void AStormCore::InfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                       UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	//判断是否抵达目标点
@@ -235,7 +235,7 @@ void AStormCore::ExpandFinished()
 
 void AStormCore::OnRep_CoreToCapture()
 {
-	//客户端Capture
+	//客户端同步播放CaptureMontage
 	if (CoreToCapture)
 	{
 		CaptureTeamCore();

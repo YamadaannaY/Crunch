@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Animations/CAnimInstance.h"
 #include  "GameFramework/Character.h"
 #include "AbilitySystemBlueprintLibrary.h"
@@ -18,7 +15,7 @@ void UCAnimInstance::NativeInitializeAnimation()
 		OwnerMovementComp=OwnerCharacter->GetCharacterMovement();
 	}
 
-	UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TryGetPawnOwner());
+	UAbilitySystemComponent* OwnerASC=UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OwnerCharacter);
 	if (OwnerASC)
 	{
 		OwnerASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::OwnerAimTagChanged);
@@ -32,7 +29,7 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		FVector Vel=OwnerCharacter->GetVelocity();
 		Speed=Vel.Length();
 		
-		FRotator BodyRot=OwnerCharacter->GetActorRotation();
+		const FRotator BodyRot=OwnerCharacter->GetActorRotation();
 		
 		//获得Rotator增量并归一化，归一化是为了匹配BS
 		const FRotator BodyRotDelta=UKismetMathLibrary::NormalizedDeltaRotator(BodyRot,BodyPrevRot);
@@ -40,12 +37,11 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		//更新PrevRot
 		BodyPrevRot=BodyRot;
 		
-		//获得旋转速度 ，单位是 °/s
+		//获得旋转速度
 		YawSpeed=BodyRotDelta.Yaw/DeltaSeconds;
 
 		float YawLerpSpeed=YawSpeedSmoothLerpSpeed;
-
-		//在YawSpeed为0时迅速回到默认状态，以一个更高的LerpToZeroSpeed实现
+		
 		if (YawSpeed == 0 )
 		{
 			YawLerpSpeed=YawSpeedLerpToZeroSpeed;
@@ -78,7 +74,7 @@ void UCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
 bool UCAnimInstance::bShouldDoFullBody() const
 {
-	return (GetSpeed() <=0 && !(GetIsAiming()));
+	return GetSpeed()<=0 && !GetIsAiming();
 }
 
 void UCAnimInstance::OwnerAimTagChanged(const FGameplayTag Tag, int32 NewCount)

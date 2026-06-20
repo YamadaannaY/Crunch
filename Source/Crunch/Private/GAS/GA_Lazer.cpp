@@ -4,6 +4,8 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitCancel.h"
+#include "Abilities/Tasks/AbilityTask_WaitConfirm.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayTagBase.h"
 #include "GAS/TargetActor_Line.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 
@@ -12,8 +14,6 @@ void UGA_Lazer::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 {
 	if (!K2_CommitAbility() || !LazerMontage) return ;
 	
-	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
-	{
 		UAbilityTask_PlayMontageAndWait* PlayerLazerMontageTask=UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this,NAME_None,LazerMontage);
 		PlayerLazerMontageTask->OnBlendOut.AddDynamic(this,&ThisClass::K2_EndAbility);
 		PlayerLazerMontageTask->OnInterrupted.AddDynamic(this,&ThisClass::K2_EndAbility);
@@ -21,6 +21,8 @@ void UGA_Lazer::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const F
 		PlayerLazerMontageTask->OnCompleted.AddDynamic(this,&ThisClass::K2_EndAbility);
 		PlayerLazerMontageTask->ReadyForActivation();
 
+	if (HasAuthorityOrPredictionKey(ActorInfo,&ActivationInfo))
+	{
 		UAbilityTask_WaitGameplayEvent* WaitShootEvent=UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(this,GetShootTag());
 		WaitShootEvent->EventReceived.AddDynamic(this,&ThisClass::ShootLazer);
 		WaitShootEvent->ReadyForActivation();
@@ -60,10 +62,8 @@ void UGA_Lazer::ShootLazer(FGameplayEventData PayLoad)
 			OwnerASC->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetManaAttribute()).AddUObject(this,&ThisClass::ManaUpdated);
 		}
 	}
-	
 	UAbilityTask_WaitTargetData* WaitDamageTask=UAbilityTask_WaitTargetData::WaitTargetData(this,NAME_None,
 		EGameplayTargetingConfirmation::CustomMulti,LazerTargetActorClass);
-	
 	WaitDamageTask->ValidData.AddDynamic(this,&ThisClass::TargetReceived);
 	WaitDamageTask->ReadyForActivation();
 
@@ -99,6 +99,5 @@ void UGA_Lazer::TargetReceived(const FGameplayAbilityTargetDataHandle& TargetDat
 	{
 		BP_ApplyGameplayEffectToTarget(TargetDataHandle,HitDamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
 	}
-	
 	PushTargets(TargetDataHandle,GetAvatarActorFromActorInfo()->GetActorForwardVector()* HitPushSpeed);
 }

@@ -47,7 +47,7 @@ UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController*
 		return CPlayerState->GetSelectedPawnClass();
 	}
 		
-	IGenericTeamAgentInterface*  TeamAgent  = Cast<IGenericTeamAgentInterface>(InController);
+	const IGenericTeamAgentInterface* TeamAgent  = Cast<IGenericTeamAgentInterface>(InController);
 	if ( TeamAgent && TeamAgent->GetGenericTeamId()==FGenericTeamId(1))
 	{
 		return BackupPawn2;

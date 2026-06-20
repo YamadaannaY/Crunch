@@ -8,9 +8,10 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSelectionUpdated , const TArray<FPlayerSelection>& )
 
 /*
- 保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
- 还有一个关键的PlayerArray存储了所有的APlayerState，存在于客户端和服务端，自动复制，客户端也能调用以制作UI等，
- 在这里，GameState主要存储了一个PlayerSelectionArray以及配置对应的交互逻辑，主要是因为所有客户端都需要用来更新SlotUI，
+保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
+还有一个关键的PlayerArray存储了所有的APlayerState，存在于客户端和服务端，自动复制，客户端也能调用以制作UI等，
+在这里，GameState主要存储了一个PlayerSelectionArray以及配置对应的交互逻辑，主要是因为客户端需要所有其他客户端的PlayerSelectionArray用来更新SlotUI
+除此之外，还有PlayerSelection数组的相关操作函数
 */
 UCLASS()
 class CRUNCH_API ACGameState : public AGameStateBase

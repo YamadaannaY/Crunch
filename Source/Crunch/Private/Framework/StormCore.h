@@ -12,7 +12,7 @@ class USphereComponent;
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGoalReachedDelegate,AActor*,int);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTeamInfluenceCountUpdatedDelegate,int,int );
 
-//GameMode核心类之一，作为判定游戏胜利的关键被创建
+//中立的风暴核心，战略争夺点，获胜条件
 UCLASS()
 class CRUNCH_API AStormCore : public ACharacter
 {
@@ -90,7 +90,7 @@ private:
 
 	//BeginOverlap回调
 	UFUNCTION()
-	void NewInfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	void InfluencerInRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 	
 	//EndOverlap回调
 	UFUNCTION()

@@ -16,7 +16,6 @@ class CRUNCH_API UGA_Dash : public UCGameplayAbility
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
-
 	static FGameplayTag GetDashStartTag() {return FGameplayTag::RequestGameplayTag("ability.dash.start");}
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Montage")

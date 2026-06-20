@@ -1,5 +1,3 @@
-/*****************  用于利用多个Socket组成的轨迹进行碰撞检测并返回TargetGroup	************************/
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,9 +6,8 @@
 #include "GenericTeamAgentInterface.h"
 #include "AN_SendTargetGroup.generated.h"
 
-/**
- * 
- */
+
+/*用于利用多个Socket组成的轨迹进行碰撞检测并返回TargetGroup*/
 UCLASS()
 class UAN_SendTargetGroup : public UAnimNotify
 {
@@ -40,6 +37,6 @@ private:
 	UPROPERTY(EditAnywhere,Category="Gameplay Ability")
 	TArray<FName> TargetSocketName;
 
-	//AN跟随Montage中的AN自动同步发送给所有客户端，避开了网络RPC的输送，利用客户端内存进行加载，减小了带宽压力
+	//AN跟随Montage中的AN自动同步发送给所有客户端，避开了网络RPC的输送。
 	void SendLocalGameplayCue(const FHitResult& HitResult) const ;
 };

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,7 +6,7 @@
 
 struct FGameplayTag;
 /**
- * 
+ * 项目基类动画实例 
  */
 UCLASS()
 class UCAnimInstance : public UAnimInstance

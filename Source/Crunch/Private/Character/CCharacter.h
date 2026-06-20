@@ -137,7 +137,7 @@ public:
 	//通过DeadTag判断DeadStat
 	bool IsDead() const;
 
-	//移除DeathGE，即移除DeathTag，触发DeathTagUpdated解除Deat状态
+	//移除DeathGE，即移除DeathTag，触发DeathTagUpdated解除Dead状态
 	void ReSpawnImmediative() const ;
 
 private:

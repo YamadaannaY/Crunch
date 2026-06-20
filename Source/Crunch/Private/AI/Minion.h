@@ -14,7 +14,7 @@ class AMinion : public ACCharacter
 public:
 	//设置ID，同时根据ID配置Skin
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
-	
+
 	//判断AI是否具有DeadTag
 	bool IsActive() const ;
 	

@@ -17,7 +17,6 @@ public:
 	
 	//重写拓展GA激活条件
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
-
 protected:
 	//获取瞄准方向范围内具有的目标
 	AActor* GetAimTarget(float AimDistance,ETeamAttitude::Type TeamAttitude) const ;

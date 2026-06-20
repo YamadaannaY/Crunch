@@ -26,9 +26,7 @@ private:
 
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	AActor* Goal;
-	
-	//由于AI需要进行大量的销毁和生成，对每一个AI单位都进行这样的操作十分消耗性能，造成卡顿和内存抖动，所以使用一个Pool存储生成
-	//的所有AI类，只在开始时生成一次，后续的Dead和Spawn都是基于这些存储好的Minion实例来操作，减小CPU负担。
+
 	UPROPERTY()
 	TArray<class AMinion*> MinionPool;
 
@@ -38,7 +36,7 @@ private:
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	TArray<APlayerStart*> SpawnSpots;
 
-	//Max Limit
+	//兵营生成数量限制
 	UPROPERTY(EditAnywhere,Category="Spawn")
 	int MaxSpawnNums = 15;
 
