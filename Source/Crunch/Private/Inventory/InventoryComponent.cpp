@@ -193,7 +193,7 @@ void UInventoryComponent::AbilityCommitted(UGameplayAbility* CommittedAbility)
 
 		if (ItemPair.Value->IsGrantingAbility(CommittedAbility->GetClass()))
 		{ 
-			//找到激活GA对应的Widget信息
+			//广播激活GA对应的Widget需要的信息，冷却+剩余时间
 			OnItemAbilityCommitted.Broadcast(ItemPair.Key, CooldownDuration, CooldownTimeRemaining);
 		}
 	}
@@ -228,11 +228,20 @@ void UInventoryComponent::Server_SellItem_Implementation(FInventoryItemHandle It
 	if (!InventoryItem || !InventoryItem->IsValid()) return ;
 
 	const float SellPrice=InventoryItem->GetShopItem()->GetSellPrice();
-	//修改属性值
-	OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,SellPrice*InventoryItem->GetStackCount());
+	//每次只卖1个，添加一份卖出价格
+	OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,SellPrice);
 
-	//这里执行的逻辑是全部卖掉
-	RemoveItem(InventoryItem);
+	//自减一次，如果此时StackCount<=0，将Item移除
+	if (!InventoryItem->ReduceStackCount())
+	{
+		RemoveItem(InventoryItem);
+	}
+	else
+	{
+		//更新自减后的ItemStack
+		OnItemStackCountChangeDelegate.Broadcast(InventoryItem->GetHandle(),InventoryItem->GetStackCount());
+		Client_ItemStackCountChangeAdded(InventoryItem->GetHandle(),InventoryItem->GetStackCount());
+	}
 }
 bool UInventoryComponent::Server_SellItem_Validate(FInventoryItemHandle ItemHandle)
 {
@@ -397,7 +406,6 @@ void UInventoryComponent::Server_Purchase_Implementation(const UPA_ShopItem* Ite
 
 	if (!IsFullFor(ItemToPurchase))
 	{
-		//这个函数会触发PostGameplayEffectExecute,常用于逻辑修改，这里进行Add，修改Gold值
 		OwnerASC->ApplyModToAttribute(UCHeroAttributeSet::GetGoldAttribute(),EGameplayModOp::Additive,-ItemToPurchase->GetPrice());
 
 		GrantItem(ItemToPurchase);

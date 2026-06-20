@@ -32,9 +32,7 @@ private:
 	TArray<const UPA_ShopItem*> Items;
 };
 
-/**
-  * PA类，作为一个ItemAsset存储，记录了商店中物品的所有必要信息
-  */
+//PA类，作为一个ItemAsset存储，记录了商店中物品的所有必要信息
 UCLASS()
 class CRUNCH_API UPA_ShopItem : public UPrimaryDataAsset
 {

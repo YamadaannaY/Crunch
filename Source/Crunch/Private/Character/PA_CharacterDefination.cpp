@@ -28,10 +28,10 @@ TSubclassOf<UAnimInstance> UPA_CharacterDefination::LoadDisplayAnimationBP() con
 
 USkeletalMesh* UPA_CharacterDefination::LoadDisplayMesh() const
 {
-	TSubclassOf<ACCharacter> LoadedCharacterClass = LoadCharacterClass();
+	const TSubclassOf<ACCharacter> LoadedCharacterClass = LoadCharacterClass();
 	if (!LoadedCharacterClass) return nullptr;
 
-	ACharacter* Character = Cast<ACharacter>(LoadedCharacterClass.GetDefaultObject());
+	const ACharacter* Character = Cast<ACharacter>(LoadedCharacterClass.GetDefaultObject());
 	if (!Character) return nullptr;
 
 	return Character->GetMesh()->GetSkeletalMeshAsset();

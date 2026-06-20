@@ -33,7 +33,6 @@ public:
 	//出售Item
 	void SellItem(const FInventoryItemHandle& ItemHandle);
 	
-	// Sets default values for this component's properties
 	UInventoryComponent();
 
 	//监听委托的回调函数，判断完Item有效性后调用Server_Purchase

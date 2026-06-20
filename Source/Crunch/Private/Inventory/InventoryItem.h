@@ -7,12 +7,6 @@
 #include "PA_ShopItem.h"
 #include "InventoryItem.generated.h"
 
-/*
- *与其只在服务端构建Item然后发送给客户端，不如直接在两端分别创建，然后以一个Handle进行管理，每个Handle分配一个独特的ID
- *当Purchase在服务端进行完毕后，服务端向客户端发送这个ID，客户端根据ID找到Handle对应的Item进行相同的操作
- *对应关系：PA_ShopItem+ItemHandle=InventoryItem
- */
-
 class UPA_ShopItem;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAbilityCanCastUpdateDelegate,bool)
@@ -60,9 +54,10 @@ inline bool operator==(const FInventoryItemHandle& Lhs,const FInventoryItemHandl
 uint32 GetTypeHash(const FInventoryItemHandle& Key);
 
 /**
- * 
- */
-
+ *与其只在服务端构建Item然后发送给客户端，不如直接在两端分别创建，然后以一个Handle进行管理，每个Handle分配一个唯一的ID
+ *当Purchase/Sell在服务端触发后，服务端向客户端发送这个ID，客户端根据ID找到Handle对应的Item，然后进行相同的操作
+ *PA_ShopItem+（ItemHandle+Slot+Count）=InventoryItem
+ **/
 UCLASS()
 class UInventoryItem : public UObject
 {
