@@ -105,21 +105,32 @@ void UInventoryWidget::ToggleContextMenu(const FInventoryItemHandle& ItemHandle)
 	UInventoryItemWidget* ItemWidget=*ItemWidgetPtrPtr;
 	if (!ItemWidget) return;
 
-	//分配Menu位置
+	//分配Menu位置：Menu的左下角对齐图标中心
 	SetContextMenuVisible(true);
-	FVector2D ItemAbsPos=ItemWidget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D{1.f,0.5f});
+	FVector2D ItemAbsPos=ItemWidget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D{0.5f,0.5f});
 	FVector2D ItemWidgetPixelPos,ItemWidgetViewportPos;
 	USlateBlueprintLibrary::AbsoluteToViewport(this,ItemAbsPos,ItemWidgetPixelPos,ItemWidgetViewportPos);
 
-	// 如果Menu超出屏幕底部，将其向上调整，保证Menu完整显示在视口内
 	const FVector2D ContextMenuSize=ContextMenuWidget->GetDesiredSize();
+
+	// 将Menu向上偏移自身高度，使左下角对准图标中心
+	ItemWidgetPixelPos.Y -= ContextMenuSize.Y;
+
+	// 边界检查：确保Menu不超出视口
 	FVector2D ViewportSize;
 	if (GEngine && GEngine->GameViewport)
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
-		if (ItemWidgetPixelPos.Y + ContextMenuSize.Y > ViewportSize.Y)
+
+		// Menu顶部超出屏幕顶部 → 向下拉
+		if (ItemWidgetPixelPos.Y < 0.f)
 		{
-			ItemWidgetPixelPos.Y = FMath::Max(0.f, ViewportSize.Y - ContextMenuSize.Y);
+			ItemWidgetPixelPos.Y = 0.f;
+		}
+		// Menu底部超出屏幕底部 → 向上推
+		else if (ItemWidgetPixelPos.Y + ContextMenuSize.Y > ViewportSize.Y)
+		{
+			ItemWidgetPixelPos.Y = ViewportSize.Y - ContextMenuSize.Y;
 		}
 	}
 

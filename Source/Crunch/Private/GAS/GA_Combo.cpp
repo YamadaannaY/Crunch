@@ -91,8 +91,7 @@ void UGA_Combo::TryCommitCombo()
 
 TSubclassOf<UGameplayEffect> UGA_Combo::GetDamageEffectForCurrentCombo() const
 {
-	UAnimInstance* OwnerAnimInst=GetOwnerAnimInstance();
-	if (OwnerAnimInst)
+	if (UAnimInstance* OwnerAnimInst=GetOwnerAnimInstance())
 	{
 		const FName CurrentSectionName=OwnerAnimInst->Montage_GetCurrentSection(ComboMontage);
 		const TSubclassOf<UGameplayEffect>* FoundEffectPtr=DamageEffectMap.Find(CurrentSectionName);

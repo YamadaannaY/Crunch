@@ -1,5 +1,3 @@
-//Type结构类，实现了用于Player存储Info的结构体数据
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -8,6 +6,7 @@
 class UPA_CharacterDefination;
 class APlayerState;
 
+//结构类，用于存储Player在Lobby选择阶段的数据
 USTRUCT()
 struct FPlayerSelection
 {

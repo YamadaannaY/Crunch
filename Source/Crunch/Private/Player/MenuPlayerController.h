@@ -5,7 +5,7 @@
 #include "MenuPlayerController.generated.h"
 
 /**
- * 
+ * Menu相关的PlayerController，处理纯UI交互 
  */
 UCLASS()
 class CRUNCH_API AMenuPlayerController : public APlayerController

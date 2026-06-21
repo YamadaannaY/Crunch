@@ -5,10 +5,10 @@
 #include "LobbyPlayerController.generated.h"
 
 DECLARE_DELEGATE(FOnSwitchToHeroSelection);
-/**
- *在LobbyMap中配置了LobbyPlayerController用于处理Lobby的UI交互
- */
 
+/**
+ *在LobbyMap中配置，处理Lobby的UI交互
+ */
 UCLASS()
 class CRUNCH_API ALobbyPlayerController : public AMenuPlayerController
 {
@@ -19,7 +19,7 @@ public:
 
 	ALobbyPlayerController();
 	
-	//客户端UI将被点击Slot的ID发送给GameState
+	//客户端将被点击Slot的ID发送给GameState中对应PlayerState的PlayerSelection
 	UFUNCTION(Server ,Reliable , WithValidation)
 	void Server_RequestSlotSelectionChange(uint8 NewSlotID);
 
