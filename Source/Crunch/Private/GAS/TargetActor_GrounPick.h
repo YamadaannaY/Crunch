@@ -5,8 +5,11 @@
 #include "Abilities/GameplayAbilityTargetActor.h"
 #include "TargetActor_GrounPick.generated.h"
 
+class IGenericTeamAgentInterface;
 /**
- * 
+ * 地面瞄准TargetActor：根据玩家相机视角确定瞄准位置。
+ * 注意：此TA只负责提供瞄准坐标(ImpactPoint)，不再做目标选择。
+ * 目标选择由GA在服务端通过 GetValidTargetsAtLocation 权威执行。
  */
 UCLASS()
 class ATargetActor_GroundPick : public AGameplayAbilityTargetActor
@@ -15,17 +18,26 @@ class ATargetActor_GroundPick : public AGameplayAbilityTargetActor
 
 public:
 	ATargetActor_GroundPick();
-	
+
 	void SetTargetAreaRadius(float NewRadius);
 	FORCEINLINE void SetTargetTraceRange(float NewRange) {TargetTraceRange=NewRange;};
 
-	//只在客户端调用的函数，接受Confirm输入后执行Overlap范围检测，获取要作用的所有目标对象并广播Confirm
+	//接受Confirm输入，只提供瞄准位置(ImpactPoint)，不选择目标
 	virtual void ConfirmTargetingAndContinue() override;
 
 	//用于设置此GA影响目标群体
 	void SetTargetOptions(bool bTargetFriendly,bool bTargetEnemy=true);
 
 	FORCEINLINE void SetShouldDrawDebug(bool bDrawDebug) {bShouldDrawDebug=bDrawDebug;}
+
+	//服务端权威Overlap：在指定位置做球体检测，按队伍态度过滤，返回有效目标Actor数组
+	static TArray<AActor*> GetValidTargetsAtLocation(
+		UWorld* World,
+		FVector Location,
+		float Radius,
+		const IGenericTeamAgentInterface* OwnerTeamAgent,
+		bool bTargetFriendly,
+		bool bTargetEnemy);
 
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Visual")

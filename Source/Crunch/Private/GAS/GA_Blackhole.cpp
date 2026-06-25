@@ -98,7 +98,7 @@ void UGA_Blackhole::PlaceBlackhole(const FGameplayAbilityTargetDataHandle& Targe
 	BlackholeTargetingTask->FinishSpawningActor(this, TargetActor);
 	if (BlackholeTargetActor)
 	{
-		BlackholeTargetActor->SetActorLocation(UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,1).ImpactPoint);
+		BlackholeTargetActor->SetActorLocation(UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(TargetDataHandle,0).ImpactPoint);
 	}
 }
 

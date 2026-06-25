@@ -210,6 +210,10 @@ void UGA_Shoot::ShootProjectile(FGameplayEventData PayLoad)
 			{
 				FName SocketName=OutNames.Last();
 				SocketLocation=MeshComp->GetSocketLocation(SocketName);
+				
+				UE_LOG(LogTemp, Warning, TEXT("EventTag=%s, SocketName=%s, SocketLoc=%s, SocketExists=%d"),
+					*PayLoad.EventTag.ToString(), *SocketName.ToString(), *SocketLocation.ToString(),
+					MeshComp->DoesSocketExist(SocketName));
 			}
 		}
 

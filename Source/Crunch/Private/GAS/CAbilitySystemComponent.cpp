@@ -4,6 +4,7 @@
 #include "GameplayEffectExtension.h"
 #include "UCAbilitySystemStatics.h"
 #include "GAS/CAttributeSet.h"
+#include "GAS/GAP_HitReact.h"
 #include "PA_AbilitySystemGeneric.h"
 #include "Crunch/DebugHelper.h"
 
@@ -32,7 +33,7 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 
 	//存储了所有Hero各项属性的DT
 	const UDataTable* BaseStatsDataTable=AbilitySystemGeneric->GetBaseStatsDataTable();
-	
+
 	const FHeroBaseStats* BaseStats=nullptr;
 
 	//遍历DT，找到当前ASC拥有者BP类的属性行，将其赋予BaseStats
@@ -42,7 +43,7 @@ void UCAbilitySystemComponent::InitializeBaseAttribute()
 
 		//获得具体蓝图生成类对象数据行
 		if (BaseStats && BaseStats->Class==GetOwner()->GetClass())
-	 	{	
+	 	{
 			break;
 		}
 	}
@@ -86,7 +87,7 @@ void UCAbilitySystemComponent::ApplyInitialEffects()
 {
 	if (!GetOwner() || !GetOwner()->HasAuthority()) return ;
 	if (!AbilitySystemGeneric) return;
-	
+
 	for (const TSubclassOf<UGameplayEffect>& Effect : AbilitySystemGeneric->GetInitialEffects())
 	{
 		//服务端应用GE
@@ -131,7 +132,7 @@ void UCAbilitySystemComponent::AuthApplyGameplayEffectToSelf(TSubclassOf<UGamepl
 void UCAbilitySystemComponent::ApplyFullStatsEffectSelf()
 {
 	if (!AbilitySystemGeneric) return;
-	
+
 	AuthApplyGameplayEffectToSelf(AbilitySystemGeneric->GetFullStateEffect());
 }
 
@@ -163,7 +164,7 @@ void UCAbilitySystemComponent::Server_UpgradeAbilityWithID_Implementation(ECAbil
 
 	const float UpgradePoint=GetGameplayAttributeValue(UCHeroAttributeSet::GetUpgradePointAttribute(),bFound);
 	if (!bFound || UpgradePoint<=0) return ;
-	
+
 	FGameplayAbilitySpec* AbilitySpec=FindAbilitySpecFromInputID((int32)InputID);
 	if (! AbilitySpec || UCAbilitySystemStatics::IsAbilityAtMaxLevel(*AbilitySpec)) return;
 
@@ -188,7 +189,7 @@ void UCAbilitySystemComponent::Client_AbilitySpecLevelUpdated_Implementation(FGa
 	if (Spec)
 	{
 		Spec->Level=Level;
-		
+
 		//广播监听Spec变化函数的回调
 		AbilitySpecDirtiedCallbacks.Broadcast(*Spec);
 	}
@@ -212,13 +213,24 @@ void UCAbilitySystemComponent::HealthUpdated(const FOnAttributeChangeData& Chang
 	{
 		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetHealthFullStatTag());
 	}
-	
+
+	// 受伤但未死亡时，发送 HitReact 事件
+	if (ChangeData.NewValue > 0 && ChangeData.NewValue < ChangeData.OldValue)
+	{
+		FGameplayEventData HitReactEventData;
+		if (ChangeData.GEModData)
+		{
+			HitReactEventData.ContextHandle = ChangeData.GEModData->EffectSpec.GetContext();
+		}
+		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(GetOwner(), UGAP_HitReact::GetHitReactEventTag(), HitReactEventData);
+	}
+
 	if (ChangeData.NewValue<=0)
 	{
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag()))
 		{
 			AddLooseGameplayTag(UCAbilitySystemStatics::GetHealthEmptyStatTag());
-			
+
 			if (AbilitySystemGeneric && AbilitySystemGeneric->GetDeathEffect())
 			{
 				//添加DeadTag
@@ -243,7 +255,7 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 
 	bool bFound=false;
 	float MaxMana=GetGameplayAttributeValue(UCAttributeSet::GetMaxManaAttribute(),bFound);
-	
+
 	if (bFound && ChangeData.NewValue>=MaxMana)
 	{
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetManaFullStatTag()))
@@ -253,7 +265,7 @@ void UCAbilitySystemComponent::ManaUpdated(const FOnAttributeChangeData& ChangeD
 	}
 	else
 		RemoveLooseGameplayTag(UCAbilitySystemStatics::GetManaFullStatTag());
-	
+
 	if (ChangeData.NewValue<=0)
 	{
 		if (!HasMatchingGameplayTag(UCAbilitySystemStatics::GetManaEmptyStatTag()))
@@ -283,11 +295,11 @@ void UCAbilitySystemComponent::ExperienceUpdated(const FOnAttributeChangeData& C
 		Debug::Print("can`t find experience data !!");
 		return;
 	}
-	
+
 	float PrevLevelExp=0;
 	float NextLevelExp=0;
 	float NewLevel=1;
-	
+
 	for (auto Iter=ExperienceCurve->GetKeyHandleIterator();Iter;++Iter)
 	{
 		//当前等级对应的具体经验值

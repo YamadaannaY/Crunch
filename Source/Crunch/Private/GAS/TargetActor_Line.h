@@ -38,7 +38,6 @@ private:
 	UPROPERTY(Replicated)
 	float DetectionCylinderRadius;
 
-	UPROPERTY(Replicated)
 	float TargetingInterval;
 
 	UPROPERTY(Replicated)

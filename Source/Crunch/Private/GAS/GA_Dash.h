@@ -21,9 +21,6 @@ private:
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
 	UAnimMontage* DashMontage;
 	
-	UPROPERTY(EditDefaultsOnly,Category="Montage")
-	TMap<int,UAnimMontage*> MontageMap ; 
-
 	UPROPERTY(EditDefaultsOnly,Category="Effects")
 	TSubclassOf<UGameplayEffect> DamageEffect;
 

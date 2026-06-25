@@ -5,6 +5,7 @@
 #include "UCAbilitySystemStatics.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
+#include "GenericTeamAgentInterface.h"
 
 UGA_GroundBlast::UGA_GroundBlast():GroundBlastMontage(nullptr),CastMontage(nullptr)
 {
@@ -58,17 +59,23 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 		return ;
 	}
 
-	//对Target对象施加GE需要在服务端执行，而Target对象的获取是在客户端通过PrimaryPC的ViewTarget进行判断，
-	//获取对象，存储到TargetData中
+	//TA只提供瞄准坐标(Index 0)，服务端据此做权威Overlap选择有效目标
+	const FVector ImpactPoint=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,0).ImpactPoint;
+
 	if(K2_HasAuthority())
 	{
-		BP_ApplyGameplayEffectToTarget(Handle,DamageEffectDef.DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
-		PushTargets(Handle,DamageEffectDef.PushVelocity);
+		const IGenericTeamAgentInterface* OwnerTeamAgent=Cast<IGenericTeamAgentInterface>(GetAvatarActorFromActorInfo());
+		TArray<AActor*> ValidTargets=ATargetActor_GroundPick::GetValidTargetsAtLocation(
+			GetWorld(),ImpactPoint,TargetAreaRadius,OwnerTeamAgent,false,true);
+
+		FGameplayAbilityTargetDataHandle AuthoritativeHandle=UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(ValidTargets,false);
+		BP_ApplyGameplayEffectToTarget(AuthoritativeHandle,DamageEffectDef.DamageEffect,GetAbilityLevel(CurrentSpecHandle,CurrentActorInfo));
+		PushTargets(AuthoritativeHandle,DamageEffectDef.PushVelocity);
 	}
-	
+
 	//CueParam
 	FGameplayCueParameters BlastingCueParams;
-	BlastingCueParams.Location=UAbilitySystemBlueprintLibrary::GetHitResultFromTargetData(Handle,1).ImpactPoint;
+	BlastingCueParams.Location=ImpactPoint;
 	BlastingCueParams.RawMagnitude=TargetAreaRadius;
 
 	//GC所有客户端可见
@@ -81,7 +88,7 @@ void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Ha
 		//此时播放一个完整的CastMontage，补上后续的手臂下落Montage动画
 		OwnerAnim->Montage_Play(CastMontage);
 	}
-	
+
 	K2_EndAbility();
 }
 

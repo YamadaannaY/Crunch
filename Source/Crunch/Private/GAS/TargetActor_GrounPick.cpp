@@ -1,7 +1,6 @@
 #include "GAS/TargetActor_GrounPick.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "GenericTeamAgentInterface.h"
-#include "Abilities/GameplayAbility.h"
 #include "Crunch/Crunch.h"
 #include "Components/DecalComponent.h"
 #include "Engine/OverlapResult.h"
@@ -28,44 +27,47 @@ void ATargetActor_GroundPick::SetTargetAreaRadius(float NewRadius)
 
 void ATargetActor_GroundPick::ConfirmTargetingAndContinue()
 {
-	//以球体检测区域进行Overlap查询
-	TArray<FOverlapResult> OverlapResults;
-	FCollisionObjectQueryParams CollisionObjectQueryParams;
-	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
-	FCollisionShape CollisionShape;
-	CollisionShape.SetSphere(TargetAreaRadius);
-	
-	GetWorld()->OverlapMultiByObjectType(OverlapResults,GetActorLocation(),FQuat::Identity,CollisionObjectQueryParams,CollisionShape);
+	// TA只提供瞄准位置，不做目标选择。目标选择由GA在服务端权威执行。
+	FGameplayAbilityTargetDataHandle TargetData;
 
-	TSet<AActor*> TargetActors;
-	const IGenericTeamAgentInterface* OwnerTeamAgentInterface=nullptr;
-
-	if (OwningAbility)  OwnerTeamAgentInterface=Cast<IGenericTeamAgentInterface>(OwningAbility->GetAvatarActorFromActorInfo());
-
-	for (const FOverlapResult& OverlapResult : OverlapResults)
-	{
-		if (OwnerTeamAgentInterface && OwnerTeamAgentInterface->GetTeamAttitudeTowards(*OverlapResult.GetActor())==ETeamAttitude::Friendly && !bShouldTargetFriendly)
-		{
-			continue;
-		}
-		if (OwnerTeamAgentInterface && OwnerTeamAgentInterface->GetTeamAttitudeTowards(*OverlapResult.GetActor())==ETeamAttitude::Hostile && !bShouldTargetEnemy)
-		{
-			continue;
-		}
-
-		TargetActors.Add(OverlapResult.GetActor());
-	}
-
-	//存储TargetActor到Data中，此Handle会传递给GA中的Confirm回调
-	FGameplayAbilityTargetDataHandle TargetData=UAbilitySystemBlueprintLibrary::AbilityTargetDataFromActorArray(TargetActors.Array(),false);
-
-	//获取区域中心的坐标，用于产生Cue
 	FGameplayAbilityTargetData_SingleTargetHit* HitLocation=new FGameplayAbilityTargetData_SingleTargetHit;
 	HitLocation->HitResult.ImpactPoint=GetActorLocation();
 	TargetData.Add(HitLocation);
 
-	//触发ValidData广播，服务器和客户端的回调函数都会被触发。
 	TargetDataReadyDelegate.Broadcast(TargetData);
+}
+
+TArray<AActor*> ATargetActor_GroundPick::GetValidTargetsAtLocation(
+	UWorld* World,
+	FVector Location,
+	float Radius,
+	const IGenericTeamAgentInterface* OwnerTeamAgent,
+	bool bTargetFriendly,
+	bool bTargetEnemy)
+{
+	TArray<AActor*> ValidTargets;
+	if (!World) return ValidTargets;
+
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionObjectQueryParams CollisionObjectQueryParams;
+	CollisionObjectQueryParams.AddObjectTypesToQuery(ECC_Pawn);
+	FCollisionShape CollisionShape;
+	CollisionShape.SetSphere(Radius);
+
+	World->OverlapMultiByObjectType(OverlapResults, Location, FQuat::Identity, CollisionObjectQueryParams, CollisionShape);
+
+	for (const FOverlapResult& OverlapResult : OverlapResults)
+	{
+		if (OwnerTeamAgent)
+		{
+			const ETeamAttitude::Type Attitude = OwnerTeamAgent->GetTeamAttitudeTowards(*OverlapResult.GetActor());
+			if (Attitude == ETeamAttitude::Friendly && !bTargetFriendly) continue;
+			if (Attitude == ETeamAttitude::Hostile && !bTargetEnemy) continue;
+		}
+		ValidTargets.Add(OverlapResult.GetActor());
+	}
+
+	return ValidTargets;
 }
 
 void ATargetActor_GroundPick::SetTargetOptions(bool bTargetFriendly, bool bTargetEnemy)
