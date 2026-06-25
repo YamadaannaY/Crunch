@@ -1,11 +1,13 @@
 #include "Character/CCharacter.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/CapsuleComponent.h"
+#include "Crunch/DebugHelper.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/CAbilitySystemComponent.h"
 #include "GAS/CAttributeSet.h"
+#include "GAS/GAP_HitReact.h"
 #include "GAS/UCAbilitySystemStatics.h"
 #include "Kismet/GameplayStatics.h"
 #include "net/UnrealNetwork.h"
@@ -31,6 +33,8 @@ ACCharacter::ACCharacter()
 
 	OverHeadWidgetComponent=CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
+	OverHeadWidgetComponent->SetWidgetSpace(EWidgetSpace::Screen);
+	OverHeadWidgetComponent->SetDrawAtDesiredSize(true);           // 按设计分辨率渲染，防止世界缩放影响清晰度
 
 	PerceptionStimuliSourceComponent=CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>("Perception StimuliSource Component");
 
@@ -140,6 +144,12 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetStunStatTag()).AddUObject(this,&ThisClass::StunTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetFocusStatTag()).AddUObject(this,&ThisClass::FocusTagUpdated);
+
+		// HitReact 方向 Tag：GA 在服务端添加，客户端收到后本地播放受击动画
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactFrontTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactBackTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactLeftTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
+		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactRightTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
 
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetAccelerationAttribute()).AddUObject(this,&ThisClass::AccelerationUpdated);
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
@@ -414,5 +424,58 @@ void ACCharacter::OnStun()
 
 void ACCharacter::OnRecoveryFromStun()
 {
-	//override in subcharacter class 
+	//override in subcharacter class
+}
+
+UAnimMontage* ACCharacter::GetHitReactMontageForDirection(const FGameplayTag& DirectionTag) const
+{
+	if (DirectionTag == UGAP_HitReact::GetHitReactFrontTag())
+	{
+		return HitReactMontage_Front;
+	}
+	if (DirectionTag == UGAP_HitReact::GetHitReactBackTag())
+	{
+		return HitReactMontage_Back;
+	}
+	if (DirectionTag == UGAP_HitReact::GetHitReactLeftTag())
+	{
+		return HitReactMontage_Left;
+	}
+	if (DirectionTag == UGAP_HitReact::GetHitReactRightTag())
+	{
+		return HitReactMontage_Right;
+	}
+
+	// 未配置对应方向时回退到 Front
+	return HitReactMontage_Front;
+}
+
+void ACCharacter::HitReactDirectionTagUpdated(const FGameplayTag Tag, int32 NewCount)
+{
+	// 与 DeadTagUpdated / StunTagUpdated 统一模式：
+	// Tag 计数 > 0 → 本地播放动画；Tag 计数 == 0 → 停止动画
+	if (IsDead()) return;
+
+	if (NewCount > 0)
+	{
+		Debug::Print(FString::Printf(TEXT("[HitReact] Tag=%s Count=%d"), *Tag.ToString(), NewCount), FColor::Cyan);
+		UAnimMontage* MontageToPlay = GetHitReactMontageForDirection(Tag);
+		if (MontageToPlay)
+		{
+			Debug::Print(FString::Printf(TEXT("[HitReact] Playing: %s"), *MontageToPlay->GetName()), FColor::Green);
+			PlayAnimMontage(MontageToPlay);
+		}
+		else
+		{
+			Debug::Print(FString::Printf(TEXT("[HitReact] Montage is NULL for Tag %s! Configure in BP."), *Tag.ToString()), FColor::Red);
+		}
+	}
+	else
+	{
+		UAnimMontage* MontageToStop = GetHitReactMontageForDirection(Tag);
+		if (MontageToStop)
+		{
+			StopAnimMontage(MontageToStop);
+		}
+	}
 }

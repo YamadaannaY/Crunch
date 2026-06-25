@@ -207,11 +207,35 @@ private:
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Stun")
 	UAnimMontage* StunMontage;
-	
+
 	UPROPERTY(EditDefaultsOnly,Category="Montage")
-	TMap<int32,UAnimMontage*> MontageMap ; 
+	TMap<int32,UAnimMontage*> MontageMap ;
 
 	//RegisterTagEvent对StunTag的回调
 	virtual void OnStun();
 	virtual void OnRecoveryFromStun();
+
+	/**************************** HitReact ******************************/
+public:
+	// 根据受击方向 Tag 返回对应的 Montage（蓝图子类配置动画）
+	UFUNCTION(BlueprintCallable, Category = "HitReact")
+	virtual UAnimMontage* GetHitReactMontageForDirection(const FGameplayTag& DirectionTag) const;
+
+private:
+	// RegisterGameplayTagEvent 回调：Tag 复制到客户端后本地播放/停止 Montage
+	// 与 DeadTagUpdated / StunTagUpdated 统一模式
+	void HitReactDirectionTagUpdated(const FGameplayTag Tag, int32 NewCount);
+
+	// 受击方向对应的 Montage（在蓝图子类中配置）
+	UPROPERTY(EditDefaultsOnly, Category = "HitReact")
+	TObjectPtr<UAnimMontage> HitReactMontage_Front;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitReact")
+	TObjectPtr<UAnimMontage> HitReactMontage_Back;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitReact")
+	TObjectPtr<UAnimMontage> HitReactMontage_Left;
+
+	UPROPERTY(EditDefaultsOnly, Category = "HitReact")
+	TObjectPtr<UAnimMontage> HitReactMontage_Right;
 };
