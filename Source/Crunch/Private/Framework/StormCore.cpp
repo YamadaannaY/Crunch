@@ -183,7 +183,6 @@ void AStormCore::UpdateTeamWeight()
 
 		TeamWeight=TeamOffset/TeamTotal;
 	}
-	UE_LOG(LogTemp,Warning,TEXT("TeamOne Count:%d, TeamTwo Count:%d, Weight:%f"),TeamOneInfluencerCount,TeamTwoInfluencerCount,TeamWeight);
 
 	UpdateCore();
 }
