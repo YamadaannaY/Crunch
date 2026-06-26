@@ -74,7 +74,11 @@ void ACPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		//使用Down作为触发，具有持续性，有开始和结束两个回调
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Triggered,this,&ThisClass::LearnAbilityLeaderDown);
 		EnhancedInputComp->BindAction(LearnAbilityLearnLeaderAction,ETriggerEvent::Completed,this,&ThisClass::LearnAbilityLeaderUp);
-		
+
+		// Sprint：按住加速，松手恢复
+		EnhancedInputComp->BindAction(SprintInputAction,ETriggerEvent::Started,this,&ThisClass::HandleSprintStart);
+		EnhancedInputComp->BindAction(SprintInputAction,ETriggerEvent::Completed,this,&ThisClass::HandleSprintStop);
+
 		for (const TPair<ECAbilityInputID,UInputAction*>& InputActionPair:GameplayAbilityInputAction)
 		{
 			EnhancedInputComp->BindAction(InputActionPair.Value,ETriggerEvent::Triggered,
@@ -198,6 +202,11 @@ void ACPlayerCharacter::SetInputEnabledFromPlayerController(bool bEnabled)
 
 void ACPlayerCharacter::OnDead()
 {
+	// 死亡时强制结束冲刺
+	if (HasAuthority())
+	{
+		Server_StopSprint_Implementation();
+	}
 	SetInputEnabledFromPlayerController(false);
 }
 
@@ -208,6 +217,11 @@ void ACPlayerCharacter::OnRespawn()
 
 void ACPlayerCharacter::OnStun()
 {
+	// 眩晕时强制结束冲刺
+	if (HasAuthority())
+	{
+		Server_StopSprint_Implementation();
+	}
 	SetInputEnabledFromPlayerController(false);
 }
 
@@ -328,4 +342,50 @@ void ACPlayerCharacter::Landed(const FHitResult& Hit)
 
 	// 落地时恢复默认空中控制系数
 	GetCharacterMovement()->AirControl=DefaultAirControl;
+}
+
+/**************************** Sprint ******************************/
+
+void ACPlayerCharacter::HandleSprintStart(const FInputActionValue& InputActionValue)
+{
+	Server_StartSprint();
+}
+
+void ACPlayerCharacter::HandleSprintStop(const FInputActionValue& InputActionValue)
+{
+	Server_StopSprint();
+}
+
+void ACPlayerCharacter::Server_StartSprint_Implementation()
+{
+	if (!SprintEffect)
+	{
+		// 没有配置 GE 时直接修改 MaxWalkSpeed
+		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		return;
+	}
+
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ASC) return;
+
+	// 避免重复应用
+	if (SprintEffectHandle.IsValid())
+	{
+		ASC->RemoveActiveGameplayEffect(SprintEffectHandle);
+	}
+
+	FGameplayEffectSpecHandle Spec = ASC->MakeOutgoingSpec(SprintEffect, 1, ASC->MakeEffectContext());
+	SprintEffectHandle = ASC->ApplyGameplayEffectSpecToSelf(*Spec.Data.Get());
+}
+
+void ACPlayerCharacter::Server_StopSprint_Implementation()
+{
+	UAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (!ASC) return;
+
+	if (SprintEffectHandle.IsValid())
+	{
+		ASC->RemoveActiveGameplayEffect(SprintEffectHandle);
+		SprintEffectHandle = FActiveGameplayEffectHandle();
+	}
 }

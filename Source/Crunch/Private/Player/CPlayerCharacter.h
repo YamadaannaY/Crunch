@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "InputActionValue.h"
 #include "Character/CCharacter.h"
 #include "GAS/CGameplayAbilitiesType.h"
@@ -70,15 +71,20 @@ private:
 
 	UPROPERTY(EditDefaultsOnly,Category="Input")
 	UInputAction* CameraZoomInputAction;
-	
+
+	UPROPERTY(EditDefaultsOnly,Category="Input")
+	UInputAction* SprintInputAction;
+
 	void HandleLookInput(const FInputActionValue& InputActionValue);
 	void HandleMoveInput(const FInputActionValue& InputActionValue);
 	void LearnAbilityLeaderDown(const FInputActionValue& InputActionValue);
 	void LearnAbilityLeaderUp(const FInputActionValue& InputActionValue);
 	void HandleAbilityInput(const FInputActionValue& InputActionValue,ECAbilityInputID InputID);
-	void UseInventoryItem(const FInputActionValue& InputActionValue); 
+	void UseInventoryItem(const FInputActionValue& InputActionValue);
 	void HandleCameraZoomInput(const FInputActionValue& InputActionValue);
 	void HandleJumpInput();
+	void HandleSprintStart(const FInputActionValue& InputActionValue);
+	void HandleSprintStop(const FInputActionValue& InputActionValue);
 
 	void SetInputEnabledFromPlayerController(bool bEnabled);
 
@@ -183,6 +189,25 @@ private:
 	void LerpArmLength(float Goal);
 	//递归函数
 	void TickArmLengthLerp(float Goal);
+
+	/************************ Sprint *********************************/
+private:
+	// 冲刺时的 MaxWalkSpeed（替代默认 MoveSpeed 属性值）
+	UPROPERTY(EditDefaultsOnly, Category="Sprint")
+	float SprintSpeed = 900.f;
+
+	// 冲刺 GE：服务端应用，修改 MoveSpeed 属性（Duration=Infinite）
+	UPROPERTY(EditDefaultsOnly, Category="Sprint")
+	TSubclassOf<UGameplayEffect> SprintEffect;
+
+	// 服务端冲刺 GE 的 ActiveHandle，用于停止时移除
+	FActiveGameplayEffectHandle SprintEffectHandle;
+
+	// RPC：服务端开始/停止冲刺
+	UFUNCTION(Server, Reliable)
+	void Server_StartSprint();
+	UFUNCTION(Server, Reliable)
+	void Server_StopSprint();
 
 	/************************Inventory *********************************/
 private:
