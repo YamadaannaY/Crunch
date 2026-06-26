@@ -217,14 +217,18 @@ private:
 
 	/**************************** HitReact ******************************/
 public:
+	
 	// 根据受击方向 Tag 返回对应的 Montage（蓝图子类配置动画）
 	UFUNCTION(BlueprintCallable, Category = "HitReact")
 	virtual UAnimMontage* GetHitReactMontageForDirection(const FGameplayTag& DirectionTag) const;
 
 private:
-	// RegisterGameplayTagEvent 回调：Tag 复制到客户端后本地播放/停止 Montage
-	// 与 DeadTagUpdated / StunTagUpdated 统一模式
-	void HitReactDirectionTagUpdated(const FGameplayTag Tag, int32 NewCount);
+	// 强制停止当前并播放对应方向 Montage，返回时长（内部实现）
+	float PlayHitReactMontage(const FGameplayTag& DirectionTag);
+
+	// NetMulticast：在所有客户端本地播放
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitReactMontage(const FGameplayTag& DirectionTag);
 
 	// 受击方向对应的 Montage（在蓝图子类中配置）
 	UPROPERTY(EditDefaultsOnly, Category = "HitReact")

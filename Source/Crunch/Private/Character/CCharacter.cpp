@@ -145,12 +145,6 @@ void ACCharacter::BindGASChangeDelegates()
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::AimTagUpdated);
 		CAbilitySystemComponent->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetFocusStatTag()).AddUObject(this,&ThisClass::FocusTagUpdated);
 
-		// HitReact 方向 Tag：GA 在服务端添加，客户端收到后本地播放受击动画
-		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactFrontTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
-		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactBackTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
-		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactLeftTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
-		CAbilitySystemComponent->RegisterGameplayTagEvent(UGAP_HitReact::GetHitReactRightTag()).AddUObject(this,&ThisClass::HitReactDirectionTagUpdated);
-
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCHeroAttributeSet::GetAccelerationAttribute()).AddUObject(this,&ThisClass::AccelerationUpdated);
 		CAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UCAttributeSet::GetMoveSpeedAttribute()).AddUObject(this,&ThisClass::MoveSpeedUpdated);
 	}
@@ -450,32 +444,37 @@ UAnimMontage* ACCharacter::GetHitReactMontageForDirection(const FGameplayTag& Di
 	return HitReactMontage_Front;
 }
 
-void ACCharacter::HitReactDirectionTagUpdated(const FGameplayTag Tag, int32 NewCount)
+float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 {
-	// 与 DeadTagUpdated / StunTagUpdated 统一模式：
-	// Tag 计数 > 0 → 本地播放动画；Tag 计数 == 0 → 停止动画
-	if (IsDead()) return;
+	if (IsDead()) return 0.f;
 
-	if (NewCount > 0)
+	UAnimMontage* MontageToPlay = GetHitReactMontageForDirection(DirectionTag);
+	if (!MontageToPlay)
 	{
-		Debug::Print(FString::Printf(TEXT("[HitReact] Tag=%s Count=%d"), *Tag.ToString(), NewCount), FColor::Cyan);
-		UAnimMontage* MontageToPlay = GetHitReactMontageForDirection(Tag);
-		if (MontageToPlay)
-		{
-			Debug::Print(FString::Printf(TEXT("[HitReact] Playing: %s"), *MontageToPlay->GetName()), FColor::Green);
-			PlayAnimMontage(MontageToPlay);
-		}
-		else
-		{
-			Debug::Print(FString::Printf(TEXT("[HitReact] Montage is NULL for Tag %s! Configure in BP."), *Tag.ToString()), FColor::Red);
-		}
+		Debug::Print(FString::Printf(TEXT("[HitReact] Montage NULL for Tag %s"), *DirectionTag.ToString()), FColor::Red);
+		return 0.f;
 	}
-	else
+
+	UAnimInstance* AnimInst = GetMesh()->GetAnimInstance();
+	if (!AnimInst)
 	{
-		UAnimMontage* MontageToStop = GetHitReactMontageForDirection(Tag);
-		if (MontageToStop)
-		{
-			StopAnimMontage(MontageToStop);
-		}
+		return 0.f;
 	}
+
+	// 强制停止当前受击动画（同方向连击也能重启）
+	AnimInst->Montage_Stop(0.f, MontageToPlay);
+
+	// 立即从开头播放
+	const float Duration = AnimInst->Montage_Play(MontageToPlay);
+	Debug::Print(FString::Printf(TEXT("[HitReact] Play: %s (%.2fs) [%s]"),
+		*MontageToPlay->GetName(), Duration,
+		HasAuthority() ? TEXT("Server") : TEXT("Client")), FColor::Green);
+
+	return Duration;
+}
+
+
+void ACCharacter::Multicast_PlayHitReactMontage_Implementation(const FGameplayTag& DirectionTag)
+{
+	PlayHitReactMontage(DirectionTag);
 }
