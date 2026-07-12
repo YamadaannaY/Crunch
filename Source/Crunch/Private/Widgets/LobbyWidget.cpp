@@ -2,8 +2,10 @@
 #include "AbilityListView.h"
 #include "Widgets/CharacterDisplay.h"
 #include "CharacterEntryWidget.h"
+#include "SkinEntryWidget.h"
 #include "PlayerTeamLayoutWidget.h"
 #include "Character/PA_CharacterDefination.h"
+#include "Character/PA_SkinDefination.h"
 #include "Components/Button.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
@@ -23,10 +25,10 @@ void ULobbyWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	ClearAndPopulateTeamSelectionSlots();
-	
+
 	//确保State已经就绪
 	ConfigureGameState();
-	
+
 	LobbyPlayerController = GetOwningPlayer<ALobbyPlayerController>();
 	if (LobbyPlayerController)
 	{
@@ -37,15 +39,34 @@ void ULobbyWidget::NativeConstruct()
 	//true的情况下Button会高亮
 	StartHeroSelectionButton->SetIsEnabled(false);
 	StartHeroSelectionButton->OnClicked.AddDynamic(this,&ThisClass::StartHeroSelectionButtonClicked);
-	
+
 	StartMatchButton->SetIsEnabled(false);
 	StartMatchButton->OnClicked.AddDynamic(this,&ThisClass::StartMatchButtonClicked);
-	
+
+	// Confirm hero button
+	if (ConfirmHeroButton)
+	{
+		ConfirmHeroButton->SetIsEnabled(false);
+		ConfirmHeroButton->OnClicked.AddDynamic(this, &ThisClass::ConfirmHeroButtonClicked);
+	}
+
 	UCAssetManager::Get().LoadCharacterDefinition(FStreamableDelegate::CreateUObject(this,&ThisClass::CharacterDefinitionLoaded));
 
 	if (CharacterSelectionTileView)
 	{
 		CharacterSelectionTileView->OnItemSelectionChanged().AddUObject(this,&ThisClass::CharacterSelected);
+	}
+
+	// Bind skin selection callback
+	if (SkinSelectionTileView)
+	{
+		SkinSelectionTileView->OnItemSelectionChanged().AddUObject(this, &ThisClass::SkinSelected);
+	}
+
+	// Hide skin selection panel initially
+	if (SkinSelectionRoot)
+	{
+		SkinSelectionRoot->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	SpawnCharacterDisplay();
@@ -79,7 +100,7 @@ void ULobbyWidget::ClearAndPopulateTeamSelectionSlots()
 			}
 			//连环逻辑的第一步，为Slot的点击进行回调
 			NewSelectionSlot->OnSlotClicked.AddUObject(this,&ThisClass::SlotSelected);
-			
+
 			TeamSelectionSlots.Add(NewSelectionSlot);
 		}
 	}
@@ -131,6 +152,18 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		}
 	}
 
+	// Reset skin selection highlights
+	if (SkinSelectionTileView)
+	{
+		for (UUserWidget* SkinEntryAsWidget : SkinSelectionTileView->GetDisplayedEntryWidgets())
+		{
+			if (USkinEntryWidget* SkinEntryWidget = Cast<USkinEntryWidget>(SkinEntryAsWidget))
+			{
+				SkinEntryWidget->SetSelected(false);
+			}
+		}
+	}
+
 	for (const FPlayerSelection& PlayerSelection : PlayerSelections)
 	{
 		if (!PlayerSelection.IsValid()) continue;
@@ -142,9 +175,40 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		{
 			SelectedEntry->SetSelected(true);
 		}
+
+		// Highlight selected skin
+		if (PlayerSelection.GetSkinDefinition())
+		{
+			USkinEntryWidget* SelectedSkinEntry = SkinSelectionTileView->GetEntryWidgetFromItem<USkinEntryWidget>(PlayerSelection.GetSkinDefinition());
+			if (SelectedSkinEntry)
+			{
+				SelectedSkinEntry->SetSelected(true);
+			}
+		}
+
 		if (PlayerSelection.IsForPlayer(GetOwningPlayerState()))
 		{
 			UpdatedCharacterDisplay(PlayerSelection);
+
+			// If hero is already confirmed, switch to skin selection for this player
+			if (PlayerSelection.IsHeroConfirmed())
+			{
+				// Disable hero TileView
+				CharacterSelectionTileView->SetVisibility(ESlateVisibility::Collapsed);
+
+				// Show skin selection
+				SwitchToSkinSelection();
+
+				CurrentSelectedCharacterDef = PlayerSelection.GetCharacterDefinition();
+
+				// Populate skins (only once, when empty)
+				if (PlayerSelection.GetCharacterDefinition()
+					&& SkinSelectionTileView
+					&& SkinSelectionTileView->GetNumItems() == 0)
+				{
+					PopulateSkinSelectionTileView(PlayerSelection.GetCharacterDefinition());
+				}
+			}
 		}
 	}
 
@@ -154,10 +218,24 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 		StartHeroSelectionButton->SetIsEnabled(CGameState->CanStartHeroSelection());
 		StartMatchButton->SetIsEnabled(CGameState->CanStartMatch());
 	}
-	
+
 	if (PlayerTeamLayoutWidget)
 	{
 		PlayerTeamLayoutWidget->UpdatePlayerSelection(PlayerSelections);
+	}
+
+	// Update confirm button state: enabled when current player has a hero selected but not yet confirmed
+	if (ConfirmHeroButton && !CPlayerState) CPlayerState = GetOwningPlayerState<ACPlayerState>();
+	if (ConfirmHeroButton && CPlayerState)
+	{
+		const FPlayerSelection* MySelection = PlayerSelections.FindByPredicate(
+			[&](const FPlayerSelection& PS) { return PS.IsForPlayer(CPlayerState); });
+		if (MySelection)
+		{
+			const bool bHasHero = MySelection->GetCharacterDefinition() != nullptr;
+			const bool bConfirmed = MySelection->IsHeroConfirmed();
+			ConfirmHeroButton->SetIsEnabled(bHasHero && !bConfirmed);
+		}
 	}
 }
 
@@ -172,12 +250,18 @@ void ULobbyWidget::StartHeroSelectionButtonClicked()
 void ULobbyWidget::SwitchToHeroSelection()
 {
 	MainSwitcher->SetActiveWidget(HeroSelectionRoot);
+
+	// Ensure skin panel is hidden when entering hero selection
+	if (SkinSelectionRoot)
+	{
+		SkinSelectionRoot->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void ULobbyWidget::CharacterDefinitionLoaded()
 {
 	TArray<UPA_CharacterDefination*> LoadedCharacterDefinitions;
-	
+
 	if (UCAssetManager::Get().GetLoadedCharacterDefinition(LoadedCharacterDefinitions))
 	{
 			CharacterSelectionTileView->SetListItems(LoadedCharacterDefinitions);
@@ -192,6 +276,7 @@ void ULobbyWidget::CharacterSelected(UObject* SelectedUObject)
 	if (const UPA_CharacterDefination* CharacterDefinition = Cast<UPA_CharacterDefination>(SelectedUObject))
 	{
 		CPlayerState->Server_SetSelectedCharacterDefinition(CharacterDefinition);
+		CurrentSelectedCharacterDef = CharacterDefinition;
 	}
 }
 
@@ -201,7 +286,7 @@ void ULobbyWidget::SpawnCharacterDisplay()
 	if (!CharacterDisplayClass) return ;
 
 	FTransform CharacterDisplayTransform = FTransform::Identity;
-	
+
 	AActor* PlayerStart = UGameplayStatics::GetActorOfClass(GetWorld(),APlayerStart::StaticClass());
 	if (PlayerStart)
 	{
@@ -219,7 +304,18 @@ void ULobbyWidget::UpdatedCharacterDisplay(const FPlayerSelection& PlayerSelecti
 	if (!PlayerSelection.GetCharacterDefinition()) return;
 
 	CharacterDisplay->ConfigureWithCharacterDefinition(PlayerSelection.GetCharacterDefinition());
-	
+
+	// Apply skin mesh if selected
+	const UPA_SkinDefination* Skin = PlayerSelection.GetSkinDefinition();
+	if (Skin)
+	{
+		USkeletalMesh* SkinMesh = PlayerSelection.GetCharacterDefinition()->LoadDisplayMeshForSkin(Skin);
+		if (SkinMesh)
+		{
+			CharacterDisplay->SetSkinMesh(SkinMesh);
+		}
+	}
+
 	AbilityListView->ClearListItems();
 	const TMap<ECAbilityInputID , TSubclassOf<UGameplayAbility>>* Abilities = PlayerSelection.GetCharacterDefinition()->GetAbilities();
 	if (Abilities)
@@ -233,5 +329,85 @@ void ULobbyWidget::StartMatchButtonClicked()
 	if (LobbyPlayerController)
 	{
 		LobbyPlayerController->Server_RequestionStartMatch();
+	}
+}
+
+// --- Skin Selection ---
+
+void ULobbyWidget::ConfirmHeroButtonClicked()
+{
+	if (!CPlayerState) CPlayerState = GetOwningPlayerState<ACPlayerState>();
+	if (!CPlayerState) return;
+
+	// Send confirm RPC to server
+	CPlayerState->Server_ConfirmHeroSelection();
+}
+
+void ULobbyWidget::SwitchToSkinSelection()
+{
+	// Remove hero TileView from layout, skin panel takes its place
+	CharacterSelectionTileView->SetVisibility(ESlateVisibility::Collapsed);
+
+	if (SkinSelectionRoot)
+	{
+		SkinSelectionRoot->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void ULobbyWidget::PopulateSkinSelectionTileView(const UPA_CharacterDefination* CharacterDef)
+{
+	if (!SkinSelectionTileView || !CharacterDef) return;
+
+	SkinSelectionTileView->ClearListItems();
+
+	const TArray<TSoftObjectPtr<UPA_SkinDefination>>& AvailableSkins = CharacterDef->GetAvailableSkins();
+	if (AvailableSkins.IsEmpty()) return;
+
+	TArray<UPA_SkinDefination*> LoadedSkins;
+	for (const TSoftObjectPtr<UPA_SkinDefination>& SkinPtr : AvailableSkins)
+	{
+		UPA_SkinDefination* LoadedSkin = SkinPtr.LoadSynchronous();
+		if (LoadedSkin)
+		{
+			LoadedSkins.Add(LoadedSkin);
+		}
+	}
+
+	SkinSelectionTileView->SetListItems(LoadedSkins);
+}
+
+void ULobbyWidget::SkinSelected(UObject* SelectedUObject)
+{
+	if (!CPlayerState) CPlayerState = GetOwningPlayerState<ACPlayerState>();
+	if (!CPlayerState) return;
+
+	const UPA_SkinDefination* SkinDef = Cast<UPA_SkinDefination>(SelectedUObject);
+	if (!SkinDef) return;
+
+	// Send skin selection to server
+	CPlayerState->Server_SetSelectedSkin(SkinDef);
+
+	// Update local preview immediately
+	UpdateSkinPreview(SkinDef);
+}
+
+void ULobbyWidget::UpdateSkinPreview(const UPA_SkinDefination* Skin)
+{
+	if (!CharacterDisplay) return;
+
+	// Use current selected character definition to get the skin mesh
+	const UPA_CharacterDefination* CharDef = CurrentSelectedCharacterDef;
+	if (!CharDef && CPlayerState)
+	{
+		CharDef = CPlayerState->GetPlayerSelection().GetCharacterDefinition();
+	}
+
+	if (CharDef)
+	{
+		USkeletalMesh* SkinMesh = CharDef->LoadDisplayMeshForSkin(Skin);
+		if (SkinMesh)
+		{
+			CharacterDisplay->SetSkinMesh(SkinMesh);
+		}
 	}
 }

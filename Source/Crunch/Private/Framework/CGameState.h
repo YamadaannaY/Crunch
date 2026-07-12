@@ -7,6 +7,9 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerSelectionUpdated , const TArray<FPlayerSelection>& )
 
+class UPA_CharacterDefination;
+class UPA_SkinDefination;
+
 /*
 保存并同步整个游戏对所有玩家可见的状态数据，适合用作保存所有玩家共享并需要的数据，例如得分，阵营，游戏状态，时间等等，
 还有一个关键的PlayerArray存储了所有的APlayerState，存在于客户端和服务端，自动复制，客户端也能调用以制作UI等，
@@ -46,6 +49,13 @@ public:
 	
 	//是否所有玩家选择Hero，可以开始比赛
 	bool CanStartMatch() const ;
+
+	//设置玩家的皮肤选择
+	void SetSkinSelected(const APlayerState* SelectingPlayer, const UPA_SkinDefination* NewSkin);
+
+	//确认英雄选择（锁定英雄，不可再切换）
+	void SetHeroConfirmed(const APlayerState* SelectingPlayer);
+
 private:
 	UPROPERTY(ReplicatedUsing=OnRep_PlayerSelectionArray)
 	TArray<FPlayerSelection> PlayerSelectionArray;

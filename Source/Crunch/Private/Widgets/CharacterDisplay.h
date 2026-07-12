@@ -18,6 +18,9 @@ public:
 	//将Def中的数据配置到此Actor中
 	void ConfigureWithCharacterDefinition(const UPA_CharacterDefination* CharacterDefinition);
 
+	//直接设置皮肤 Mesh（用于皮肤预览）
+	void SetSkinMesh(USkeletalMesh* NewSkinMesh);
+
 private:
 	UPROPERTY(VisibleDefaultsOnly,Category="Character Display")
 	USkeletalMeshComponent* SkeletalMeshComp;

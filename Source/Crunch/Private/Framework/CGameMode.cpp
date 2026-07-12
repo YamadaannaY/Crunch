@@ -5,6 +5,8 @@
 #include "Framework/StormCore.h"
 #include "Player/CPlayerController.h"
 #include "Player/CPlayerState.h"
+#include "Character/PA_CharacterDefination.h"
+#include "Character/PA_SkinDefination.h"
 
 APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
@@ -29,7 +31,7 @@ APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, cons
 void ACGameMode::StartPlay()
 {
 	Super::StartPlay();
-		
+
 	AStormCore* StormCore=GetStormCore();
 	if (StormCore)
 	{
@@ -41,18 +43,25 @@ void ACGameMode::StartPlay()
 UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
 	ACPlayerState* CPlayerState = InController->GetPlayerState<ACPlayerState>();
-	
+
 	if (CPlayerState && CPlayerState->GetSelectedPawnClass())
 	{
+		// 皮肤：SpawnActor 前把 CDO 的 Mesh 改成选中皮肤的 Mesh
+		const FPlayerSelection& Selection = CPlayerState->GetPlayerSelection();
+		const UPA_CharacterDefination* CharDef = Selection.GetCharacterDefinition();
+		if (CharDef)
+		{
+			CharDef->ApplySkinToClassDefault(Selection.GetSkinDefinition());
+		}
 		return CPlayerState->GetSelectedPawnClass();
 	}
-		
+
 	const IGenericTeamAgentInterface* TeamAgent  = Cast<IGenericTeamAgentInterface>(InController);
 	if ( TeamAgent && TeamAgent->GetGenericTeamId()==FGenericTeamId(1))
 	{
 		return BackupPawn2;
 	}
-		
+
 	return BackupPawn1;
 }
 

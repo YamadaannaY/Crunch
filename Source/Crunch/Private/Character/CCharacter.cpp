@@ -16,6 +16,9 @@
 #include "Crunch/Crunch.h"
 #include "GAS/CHeroAttributeSet.h"
 #include "Widgets/OverHeadStatsGauge.h"
+#include "Player/CPlayerState.h"
+#include "Character/PA_CharacterDefination.h"
+#include "Character/PA_SkinDefination.h"
 
 ACCharacter::ACCharacter()
 {
@@ -62,7 +65,7 @@ bool ACCharacter::IsLocallyControlledByPlayer() const
 void ACCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	
+
 	//处理AI的Init相关部分
 	if (NewController && !NewController->IsPlayerController())
 	{

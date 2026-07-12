@@ -61,6 +61,8 @@ void ACPlayerState::Server_SetSelectedCharacterDefinition_Implementation(const U
 {
 	if (!CGameState) return ;
 	if (!NewDefinition) return ;
+	// 已确认英雄后不允许切换
+	if (PlayerSelection.IsHeroConfirmed()) return;
 	if (CGameState->IsDefinitionSelected(NewDefinition)) return ;
 
 	//有的话先置为null
@@ -90,4 +92,34 @@ void ACPlayerState::PlayerSelectionUpdated(const TArray<FPlayerSelection>& NewPl
 			break;
 		}
 	}
+}
+
+void ACPlayerState::Server_SetSelectedSkin_Implementation(const UPA_SkinDefination* NewSkin)
+{
+	if (!CGameState) return;
+
+	FPlayerSelection* FoundSelection = const_cast<FPlayerSelection*>(
+		CGameState->GetPlayerSelection().FindByPredicate([&](const FPlayerSelection& PS) {
+			return PS.IsForPlayer(this);
+		}));
+
+	// 通过 CGameState 的函数更新
+	CGameState->SetSkinSelected(this, NewSkin);
+}
+
+bool ACPlayerState::Server_SetSelectedSkin_Validate(const UPA_SkinDefination* NewSkin)
+{
+	return true;
+}
+
+void ACPlayerState::Server_ConfirmHeroSelection_Implementation()
+{
+	if (!CGameState) return;
+
+	CGameState->SetHeroConfirmed(this);
+}
+
+bool ACPlayerState::Server_ConfirmHeroSelection_Validate()
+{
+	return true;
 }

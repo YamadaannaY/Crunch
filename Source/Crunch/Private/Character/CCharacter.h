@@ -170,7 +170,7 @@ private:
 	//Dead / Respawn 函数调用时进行的逻辑，根据不同的Character子类执行不同的逻辑
 	virtual void OnDead();
 	virtual void OnRespawn();
-	
+
 	/******************************* Team ***********************************/
 public:
 	/** Assigns Team Agent to given TeamID 在Controller OnPossess时调用*/

@@ -1,12 +1,12 @@
 #include "PlayerInfoTypes.h"
 #include "GameFramework/PlayerState.h"
 
-FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid()),PlayerNickName(),CharacterDefinition(nullptr)
+FPlayerSelection::FPlayerSelection() : Slot(GetInvalidSlot()) ,PlayerUniqueId(FUniqueNetIdRepl::Invalid()),PlayerNickName(),CharacterDefinition(nullptr),SkinDefinition(nullptr),bHeroConfirmed(false)
 {
-	
+
 }
 
-FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) : Slot(InSlot),CharacterDefinition(nullptr)
+FPlayerSelection::FPlayerSelection(uint8 InSlot, const APlayerState* InPlayerState) : Slot(InSlot),CharacterDefinition(nullptr),SkinDefinition(nullptr),bHeroConfirmed(false)
 {
 	if (InPlayerState)
 	{

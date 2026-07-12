@@ -1,5 +1,7 @@
 #include "CGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "Character/PA_CharacterDefination.h"
+#include "Character/PA_SkinDefination.h"
 
 void ACGameState::RequestPlayerSelectionChange(const APlayerState* RequestingPlayer , uint8 DesiredSlot)
 {
@@ -82,9 +84,9 @@ bool ACGameState::CanStartMatch() const
 {
 	for (const FPlayerSelection& PlayerSelection : PlayerSelectionArray)
 	{
-		if (PlayerSelection.GetCharacterDefinition() == nullptr) return false ; 
+		if (PlayerSelection.GetCharacterDefinition() == nullptr) return false ;
 	}
-	
+
 	return true;
 }
 
@@ -110,4 +112,34 @@ void ACGameState::SetCharacterDeselected(const UPA_CharacterDefination* Definiti
 void ACGameState::OnRep_PlayerSelectionArray() const
 {
 	OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
-} 
+}
+
+void ACGameState::SetSkinSelected(const APlayerState* SelectingPlayer, const UPA_SkinDefination* NewSkin)
+{
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
+	{
+		return PlayerSelection.IsForPlayer(SelectingPlayer);
+	});
+
+	if (FoundPlayerSelection)
+	{
+		FoundPlayerSelection->SetSkinDefinition(NewSkin);
+		FoundPlayerSelection->GetCharacterDefinition()->
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+}
+
+void ACGameState::SetHeroConfirmed(const APlayerState* SelectingPlayer)
+{
+	FPlayerSelection* FoundPlayerSelection = PlayerSelectionArray.FindByPredicate([&](const FPlayerSelection& PlayerSelection)
+	{
+		return PlayerSelection.IsForPlayer(SelectingPlayer);
+	});
+
+	if (FoundPlayerSelection)
+	{
+		FoundPlayerSelection->SetHeroConfirmed(true);
+
+		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
+	}
+}

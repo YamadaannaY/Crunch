@@ -11,7 +11,7 @@ ACharacterDisplay::ACharacterDisplay()
 
 	SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh Comp");
 	SkeletalMeshComp->SetupAttachment(GetRootComponent());
-	
+
 	ViewCameraComp = CreateDefaultSubobject<UCameraComponent>("View Camera");
 	ViewCameraComp->SetupAttachment(GetRootComponent());
 }
@@ -23,4 +23,10 @@ void ACharacterDisplay::ConfigureWithCharacterDefinition(const UPA_CharacterDefi
 	SkeletalMeshComp->SetSkeletalMesh(CharacterDefinition->LoadDisplayMesh());
 	SkeletalMeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	SkeletalMeshComp->SetAnimInstanceClass(CharacterDefinition->LoadDisplayAnimationBP());
+}
+
+void ACharacterDisplay::SetSkinMesh(USkeletalMesh* NewSkinMesh)
+{
+	if (!NewSkinMesh) return;
+	SkeletalMeshComp->SetSkeletalMesh(NewSkinMesh);
 }
