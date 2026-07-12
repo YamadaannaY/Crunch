@@ -217,6 +217,9 @@ private:
 
 	/**************************** HitReact ******************************/
 public:
+        // GA 调用：服务端 -> NetMulticast 广播到所有客户端
+        void ServerPlayHitReactMontage(const FGameplayTag& DirectionTag);
+
 	
 	// 根据受击方向 Tag 返回对应的 Montage（蓝图子类配置动画）
 	UFUNCTION(BlueprintCallable, Category = "HitReact")

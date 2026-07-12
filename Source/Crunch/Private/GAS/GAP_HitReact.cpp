@@ -30,7 +30,7 @@ void UGAP_HitReact::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	AActor* Attacker = TriggerEventData->ContextHandle.GetInstigator();
+	const AActor* Attacker = TriggerEventData->ContextHandle.GetInstigator();
 	if (!Attacker)
 	{
 		Debug::Print(TEXT("[HitReact] No Attacker"), FColor::Red);
@@ -49,7 +49,7 @@ void UGAP_HitReact::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	const FGameplayTag DirectionTag = ComputeHitReactDirectionTag(Attacker, VictimChar, OutDist);
 
 	// 服务端播放 + NetMulticast RPC 到所有客户端
-	VictimChar->Multicast_PlayHitReactMontage_Implementation(DirectionTag);
+	VictimChar->ServerPlayHitReactMontage(DirectionTag);
 
 	K2_EndAbility();
 }

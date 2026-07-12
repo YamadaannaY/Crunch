@@ -464,7 +464,7 @@ float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 	// 强制停止当前受击动画（同方向连击也能重启）
 	AnimInst->Montage_Stop(0.f, MontageToPlay);
 
-	// 立即从开头播放
+	//立即从开头播放
 	const float Duration = AnimInst->Montage_Play(MontageToPlay);
 	Debug::Print(FString::Printf(TEXT("[HitReact] Play: %s (%.2fs) [%s]"),
 		*MontageToPlay->GetName(), Duration,
@@ -473,6 +473,11 @@ float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 	return Duration;
 }
 
+
+void ACCharacter::ServerPlayHitReactMontage(const FGameplayTag& DirectionTag)
+{
+	Multicast_PlayHitReactMontage(DirectionTag);
+}
 
 void ACCharacter::Multicast_PlayHitReactMontage_Implementation(const FGameplayTag& DirectionTag)
 {
