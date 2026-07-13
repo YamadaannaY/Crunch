@@ -20,6 +20,9 @@ class CRUNCH_API UCGameInstance : public UGameInstance
 public:
 	//点击Button调用此函数从而加载GameMap
 	void StartMatch();
+
+	// GameInstance 销毁时（PIE退出 / 游戏关闭）调用，恢复所有 CDO Mesh
+	virtual void Shutdown() override;
 	
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Map")

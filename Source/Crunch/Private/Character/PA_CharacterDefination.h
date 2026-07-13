@@ -48,7 +48,10 @@ public:
 
 	//将指定皮肤的 Mesh 直接设置到 CharacterClass 的 CDO 上（在 SpawnActor 前调用）
 	void ApplySkinToClassDefault(const UPA_SkinDefination* Skin) const;
-	
+
+	//将 CDO 的 Mesh 恢复为此 CharacterDef 的默认 Mesh（游戏结束时调用）
+	void RestoreDefaultMesh() const;
+
 private:
 	UPROPERTY(EditDefaultsOnly,Category="Character")
 	FString CharacterName;
@@ -65,4 +68,8 @@ private:
 	/** 此英雄可用的所有皮肤（在编辑器中配置）。第一个元素为默认皮肤 */
 	UPROPERTY(EditDefaultsOnly, Category = "Character|Skin")
 	TArray<TSoftObjectPtr<UPA_SkinDefination>> AvailableSkins;
+
+	/** 缓存的默认 Mesh —— 第一次 ApplySkin 前保存，RestoreDefaultMesh 时用 */
+	UPROPERTY()
+	mutable USkeletalMesh* CachedDefaultMesh = nullptr;
 };

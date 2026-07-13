@@ -1,4 +1,21 @@
 #include "CGameInstance.h"
+#include "CAssetManager.h"
+#include "Character/PA_CharacterDefination.h"
+
+void UCGameInstance::Shutdown()
+{
+	// PIE 退出 / 游戏关闭时，恢复所有 CDO Mesh 为默认值
+	TArray<UPA_CharacterDefination*> AllCharDefs;
+	if (UCAssetManager::Get().GetLoadedCharacterDefinition(AllCharDefs))
+	{
+		for (UPA_CharacterDefination* CharDef : AllCharDefs)
+		{
+			CharDef->RestoreDefaultMesh();
+		}
+	}
+
+	Super::Shutdown();
+}
 
 void UCGameInstance::StartMatch()
 {

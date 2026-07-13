@@ -24,9 +24,6 @@ public:
 	//在服务端上为每个Controller调用一次,确定生成的Pawn，在SpawnPlayerController之后调用
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override;
 
-	// SpawnPawn 后调用，读取 PlayerSelection 中的皮肤应用到角色
-	virtual void RestartPlayer(AController* NewPlayer) override;
-	
 private:
 	//在OnProperty函数中保留了Lobby中继承的PlayerSelection，如果有则根据其Slot变量获取TeamID,如果没有静态递增赋值
 	FGenericTeamId GetTeamIDForPlayer(const AController* InController) const;
@@ -50,4 +47,5 @@ private:
 
 	//对服务端的所有PlayerController调用MatchFinished，传参数ViewTarget和WinningTeam
 	void MatchFinished(AActor* ViewTarget,int WinningTeam) const ;
+	
 };

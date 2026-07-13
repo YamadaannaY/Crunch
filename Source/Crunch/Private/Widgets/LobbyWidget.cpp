@@ -389,6 +389,14 @@ void ULobbyWidget::SkinSelected(UObject* SelectedUObject)
 
 	// Update local preview immediately
 	UpdateSkinPreview(SkinDef);
+
+	//立即修改本客户端的 CDO Mesh
+	const UPA_CharacterDefination* CharDef = CurrentSelectedCharacterDef;
+	if (!CharDef) CharDef = CPlayerState->GetPlayerSelection().GetCharacterDefinition();
+	if (CharDef)
+	{
+		CharDef->ApplySkinToClassDefault(SkinDef);
+	}
 }
 
 void ULobbyWidget::UpdateSkinPreview(const UPA_SkinDefination* Skin)

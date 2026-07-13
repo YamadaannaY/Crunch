@@ -62,11 +62,28 @@ void UPA_CharacterDefination::ApplySkinToClassDefault(const UPA_SkinDefination* 
 	TSubclassOf<ACCharacter> LoadedClass = LoadCharacterClass();
 	if (!LoadedClass) return;
 
-	// 直接修改 CDO —— SpawnActor 时从 CDO 复制属性，新生成的 Pawn 就自动带上皮肤 Mesh
 	ACCharacter* CDO = Cast<ACCharacter>(LoadedClass.GetDefaultObject());
 	if (CDO)
 	{
+		if (!CachedDefaultMesh)
+		{
+			CachedDefaultMesh = CDO->GetMesh()->GetSkeletalMeshAsset();
+		}
 		CDO->GetMesh()->SetSkeletalMesh(SkinMesh);
+	}
+}
+
+void UPA_CharacterDefination::RestoreDefaultMesh() const
+{
+	if (!CachedDefaultMesh) return;
+
+	TSubclassOf<ACCharacter> LoadedClass = LoadCharacterClass();
+	if (!LoadedClass) return;
+
+	ACCharacter* CDO = Cast<ACCharacter>(LoadedClass.GetDefaultObject());
+	if (CDO)
+	{
+		CDO->GetMesh()->SetSkeletalMesh(CachedDefaultMesh);
 	}
 }
 

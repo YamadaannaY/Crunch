@@ -5,8 +5,8 @@
 #include "Framework/StormCore.h"
 #include "Player/CPlayerController.h"
 #include "Player/CPlayerState.h"
+#include "Framework/CGameState.h"
 #include "Character/PA_CharacterDefination.h"
-#include "Character/PA_SkinDefination.h"
 
 APlayerController* ACGameMode::SpawnPlayerController(ENetRole InRemoteRole, const FString& Options)
 {
@@ -46,13 +46,6 @@ UClass* ACGameMode::GetDefaultPawnClassForController_Implementation(AController*
 
 	if (CPlayerState && CPlayerState->GetSelectedPawnClass())
 	{
-		// 皮肤：SpawnActor 前把 CDO 的 Mesh 改成选中皮肤的 Mesh
-		const FPlayerSelection& Selection = CPlayerState->GetPlayerSelection();
-		const UPA_CharacterDefination* CharDef = Selection.GetCharacterDefinition();
-		if (CharDef)
-		{
-			CharDef->ApplySkinToClassDefault(Selection.GetSkinDefinition());
-		}
 		return CPlayerState->GetSelectedPawnClass();
 	}
 
@@ -116,7 +109,7 @@ AStormCore* ACGameMode::GetStormCore() const
 	return nullptr;
 }
 
-void ACGameMode::MatchFinished(AActor* ViewTarget,int WinningTeam) const 
+void ACGameMode::MatchFinished(AActor* ViewTarget,int WinningTeam) const
 	{
 		UWorld* World = GetWorld();
 		if (World)
@@ -125,6 +118,21 @@ void ACGameMode::MatchFinished(AActor* ViewTarget,int WinningTeam) const
 			for (TActorIterator<ACPlayerController> It(World);It;++It)
 			{
 				It->MatchFinished(ViewTarget,WinningTeam);
+			}
+		}
+
+		// 恢复所有被修改过的 CDO Mesh 为默认值
+		if (ACGameState* GS = GetGameState<ACGameState>())
+		{
+			for (const APlayerState* PS : GS->PlayerArray)
+			{
+				if (const ACPlayerState* CPS = Cast<ACPlayerState>(PS))
+				{
+					if (const UPA_CharacterDefination* CharDef = CPS->GetPlayerSelection().GetCharacterDefinition())
+					{
+						CharDef->RestoreDefaultMesh();
+					}
+				}
 			}
 		}
 	}

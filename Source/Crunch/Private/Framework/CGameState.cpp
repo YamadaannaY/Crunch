@@ -85,6 +85,7 @@ bool ACGameState::CanStartMatch() const
 	for (const FPlayerSelection& PlayerSelection : PlayerSelectionArray)
 	{
 		if (PlayerSelection.GetCharacterDefinition() == nullptr) return false ;
+		if (!PlayerSelection.IsHeroConfirmed()) return false;
 	}
 
 	return true;
@@ -124,7 +125,6 @@ void ACGameState::SetSkinSelected(const APlayerState* SelectingPlayer, const UPA
 	if (FoundPlayerSelection)
 	{
 		FoundPlayerSelection->SetSkinDefinition(NewSkin);
-		FoundPlayerSelection->GetCharacterDefinition()->
 		OnPlayerSelectionUpdated.Broadcast(PlayerSelectionArray);
 	}
 }

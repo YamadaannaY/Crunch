@@ -5,6 +5,8 @@
 #include "Widgets/GameplayWidget.h"
 #include "net/UnrealNetwork.h"
 #include "Widgets/InventoryWidget.h"
+#include "Player/CPlayerState.h"
+#include "Character/PA_CharacterDefination.h"
 
 void ACPlayerController::OnPossess(APawn* NewPawn)
 {
@@ -84,18 +86,28 @@ void ACPlayerController::ClearContextMenuInInventory()
 
 void ACPlayerController::Client_MatchFinished_Implementation(AActor* ViewTarget, int WinningTeam)
 {
+	// 恢复本客户端 CDO Mesh 为默认值（退出游戏前清理皮肤修改）
+	ACPlayerState* PS = GetPlayerState<ACPlayerState>();
+	if (PS)
+	{
+		if (const UPA_CharacterDefination* CharDef = PS->GetPlayerSelection().GetCharacterDefinition())
+		{
+			CharDef->RestoreDefaultMesh();
+		}
+	}
+
 	CPlayerCharacter->DisableInput(this);
-	
+
 	//将玩家镜头过渡到一个新的ViewTarget上
 	SetViewTargetWithBlend(ViewTarget,MatchFinishedViewBlendTimeDuration);
-	
+
 	FString WinLoseMsg="You Win !";
 	if (GetGenericTeamId().GetId()!=WinningTeam)
 	{
 		WinLoseMsg="You Lose ...." ;
 	}
 	GameplayWidget->SetGameplayMenuTitle(WinLoseMsg);
-	
+
 	FTimerHandle ShowWinLoseStateTimerHandle;
 
 	//在镜头过渡完毕后调用，显示GameMenu

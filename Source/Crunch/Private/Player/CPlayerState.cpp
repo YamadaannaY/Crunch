@@ -98,13 +98,13 @@ void ACPlayerState::Server_SetSelectedSkin_Implementation(const UPA_SkinDefinati
 {
 	if (!CGameState) return;
 
-	FPlayerSelection* FoundSelection = const_cast<FPlayerSelection*>(
-		CGameState->GetPlayerSelection().FindByPredicate([&](const FPlayerSelection& PS) {
-			return PS.IsForPlayer(this);
-		}));
-
-	// 通过 CGameState 的函数更新
 	CGameState->SetSkinSelected(this, NewSkin);
+
+	// 立即修改服务端的 CDO Mesh
+	if (NewSkin && PlayerSelection.GetCharacterDefinition())
+	{
+		PlayerSelection.GetCharacterDefinition()->ApplySkinToClassDefault(NewSkin);
+	}
 }
 
 bool ACPlayerState::Server_SetSelectedSkin_Validate(const UPA_SkinDefination* NewSkin)
