@@ -193,10 +193,10 @@ void ULobbyWidget::UpdatePlayerSelectionOnDisplay(const TArray<FPlayerSelection>
 			// If hero is already confirmed, switch to skin selection for this player
 			if (PlayerSelection.IsHeroConfirmed())
 			{
-				// Disable hero TileView
+				//选择完毕后隐藏英雄选择界面
 				CharacterSelectionTileView->SetVisibility(ESlateVisibility::Collapsed);
 
-				// Show skin selection
+				//跳转到SkinSlot
 				SwitchToSkinSelection();
 
 				CurrentSelectedCharacterDef = PlayerSelection.GetCharacterDefinition();
@@ -251,7 +251,6 @@ void ULobbyWidget::SwitchToHeroSelection()
 {
 	MainSwitcher->SetActiveWidget(HeroSelectionRoot);
 
-	// Ensure skin panel is hidden when entering hero selection
 	if (SkinSelectionRoot)
 	{
 		SkinSelectionRoot->SetVisibility(ESlateVisibility::Collapsed);
@@ -301,26 +300,29 @@ void ULobbyWidget::SpawnCharacterDisplay()
 
 void ULobbyWidget::UpdatedCharacterDisplay(const FPlayerSelection& PlayerSelection)
 {
-	if (!PlayerSelection.GetCharacterDefinition()) return;
+	const UPA_CharacterDefination* CharDef = PlayerSelection.GetCharacterDefinition();
+	if (!CharDef) return;
 
-	CharacterDisplay->ConfigureWithCharacterDefinition(PlayerSelection.GetCharacterDefinition());
-
-	// Apply skin mesh if selected
-	const UPA_SkinDefination* Skin = PlayerSelection.GetSkinDefinition();
-	if (Skin)
+	// 只在英雄切换时才重新调用Configure，避免皮肤切换/其他玩家变动PlayerSelectionArray导致动画重新播放）
+	if (CharDef != LastDisplayedCharacterDef)
 	{
-		USkeletalMesh* SkinMesh = PlayerSelection.GetCharacterDefinition()->LoadDisplayMeshForSkin(Skin);
-		if (SkinMesh)
+		CharacterDisplay->ConfigureWithCharacterDefinition(CharDef);
+		LastDisplayedCharacterDef = CharDef;
+
+		AbilityListView->ClearListItems();
+		const TMap<ECAbilityInputID, TSubclassOf<UGameplayAbility>>* Abilities = CharDef->GetAbilities();
+		if (Abilities)
 		{
-			CharacterDisplay->SetSkinMesh(SkinMesh);
+			AbilityListView->ConfigureAbilities(*Abilities);
 		}
 	}
 
-	AbilityListView->ClearListItems();
-	const TMap<ECAbilityInputID , TSubclassOf<UGameplayAbility>>* Abilities = PlayerSelection.GetCharacterDefinition()->GetAbilities();
-	if (Abilities)
+	// Apply skin mesh
+	const UPA_SkinDefination* Skin = PlayerSelection.GetSkinDefinition();
+	USkeletalMesh* SkinMesh = CharDef->LoadDisplayMeshForSkin(Skin);
+	if (SkinMesh)
 	{
-		AbilityListView->ConfigureAbilities(*Abilities);
+		CharacterDisplay->SetSkinMesh(SkinMesh);
 	}
 }
 
@@ -345,7 +347,6 @@ void ULobbyWidget::ConfirmHeroButtonClicked()
 
 void ULobbyWidget::SwitchToSkinSelection()
 {
-	// Remove hero TileView from layout, skin panel takes its place
 	CharacterSelectionTileView->SetVisibility(ESlateVisibility::Collapsed);
 
 	if (SkinSelectionRoot)

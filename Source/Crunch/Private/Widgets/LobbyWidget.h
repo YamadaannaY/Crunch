@@ -141,10 +141,14 @@ private:
 	//更新皮肤预览（切换 CharacterDisplay 的 Mesh）
 	void UpdateSkinPreview(const UPA_SkinDefination* Skin);
 
-	//切换到皮肤选择面板并锁定英雄选择
+	//切换到皮肤选择面板并隐藏英雄选择
 	void SwitchToSkinSelection();
 
 	/** 当前选中的 CharacterDefinition（缓存用于皮肤加载） */
 	UPROPERTY()
 	const UPA_CharacterDefination* CurrentSelectedCharacterDef = nullptr;
+
+	/** 上一次 Display 显示的角色（避免重复配置导致动画重置） */
+	UPROPERTY()
+	const UPA_CharacterDefination* LastDisplayedCharacterDef = nullptr;
 };
