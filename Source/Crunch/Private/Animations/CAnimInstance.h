@@ -42,6 +42,10 @@ public:
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE bool GetIsJumping() const {return bIsJumping;}
 
+	// 当前跳跃段数：0=地面, 1=一段跳, 2=二段跳
+	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
+	FORCEINLINE int32 GetJumpCount() const {return JumpCount;}
+
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE bool GetIsAiming() const {return bIsAiming;}
 
@@ -55,7 +59,15 @@ public:
 	FORCEINLINE float GetRightSpeed() const {return RightSpeed;}
 
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
-	FORCEINLINE float GetLookYawOffset() const {return LookRotOffset.Yaw;}
+	FORCEINLINE bool HasAcceleration() const {return Acceleration > 0.f;}
+
+	//锁定的停步方向：0=Forward, 1=Backward, 2=Left, 3=Right
+	//在HasAcceleration为true且高速移动时持续更新，松手瞬间锁住
+	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
+	FORCEINLINE int32 GetLockedStopDir() const {return LockedStopDir;}
+
+	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
+	FORCEINLINE float GetLookYawOffset() const {return FMath::UnwindDegrees(LookRotOffset.Yaw);}
 
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE float GetLookPitchOffset() const {return LookRotOffset.Pitch;}
@@ -74,7 +86,7 @@ private:
 	class UCharacterMovementComponent*  OwnerMovementComp;
 
 	float Speed;
-
+	
 	float YawSpeed;
 
 	float SmoothYawSpeed;
@@ -83,7 +95,20 @@ private:
 	
 	float RightSpeed;
 
+	float Acceleration;
+
+	//锁定的停步方向，仅在高速移动时更新，松手瞬间锁住
+	//0=Forward, 1=Backward, 2=Left, 3=Right
+	int32 LockedStopDir = 0;
+
+	//只有速度超过此阈值时才会锁定停步方向，低于此值直接回Idle不播停步动画
+	UPROPERTY(EditAnywhere, Category = "Animation")
+	float StopSpeedThreshold = 200.f;
+
 	bool bIsJumping;
+
+	// 跳跃段数：0=地面, 1=一段跳, 2=二段跳
+	int32 JumpCount = 0;
 	
 	bool bIsAiming;
 

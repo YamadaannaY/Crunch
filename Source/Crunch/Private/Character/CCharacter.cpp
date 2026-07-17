@@ -451,6 +451,12 @@ float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 {
 	if (IsDead()) return 0.f;
 
+	// 处于Stun状态时不播放HitReact，避免与StunMontage冲突
+	if (GetAbilitySystemComponent() && GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetStunStatTag()))
+	{
+		return 0.f;
+	}
+
 	UAnimMontage* MontageToPlay = GetHitReactMontageForDirection(DirectionTag);
 	if (!MontageToPlay)
 	{

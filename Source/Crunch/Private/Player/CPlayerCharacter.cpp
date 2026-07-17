@@ -138,6 +138,11 @@ void ACPlayerCharacter::HandleAbilityInput(const FInputActionValue& InputActionV
 	
 	if (bPressed)
 	{
+		// 二段跳期间禁止触发普攻 GA（一段跳可以）
+		if (InputID == ECAbilityInputID::BasicAttacks && JumpCurrentCount >= 2)
+		{
+			return;
+		}
 		GetAbilitySystemComponent()->AbilityLocalInputPressed((int32)InputID);
 	}
 	else

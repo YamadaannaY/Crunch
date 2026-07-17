@@ -14,7 +14,8 @@ UGAP_HitReact::UGAP_HitReact()
 	TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
 	AbilityTriggers.Add(TriggerData);
 
-	ActivationBlockedTags.RemoveTag(UCAbilitySystemStatics::GetStunStatTag());
+	// 收到Stun伤害时不触发HitReact，只播放StunMontage
+	// ActivationBlockedTags 继承自 UCGameplayAbility，已包含 StunStatTag，此处不再移除
 }
 
 void UGAP_HitReact::ActivateAbility(const FGameplayAbilitySpecHandle Handle,

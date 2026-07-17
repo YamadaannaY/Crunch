@@ -64,6 +64,29 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		//角色当前不在地面上时Falling为True，原理是每一帧进行向下sweep检测是否有可以站立的地面
 		bIsJumping=OwnerMovementComp->IsFalling();
+		Acceleration = OwnerMovementComp->GetCurrentAcceleration().Length();
+	}
+
+	if (OwnerCharacter)
+	{
+		// 缓存跳跃段数：0=地面, 1=一段跳, 2=二段跳
+		JumpCount = OwnerCharacter->JumpCurrentCount;
+	}
+
+	//锁定停步方向：有加速度输入 且 高速移动时 持续更新；松手瞬间锁住
+	if (HasAcceleration() && Speed > StopSpeedThreshold)
+	{
+		const float AbsFwd = FMath::Abs(FwdSpeed);
+		const float AbsRight = FMath::Abs(RightSpeed);
+
+		if (AbsFwd >= AbsRight)
+		{
+			LockedStopDir = (FwdSpeed > 0.f) ? 0 : 1;
+		}
+		else
+		{
+			LockedStopDir = (RightSpeed > 0.f) ? 2 : 3;
+		}
 	}
 }
 
@@ -74,7 +97,7 @@ void UCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
 bool UCAnimInstance::bShouldDoFullBody() const
 {
-	return GetSpeed()<=0 && !GetIsAiming();
+	return GetSpeed()<=0 && !GetIsAiming(); 
 }
 
 void UCAnimInstance::OwnerAimTagChanged(const FGameplayTag Tag, int32 NewCount)
