@@ -336,9 +336,35 @@ void ACPlayerCharacter::HandleJumpInput()
 		// 空中二段跳：使用较低的跳跃速度和更高的空中控制
 		MovementComp->JumpZVelocity=SecondJumpZVelocity;
 		MovementComp->AirControl=DoubleJumpAirControl;
+
+		// 二段跳时取消普攻、Roll、StaffSpin 技能
+		FGameplayTagContainer CancelTags;
+		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.staffspin.wukong"));
+		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.basicattack"));
+		GetAbilitySystemComponent()->CancelAbilities(&CancelTags); // 本地取消（LocalPredicted GA）
+		Server_CancelDoubleJumpAbilities();                        // 服务端取消（ServerOnly GA）
 	}
 
 	Jump();
+}
+
+void ACPlayerCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	// 服务端广播跳跃事件到所有客户端，确保远程客户端每次都收到正确的跳跃段数
+	// 解决 JumpCurrentCount 复制跳过中间值（0→2）导致远程客户端动画错乱
+	if (HasAuthority())
+	{
+		Multicast_PlayJumpAnimation(JumpCurrentCount);
+	}
+}
+
+void ACPlayerCharacter::Multicast_PlayJumpAnimation_Implementation(int32 InJumpCount)
+{
+	// 直接修正远程客户端的 JumpCurrentCount，触发 OnRep → OnJumped → ABP 读取正确的 GetJumpCount()
+	// 本地客户端 JumpCurrentCount 已由本地预测正确设置，相同值不会触发 OnRep
+	JumpCurrentCount = InJumpCount;
 }
 
 void ACPlayerCharacter::Landed(const FHitResult& Hit)
@@ -392,5 +418,16 @@ void ACPlayerCharacter::Server_StopSprint_Implementation()
 	{
 		ASC->RemoveActiveGameplayEffect(SprintEffectHandle);
 		SprintEffectHandle = FActiveGameplayEffectHandle();
+	}
+}
+
+void ACPlayerCharacter::Server_CancelDoubleJumpAbilities_Implementation()
+{
+	FGameplayTagContainer CancelTags;
+	CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.staffspin.wukong"));
+	CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.basicattack"));
+	if (UAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	{
+		ASC->CancelAbilities(&CancelTags);
 	}
 }

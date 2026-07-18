@@ -42,7 +42,7 @@ public:
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE bool GetIsJumping() const {return bIsJumping;}
 
-	// 当前跳跃段数：0=地面, 1=一段跳, 2=二段跳
+	// 当前跳跃段数：0=地面, 1=一段跳, 2=二段跳（从 Character->JumpCurrentCount 每一帧缓存）
 	UFUNCTION(BlueprintCallable,meta=(BlueprintThreadSafe))
 	FORCEINLINE int32 GetJumpCount() const {return JumpCount;}
 
@@ -109,7 +109,7 @@ private:
 
 	// 跳跃段数：0=地面, 1=一段跳, 2=二段跳
 	int32 JumpCount = 0;
-	
+
 	bool bIsAiming;
 
 	//由于鼠标控制旋转，速度和变化都非常快，所以手动设置一个LerpSeed，控制插值速度，使用InterpTo进行在这个速度下平滑旋转

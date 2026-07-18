@@ -8,7 +8,7 @@
 
 void UCAnimInstance::NativeInitializeAnimation()
 {
-	
+
 	OwnerCharacter=Cast<ACharacter>(TryGetPawnOwner());
 	if (OwnerCharacter)
 	{
@@ -20,7 +20,7 @@ void UCAnimInstance::NativeInitializeAnimation()
 	{
 		OwnerASC->RegisterGameplayTagEvent(UCAbilitySystemStatics::GetAimStatTag()).AddUObject(this,&ThisClass::OwnerAimTagChanged);
 	}
-} 
+}
 
 void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -28,30 +28,30 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		FVector Vel=OwnerCharacter->GetVelocity();
 		Speed=Vel.Length();
-		
+
 		const FRotator BodyRot=OwnerCharacter->GetActorRotation();
-		
+
 		//获得Rotator增量并归一化，归一化是为了匹配BS
 		const FRotator BodyRotDelta=UKismetMathLibrary::NormalizedDeltaRotator(BodyRot,BodyPrevRot);
 
 		//更新PrevRot
 		BodyPrevRot=BodyRot;
-		
+
 		//获得旋转速度
 		YawSpeed=BodyRotDelta.Yaw/DeltaSeconds;
 
 		float YawLerpSpeed=YawSpeedSmoothLerpSpeed;
-		
+
 		if (YawSpeed == 0 )
 		{
 			YawLerpSpeed=YawSpeedLerpToZeroSpeed;
 		}
-		
+
 		SmoothYawSpeed=UKismetMathLibrary::FInterpTo(SmoothYawSpeed,YawSpeed,DeltaSeconds,YawLerpSpeed);
 
 		//BaseAimRotation：Character的实际视野朝向，包括了Pitch
 		FRotator ControlRot=OwnerCharacter->GetBaseAimRotation();
-		
+
 		//获得视线和身体角度的差值，即BS中头部要转过的角度。
 		LookRotOffset=UKismetMathLibrary::NormalizedDeltaRotator(ControlRot,BodyRot);
 
@@ -97,7 +97,7 @@ void UCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
 bool UCAnimInstance::bShouldDoFullBody() const
 {
-	return GetSpeed()<=0 && !GetIsAiming(); 
+	return GetSpeed()<=0 && !GetIsAiming();
 }
 
 void UCAnimInstance::OwnerAimTagChanged(const FGameplayTag Tag, int32 NewCount)

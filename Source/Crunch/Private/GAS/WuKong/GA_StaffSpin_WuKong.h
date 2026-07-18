@@ -45,6 +45,10 @@ private:
 	// 统一伤害入口：阵营/死亡/限频校验后应用 DamageGE + 径向击退
 	void TryDamageTarget(AActor* TargetActor);
 
+	// 再次按下技能按键时提前结束 GA（延迟一帧注册，避免激活当帧误触发）
+	UFUNCTION()
+	void OnToggleInputPressed(float TimeWaited);
+
 	// 旋转挥舞 Montage
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* StaffSpinMontage;

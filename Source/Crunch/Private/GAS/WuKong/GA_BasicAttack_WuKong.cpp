@@ -32,13 +32,13 @@ void UGA_BasicAttack_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Ha
 
 	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo))
 	{
-		// 监听 Recovery 输入窗口开始（持续监听，贯穿整个 GA 生命周期）
+		//Recovery 输入窗口开始（持续监听，贯穿整个 GA 生命周期）
 		UAbilityTask_WaitGameplayEvent* WaitRecoveryTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 			this, GetRecoverySectionEventTag(), nullptr, false, false);
 		WaitRecoveryTask->EventReceived.AddDynamic(this, &ThisClass::OnRecoverySectionEntered);
 		WaitRecoveryTask->ReadyForActivation();
 
-		// 监听 Recovery 输入窗口结束
+		//Recovery 输入窗口结束
 		UAbilityTask_WaitGameplayEvent* WaitRecoveryEndTask = UAbilityTask_WaitGameplayEvent::WaitGameplayEvent(
 			this, GetRecoveryEndEventTag(), nullptr, false, false);
 		WaitRecoveryEndTask->EventReceived.AddDynamic(this, &ThisClass::OnRecoveryEndEntered);
@@ -129,12 +129,6 @@ void UGA_BasicAttack_WuKong::OnInputPressDuringRecovery(float TimeWaited)
 {
 	// 只在 Recovery 输入窗口期间且未在过渡中才响应
 	if (!bIsInRecovery || bIsTransitioning) return;
-
-	// 二段跳期间禁止连段
-	if (const ACCharacter* Char = Cast<ACCharacter>(GetAvatarActorFromActorInfo()))
-	{
-		if (Char->JumpCurrentCount >= 2) return;
-	}
 
 	bIsTransitioning = true;
 	bIsInRecovery = false;

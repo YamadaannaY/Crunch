@@ -129,7 +129,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category="Jump")
 	float DoubleJumpAirControl = 0.5f;
 
+	// 跳跃提交时（服务端+本地客户端）：通过 Multicast 确保远程客户端正确收到跳跃段数
 	// 落地时重置跳跃和空中控制状态
+	virtual void OnJumped_Implementation() override;
 	virtual void Landed(const FHitResult& Hit) override;
 
 	/******************* Death and Respawn **************************/
@@ -208,6 +210,15 @@ private:
 	void Server_StartSprint();
 	UFUNCTION(Server, Reliable)
 	void Server_StopSprint();
+
+	// 二段跳时通知服务端取消普攻、Roll、StaffSpin 技能
+	UFUNCTION(Server, Reliable)
+	void Server_CancelDoubleJumpAbilities();
+
+	// 广播跳跃事件到所有客户端，确保远程客户端也能收到每次跳跃及段数
+	// 解决 JumpCurrentCount 复制可能跳过中间值（0→2）导致远程客户端跳帧的问题
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayJumpAnimation(int32 InJumpCount);
 
 	/************************Inventory *********************************/
 private:

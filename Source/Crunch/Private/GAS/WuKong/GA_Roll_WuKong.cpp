@@ -2,6 +2,7 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Character/CCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GAS/UCAbilitySystemStatics.h"
 
 UGA_Roll_WuKong::UGA_Roll_WuKong()
 {
@@ -22,7 +23,7 @@ void UGA_Roll_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 		return;
 	}
 
-	ACharacter* Character = Cast<ACharacter>(GetAvatarActorFromActorInfo());
+	ACCharacter* Character = Cast<ACCharacter>(GetAvatarActorFromActorInfo());
 	if (!Character)
 	{
 		K2_EndAbility();
@@ -33,6 +34,7 @@ void UGA_Roll_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	const FVector RollStartDir = GetRollDirection();
 	FVector BurstVelocity = RollStartDir * InitialBurstSpeed;
 	BurstVelocity.Z = FMath::Max(BurstVelocity.Z, 0.f) + InitialUpwardSpeed;
+	
 	Character->LaunchCharacter(BurstVelocity, false, false);
 
 	StartRollPhase();
@@ -56,7 +58,6 @@ void UGA_Roll_WuKong::StartRollPhase()
 
 void UGA_Roll_WuKong::OnRollMontageCompleted()
 {
-	// 延迟到下一帧：避免在同 Slot 上创建新 PlayMontageAndWait 时与旧 Task 清理冲突
 	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::StartAirbornePhase);
 }
 

@@ -7,6 +7,7 @@
 #include "GA_StaffSpin_WuKong.h"
 #include "GAS/UCAbilitySystemStatics.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputPress.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Character.h"
@@ -39,6 +40,17 @@ void UGA_StaffSpin_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		PlaySpinMontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlaySpinMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlaySpinMontageTask->ReadyForActivation();
+
+		// 延迟一帧注册 WaitInputPress，避免激活当帧的 InputPressed 事件立即误触发结束
+		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
+		{
+			if (IsActive())
+			{
+				UAbilityTask_WaitInputPress* WaitPress = UAbilityTask_WaitInputPress::WaitInputPress(this);
+				WaitPress->OnPress.AddDynamic(this, &ThisClass::OnToggleInputPressed);
+				WaitPress->ReadyForActivation();
+			}
+		});
 	}
 
 	// 伤害检测仅在服务端：所以服务端生成碰撞盒 + 启动补伤定时器(可选时间)
@@ -191,6 +203,11 @@ void UGA_StaffSpin_WuKong::RemoveStaffCollisionBox()
 	}
 
 	LastHitTimeMap.Empty();
+}
+
+void UGA_StaffSpin_WuKong::OnToggleInputPressed(float TimeWaited)
+{
+	K2_EndAbility();
 }
 
 void UGA_StaffSpin_WuKong::EndAbility(const FGameplayAbilitySpecHandle Handle,
