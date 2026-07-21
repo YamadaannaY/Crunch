@@ -1,4 +1,4 @@
-// 悟空翻滚：Launch 起跳 → RollMontage（翻滚动画）→ AirborneMontage（滞空动画）→ 落地结束
+// 悟空翻滚：Launch 起跳 → RollMontage（翻滚+滞空，Section 循环）→ 落地结束
 // 全程不干预重力，依靠 Launch 初速度形成自然抛物线弧
 // AnimBP 的 SequencePlayer 关闭 Root Motion，位移完全由 GA 代码驱动
 
@@ -22,7 +22,6 @@ public:
 
 private:
 	void StartRollPhase();
-	void StartAirbornePhase();
 
 	// 翻滚阶段每帧前冲
 	void TickRollForward();
@@ -36,13 +35,9 @@ private:
 	// 轮询落地（替代 LandedDelegate，客户端/服务端各自独立检测）
 	void TickCheckLanding();
 
-	// 翻滚 Montage（踩地前空翻）
+	// 翻滚 Montage（翻滚 + 滞空循环 Section）
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	UAnimMontage* RollMontage;
-
-	// 滞空 Montage（空翻后到落地前）
-	UPROPERTY(EditDefaultsOnly, Category = "Animation")
-	UAnimMontage* AirborneMontage;
 
 	// Launch 前冲速度（cm/s）
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")

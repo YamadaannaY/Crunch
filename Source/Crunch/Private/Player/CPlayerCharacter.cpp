@@ -341,6 +341,7 @@ void ACPlayerCharacter::HandleJumpInput()
 		FGameplayTagContainer CancelTags;
 		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.staffspin.wukong"));
 		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.basicattack"));
+		CancelTags.AddTag(FGameplayTag::RequestGameplayTag("ability.roll.wukong"));
 		GetAbilitySystemComponent()->CancelAbilities(&CancelTags); // 本地取消（LocalPredicted GA）
 		Server_CancelDoubleJumpAbilities();                        // 服务端取消（ServerOnly GA）
 	}
@@ -362,8 +363,6 @@ void ACPlayerCharacter::OnJumped_Implementation()
 
 void ACPlayerCharacter::Multicast_PlayJumpAnimation_Implementation(int32 InJumpCount)
 {
-	// 直接修正远程客户端的 JumpCurrentCount，触发 OnRep → OnJumped → ABP 读取正确的 GetJumpCount()
-	// 本地客户端 JumpCurrentCount 已由本地预测正确设置，相同值不会触发 OnRep
 	JumpCurrentCount = InJumpCount;
 }
 

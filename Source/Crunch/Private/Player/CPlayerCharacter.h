@@ -1,4 +1,4 @@
-//玩家类，具有本地输入，
+//玩家类，具有本地输入，移动组件
 
 #pragma once
 
@@ -41,7 +41,6 @@ private:
 	class UCameraComponent* ViewCamera;
 
 	/*******************	GA	********************************/
-private:
 	//Aim逻辑重写
 	virtual void OnAimStatChanged(bool bIsAiming) override;
 
@@ -128,7 +127,7 @@ private:
 	// 二段跳时的空中控制系数（值越大空中转向越灵活）
 	UPROPERTY(EditDefaultsOnly, Category="Jump")
 	float DoubleJumpAirControl = 0.5f;
-
+	
 	// 跳跃提交时（服务端+本地客户端）：通过 Multicast 确保远程客户端正确收到跳跃段数
 	// 落地时重置跳跃和空中控制状态
 	virtual void OnJumped_Implementation() override;
@@ -143,7 +142,6 @@ private:
 	virtual void OnRecoveryFromStun() override;
 
 	/******************* Camera View **************************/
-private:
 	//Camera偏移值
 	UPROPERTY(EditDefaultsOnly,Category="View")
 	FVector CameraAimLocalOffset;
@@ -193,7 +191,6 @@ private:
 	void TickArmLengthLerp(float Goal);
 
 	/************************ Sprint *********************************/
-private:
 	// 冲刺时的 MaxWalkSpeed（替代默认 MoveSpeed 属性值）
 	UPROPERTY(EditDefaultsOnly, Category="Sprint")
 	float SprintSpeed = 900.f;
@@ -215,13 +212,12 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_CancelDoubleJumpAbilities();
 
-	// 广播跳跃事件到所有客户端，确保远程客户端也能收到每次跳跃及段数
-	// 解决 JumpCurrentCount 复制可能跳过中间值（0→2）导致远程客户端跳帧的问题
+	// 广播跳跃计数到所有客户端，确保远程客户端也能收到每次跳跃及段数
+	// 为了解决 JumpCurrentCount 复制可能跳过中间值（0→2）导致远程客户端跳过第一段动画的问题
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayJumpAnimation(int32 InJumpCount);
 
 	/************************Inventory *********************************/
-private:
 	UPROPERTY()
 	class UInventoryComponent* InventoryComponent;
 };

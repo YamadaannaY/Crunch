@@ -10,7 +10,8 @@ AATargetActor_Around::AATargetActor_Around()
 	ShouldProduceTargetDataOnServer=true;
 
 	RootComp = CreateDefaultSubobject<USceneComponent>(TEXT("Root Comp"));
-	
+	RootComponent = RootComp;
+
 	AroundSphereComponent = CreateDefaultSubobject<USphereComponent>("Around Sphere Component");
 	AroundSphereComponent->SetupAttachment(RootComp);
 	AroundSphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -26,7 +27,7 @@ void AATargetActor_Around::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 void AATargetActor_Around::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
+
 	DOREPLIFETIME(AATargetActor_Around,TeamID);
 	DOREPLIFETIME(AATargetActor_Around,LocalGameplayCueTag);
 	DOREPLIFETIME(AATargetActor_Around,TargetDetectionRadius);
@@ -61,8 +62,9 @@ void AATargetActor_Around::ActorInDetectionRange(UPrimitiveComponent* Overlapped
 
 	if (HasAuthority())
 	{
-		FGameplayAbilityTargetDataHandle TargetDataHandle;
 		
+		FGameplayAbilityTargetDataHandle TargetDataHandle;
+
 		FGameplayAbilityTargetData_ActorArray* ActorArray = new FGameplayAbilityTargetData_ActorArray;
 		ActorArray->SetActors(TArray<TWeakObjectPtr<AActor>>{OtherActor});
 		TargetDataHandle.Add(ActorArray);
@@ -77,4 +79,3 @@ void AATargetActor_Around::ActorInDetectionRange(UPrimitiveComponent* Overlapped
 		UCAbilitySystemStatics::SendLocalGameplayCue(OtherActor, HitResult, LocalGameplayCueTag);
 	}
 }
-

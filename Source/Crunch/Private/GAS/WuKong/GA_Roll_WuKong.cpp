@@ -58,23 +58,6 @@ void UGA_Roll_WuKong::StartRollPhase()
 
 void UGA_Roll_WuKong::OnRollMontageCompleted()
 {
-	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::StartAirbornePhase);
-}
-
-void UGA_Roll_WuKong::OnRollMontageInterrupted()
-{
-	K2_EndAbility();
-}
-
-void UGA_Roll_WuKong::StartAirbornePhase()
-{
-	ACCharacter* Character = Cast<ACCharacter>(GetAvatarActorFromActorInfo());
-	if (!Character)
-	{
-		K2_EndAbility();
-		return;
-	}
-
 	// 停止前冲，重力自然牵引下落
 	if (RollTimerHandle.IsValid())
 	{
@@ -83,14 +66,11 @@ void UGA_Roll_WuKong::StartAirbornePhase()
 
 	// 每帧轮询落地
 	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::TickCheckLanding);
+}
 
-	// 播放滞空 Montage
-	if (AirborneMontage && HasAuthorityOrPredictionKey(CurrentActorInfo, &CurrentActivationInfo))
-	{
-		UAbilityTask_PlayMontageAndWait* PlayTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(
-			this, NAME_None, AirborneMontage);
-		PlayTask->ReadyForActivation();
-	}
+void UGA_Roll_WuKong::OnRollMontageInterrupted()
+{
+	K2_EndAbility();
 }
 
 void UGA_Roll_WuKong::TickCheckLanding()

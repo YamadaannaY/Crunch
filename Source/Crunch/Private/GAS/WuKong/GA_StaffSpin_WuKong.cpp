@@ -1,6 +1,6 @@
 // 悟空旋转挥棍：CollisionBox 附着到棍 Socket 随动画旋转，Overlap 收集目标并应用 FGenericDamageEffectDef
 // 命中管线：BeginOverlap（棍每转一圈重新进入目标触发一次）+ 定时器补伤（目标滞留盒内时）
-//   → TryDamageTarget 统一校验（阵营/死亡/限频）→ 径向击退 + DamageGE
+//  → TryDamageTarget 统一校验（阵营/死亡/限频）→ 径向击退 + DamageGE
 // DedicatedServer 适配：服务端 Mesh 不渲染，默认 AlwaysTickPose 不刷新骨骼、Socket 不随棍转动，
 // 因此旋转期间临时把 Mesh 的 VisibilityBasedAnimTickOption 覆盖为 AlwaysTickPoseAndRefreshBones，结束时还原
 
@@ -41,7 +41,7 @@ void UGA_StaffSpin_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		PlaySpinMontageTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
 		PlaySpinMontageTask->ReadyForActivation();
 
-		// 延迟一帧注册 WaitInputPress，避免激活当帧的 InputPressed 事件立即误触发结束
+		// 延迟一帧注册 WaitInputPress，避免玩家误触激活当帧的 InputPressed 事件立即结束
 		GetWorld()->GetTimerManager().SetTimerForNextTick([this]()
 		{
 			if (IsActive())
@@ -53,7 +53,7 @@ void UGA_StaffSpin_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 		});
 	}
 
-	// 伤害检测仅在服务端：所以服务端生成碰撞盒 + 启动补伤定时器(可选时间)
+	// 伤害检测仅在服务端：所以服务端生成碰撞盒 + 补伤定时器
 	if (K2_HasAuthority())
 	{
 		LastHitTimeMap.Empty();
@@ -64,7 +64,7 @@ void UGA_StaffSpin_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 			GetWorld()->GetTimerManager().SetTimer(RehitTimerHandle, this, &ThisClass::TickRehitOverlappingTargets, PerTargetHitInterval, true);
 		}
 	}
-	//调试用：在本地客户端额外生成一个纯可视化 Box（无碰撞、不参与伤害），观察位置/尺寸/随棍转动
+	//调试用：在本地客户端额外生成一个纯可视化 Box（无碰撞、不参与伤害）以适配实际棍尺寸
 	else if (ShouldDrawDebug())
 	{
 		SpawnStaffCollisionBox();
@@ -88,8 +88,8 @@ void UGA_StaffSpin_WuKong::SpawnStaffCollisionBox()
 
 	if (bIsServer)
 	{
-		// DS 上 Mesh 不渲染时骨骼默认不刷新（AlwaysTickPose 只推进动画），
-		// 旋转期间临时强制刷新骨骼，让棍 Socket（及附着的 Box）随挥舞动画转动；EndAbility 还原
+		// DS上Mesh不进行渲染，骨骼默认不刷新（AlwaysTickPose 只推进动画），
+		// 因此激活GA期间DS临时强制刷新骨骼，让棍 Socket（及附着的 Box）随挥舞动画转动；EndAbility 还原
 		CachedAnimTickOption = OwnerMesh->VisibilityBasedAnimTickOption;
 		OwnerMesh->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 		bAnimTickOptionOverridden = true;
@@ -106,7 +106,7 @@ void UGA_StaffSpin_WuKong::SpawnStaffCollisionBox()
 	}
 	else
 	{
-		// 客户端调试用可视化 Box：完全关闭碰撞，只显示线框
+		// 客户端调试用可视化 Box：完全关闭碰撞，只显示Box
 		StaffCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
@@ -145,7 +145,7 @@ void UGA_StaffSpin_WuKong::TryDamageTarget(AActor* TargetActor)
 	if (!IsActorTeamAttitudeIs(TargetActor, ETeamAttitude::Hostile)) return;
 	if (UCAbilitySystemStatics::IsActorDead(TargetActor)) return;
 
-	// 同一目标限频：两次命中间隔需大于 PerTargetHitInterval；<=0 时只允许命中一次
+	// 同一目标：两次命中间隔需大于 PerTargetHitInterval；<=0 时只允许命中一次
 	const float Now = GetWorld()->GetTimeSeconds();
 	if (const float* LastHitTime = LastHitTimeMap.Find(TargetActor))
 	{
@@ -154,7 +154,7 @@ void UGA_StaffSpin_WuKong::TryDamageTarget(AActor* TargetActor)
 	}
 	LastHitTimeMap.Add(TargetActor, Now);
 
-	// 径向击退：旋转挥舞对四周目标的击退方向为 自身→目标（水平），PushVelocity.X=水平速度，Z=竖直速度
+	// 击退：旋转挥舞对四周目标的击退方向为 自身→目标（水平），PushVelocity.X=水平速度，Z=竖直速度
 	const FVector RadialDir = (TargetActor->GetActorLocation() - OwnerAvatarActor->GetActorLocation()).GetSafeNormal2D();
 	const FVector PushVel = RadialDir * SpinDamageEffectDef.PushVelocity.X + FVector::UpVector * SpinDamageEffectDef.PushVelocity.Z;
 	if (!PushVel.IsNearlyZero())
