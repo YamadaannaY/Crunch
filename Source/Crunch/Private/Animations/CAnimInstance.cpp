@@ -64,13 +64,29 @@ void UCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		//角色当前不在地面上时Falling为True，原理是每一帧进行向下sweep检测是否有可以站立的地面
 		bIsJumping=OwnerMovementComp->IsFalling();
+		MovementMode = OwnerMovementComp->MovementMode;
+
 		Acceleration = OwnerMovementComp->GetCurrentAcceleration().Length();
 	}
 
 	if (OwnerCharacter)
 	{
+		// 缓存上一帧的跳跃段数（在更新 JumpCount 之前保存，用于检测空中起跳）
+		PrevJumpCount = JumpCount;
+
 		// 缓存跳跃段数：0=地面, 1=一段跳, 2=二段跳
 		JumpCount = OwnerCharacter->JumpCurrentCount;
+	}
+
+	// 更新地面停留时间：Walking 时累加，腾空时清零
+	// 用于 JumpRecovery → Ground 过渡（落地后需停留 JumpRecoveryDuration 秒）
+	if (MovementMode == MOVE_Walking)
+	{
+		TimeOnGround += DeltaSeconds;
+	}
+	else
+	{
+		TimeOnGround = 0.f;
 	}
 
 	//锁定停步方向：有加速度输入 且 高速移动时 持续更新；松手瞬间锁住
