@@ -1,7 +1,6 @@
 #include "Character/CCharacter.h"
 #include "AbilitySystemBlueprintLibrary.h"
 #include "Components/CapsuleComponent.h"
-#include "Crunch/DebugHelper.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -15,10 +14,9 @@
 #include "Perception/AISense_Sight.h"
 #include "Crunch/Crunch.h"
 #include "GAS/CHeroAttributeSet.h"
+#include "MotionWarpingComponent.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Widgets/OverHeadStatsGauge.h"
-#include "Player/CPlayerState.h"
-#include "Character/PA_CharacterDefination.h"
-#include "Character/PA_SkinDefination.h"
 
 ACCharacter::ACCharacter()
 {
@@ -33,6 +31,8 @@ ACCharacter::ACCharacter()
 
 	CAbilitySystemComponent=CreateDefaultSubobject<UCAbilitySystemComponent>("CAbility System Component");
 	CAttributeSet=CreateDefaultSubobject<UCAttributeSet>("CAttribute Set");
+
+	MotionWarpingComponent=CreateDefaultSubobject<UMotionWarpingComponent>("MotionWarping Component");
 
 	OverHeadWidgetComponent=CreateDefaultSubobject<UWidgetComponent>("Over Head Widget Component");
 	OverHeadWidgetComponent->SetupAttachment(GetRootComponent());
@@ -106,6 +106,9 @@ void ACCharacter::BeginPlay()
 
 	//为刺激源组件添加Sense，即能够触发AI的Sense_Sight
 	PerceptionStimuliSourceComponent->RegisterForSense(UAISense_Sight::StaticClass());
+
+	// 仅在客户端生成武器 Niagara 特效并附着到武器 Socket
+	InitializeWeaponTrailVFX();
 }
 
 void ACCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -384,6 +387,36 @@ void ACCharacter::OnRespawn()
 	//override in CharacterClass
 }
 
+void ACCharacter::InitializeWeaponTrailVFX()
+{
+	// DedicatedServer 不需要粒子特效，跳过
+	if (GetNetMode() == NM_DedicatedServer) return;
+	// 未配置特效则跳过
+	if (WeaponTrailEffects.IsEmpty()) return;
+
+	USkeletalMeshComponent* OwnerMesh = GetMesh();
+	if (!OwnerMesh) return;
+
+	for (const TPair<FName, UParticleSystem*>& Entry : WeaponTrailEffects)
+	{
+		const FName& SocketName = Entry.Key;
+		UParticleSystem* ParticleTemplate = Entry.Value;
+		if (!ParticleTemplate) continue;
+
+		UParticleSystemComponent* ParticleComp = NewObject<UParticleSystemComponent>(this);
+		ParticleComp->RegisterComponent();
+		ParticleComp->SetTemplate(ParticleTemplate);
+		ParticleComp->AttachToComponent(
+			OwnerMesh,
+			FAttachmentTransformRules::KeepRelativeTransform,
+			SocketName);
+		ParticleComp->SetAutoActivate(true);
+		ParticleComp->Activate(true);
+
+		WeaponTrailParticleComponents.Add(ParticleComp);
+	}
+}
+
 void ACCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	TeamID=NewTeamID;
@@ -460,7 +493,6 @@ float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 	UAnimMontage* MontageToPlay = GetHitReactMontageForDirection(DirectionTag);
 	if (!MontageToPlay)
 	{
-		Debug::Print(FString::Printf(TEXT("[HitReact] Montage NULL for Tag %s"), *DirectionTag.ToString()), FColor::Red);
 		return 0.f;
 	}
 
@@ -475,9 +507,6 @@ float ACCharacter::PlayHitReactMontage(const FGameplayTag& DirectionTag)
 
 	//立即从开头播放
 	const float Duration = AnimInst->Montage_Play(MontageToPlay);
-	Debug::Print(FString::Printf(TEXT("[HitReact] Play: %s (%.2fs) [%s]"),
-		*MontageToPlay->GetName(), Duration,
-		HasAuthority() ? TEXT("Server") : TEXT("Client")), FColor::Green);
 
 	return Duration;
 }

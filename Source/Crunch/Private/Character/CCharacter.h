@@ -66,6 +66,9 @@ public:
 	
 	//获取ASC
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	//获取MotionWarpingComponent
+	FORCEINLINE class UMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
 	
 	//用于客户端本地输入触发Event的情况：将Event同步发送给服务端，触发WaitEvent回调
 	UFUNCTION(Server, Reliable, WithValidation)
@@ -107,6 +110,9 @@ private:
 	UPROPERTY()
 	class UCAttributeSet* CAttributeSet;
 
+	UPROPERTY(VisibleDefaultsOnly, Category="Motion Warping")
+	class UMotionWarpingComponent* MotionWarpingComponent;
+
 	/***********UI************/
 
 	FTimerHandle HeadStatGaugeVisibilityUpdateTimerHandle;
@@ -131,6 +137,21 @@ private:
 
 	//Death状态下在客户端调用，判断是否显示OverHeadWidget
 	void SetStatusGaugeEnabled(bool bEnabled);
+
+	/************************** Weapon VFX ********************************/
+public:
+	// 配置武器拖尾/环绕等粒子特效，Key = Socket 名，Value = 粒子资源（仅在客户端生成）
+	// 示例：{"weapon_r" → 火焰粒子, "weapon_tip" → 光晕粒子}
+	UPROPERTY(EditDefaultsOnly, Category = "VFX|Weapon")
+	TMap<FName, UParticleSystem*> WeaponTrailEffects;
+
+private:
+	// 运行时生成的粒子组件数组（仅客户端存在，由 NewObject 创建，随 Owner 自动 GC）
+	UPROPERTY()
+	TArray<UParticleSystemComponent*> WeaponTrailParticleComponents;
+
+	// 客户端初始化武器特效：遍历 Map，为每个 Socket 生成 ParticleSystemComponent 并附着
+	void InitializeWeaponTrailVFX();
 
 	/************************** Death and Respawn ********************************/
 public:
