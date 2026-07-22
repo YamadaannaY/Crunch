@@ -25,6 +25,11 @@ FGameplayTag UCAbilitySystemStatics::GetBasicAttackInputReleasedTag()
 	return FGameplayTag::RequestGameplayTag("ability.basicattack.released");
 }
 
+FGameplayTag UCAbilitySystemStatics::GetBlockInputStatTag()
+{
+	return FGameplayTag::RequestGameplayTag("stats.BlockInput");
+}
+
 FGameplayTag UCAbilitySystemStatics::GetDeadStatTag()
 {
 	return FGameplayTag::RequestGameplayTag("stats.dead");

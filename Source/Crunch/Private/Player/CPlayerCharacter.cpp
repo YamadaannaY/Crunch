@@ -104,6 +104,7 @@ void ACPlayerCharacter::HandleLookInput(const FInputActionValue& InputActionValu
 void ACPlayerCharacter::HandleMoveInput(const FInputActionValue& InputActionValue)
 {
 	if (GetIsInFocusMode()) return ;
+	if (GetAbilitySystemComponent() && GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetBlockInputStatTag())) return;
 	
 	//W+D 组合输入时会是 (1,1)，向量长度 √2,也就是输入值比直线更快，通过归一化获取单位向量进行避免
 	FVector2D InputVal=InputActionValue.Get<FVector2d>();
@@ -322,6 +323,8 @@ void ACPlayerCharacter::TickArmLengthLerp(float Goal)
 
 void ACPlayerCharacter::HandleJumpInput()
 {
+	if (GetAbilitySystemComponent() && GetAbilitySystemComponent()->HasMatchingGameplayTag(UCAbilitySystemStatics::GetBlockInputStatTag())) return;
+
 	UCharacterMovementComponent* MovementComp=GetCharacterMovement();
 	if (!MovementComp) return;
 	if (!CanJump()) return;
