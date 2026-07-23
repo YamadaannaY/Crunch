@@ -8,6 +8,8 @@ void UOverHeadStatsGauge::ConfigureWithASC(class UAbilitySystemComponent* Abilit
 	if (AbilitySystemComponent)
 	{
 		HealthBar->SetAndBoundToGameplayAttribute(AbilitySystemComponent,UCAttributeSet::GetHealthAttribute(),UCAttributeSet::GetMaxHealthAttribute());
+		HealthBar->SetAndBoundToShieldAttribute(AbilitySystemComponent);
+		HealthBar->SetShieldFillColor(FLinearColor(1.0f, 0.8f, 0.0f));  // 金色护盾
 		ManaBar->SetAndBoundToGameplayAttribute(AbilitySystemComponent,UCAttributeSet::GetManaAttribute(),UCAttributeSet::GetMaxManaAttribute());
 	}
 }

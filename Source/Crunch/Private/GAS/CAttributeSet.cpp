@@ -5,13 +5,10 @@
 void UCAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	
-	//用于在类中注册所有需要网络同步的变量：定义引擎对变量复制的规则：哪些变量需要被复制，如何复制，什么时候复制
 
-	//如下规则表明：无条件且一直复制这些属性
-	
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,Health,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MaxHealth,COND_None,REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,Shield,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,Mana,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MaxMana,COND_None,REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,AttackDamage,COND_None,REPNOTIFY_Always);
@@ -19,29 +16,63 @@ void UCAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>&
 	DOREPLIFETIME_CONDITION_NOTIFY(UCAttributeSet,MoveSpeed,COND_None,REPNOTIFY_Always);
 }
 
-//在属性值改变操作执行前调用的函数，一般用于Clamp对要改变的值进行限制
 void UCAttributeSet::PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue)
 {
-	if (Attribute==GetHealthAttribute())
+	if (bProcessingShieldAbsorption)
 	{
-		NewValue=FMath::Clamp(NewValue,0.f,GetMaxHealth());
+		if (Attribute == GetHealthAttribute())
+		{
+			NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+		}
+		if (Attribute == GetShieldAttribute())
+		{
+			NewValue = FMath::Max(NewValue, 0.f);
+		}
+		return;
 	}
-	if (Attribute==GetManaAttribute())
+
+	if (Attribute == GetHealthAttribute())
 	{
-		NewValue=FMath::Clamp(NewValue,0.f,GetMaxMana());
+		const float OldHealth = GetHealth();
+		const float CurrentShield = GetShield();
+
+		if (NewValue < OldHealth && CurrentShield > 0.f)
+		{
+			const float DamageTaken = OldHealth - NewValue;
+			const float Absorbed = FMath::Min(DamageTaken, CurrentShield);
+			// 活跃 GE 对 Shield 的 Modifier = CurrentValue - BaseValue
+			// SetShield() 会设 BaseValue=入参，导致 CurrentValue=BaseValue+GEModifier（叠加而非减少）
+			// 正确做法：直接扣减 BaseValue
+			const float ActiveGEModifier = CurrentShield - Shield.GetBaseValue();
+			const float NewBaseValue = Shield.GetBaseValue() - Absorbed;
+
+			Shield.SetBaseValue(NewBaseValue);
+			Shield.SetCurrentValue(FMath::Max(0.f, NewBaseValue + ActiveGEModifier));
+
+			NewValue = OldHealth - (DamageTaken - Absorbed);
+		}
+
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxHealth());
+	}
+	if (Attribute == GetManaAttribute())
+	{
+		NewValue = FMath::Clamp(NewValue, 0.f, GetMaxMana());
+	}
+	if (Attribute == GetShieldAttribute())
+	{
+		NewValue = FMath::Max(NewValue, 0.f);
 	}
 }
 
-//在GE改变值后调用的函数，同样进行限制
 void UCAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data)
 {
-	if (Data.EvaluatedData.Attribute==GetHealthAttribute())
+	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
-		SetHealth(FMath::Clamp(GetHealth(),0.f,GetMaxHealth()));
+		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
 	}
-	if (Data.EvaluatedData.Attribute==GetManaAttribute())
+	if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
-		SetMana(FMath::Clamp(GetMana(),0.f,GetMaxMana()));
+		SetMana(FMath::Clamp(GetMana(), 0.f, GetMaxMana()));
 	}
 }
 
@@ -54,6 +85,11 @@ void UCAttributeSet::OnRep_Health(const FGameplayAttributeData& OldValue)
 void UCAttributeSet::OnRep_MaxHealth(const FGameplayAttributeData& OldValue)
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet,MaxHealth,OldValue);
+}
+
+void UCAttributeSet::OnRep_Shield(const FGameplayAttributeData& OldValue)
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UCAttributeSet,Shield,OldValue);
 }
 
 void UCAttributeSet::OnRep_Mana(const FGameplayAttributeData& OldValue)

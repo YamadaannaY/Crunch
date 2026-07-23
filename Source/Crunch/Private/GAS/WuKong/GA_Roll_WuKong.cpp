@@ -1,8 +1,8 @@
 #include "GA_Roll_WuKong.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Character/CCharacter.h"
+#include "AbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GAS/UCAbilitySystemStatics.h"
 
 UGA_Roll_WuKong::UGA_Roll_WuKong()
 {
@@ -36,6 +36,18 @@ void UGA_Roll_WuKong::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 	BurstVelocity.Z = FMath::Max(BurstVelocity.Z, 0.f) + InitialUpwardSpeed;
 	
 	Character->LaunchCharacter(BurstVelocity, false, false);
+
+	// 给自身附加护盾 GE（Duration=10s，到期自动移除 Shield）
+	if (HasAuthorityOrPredictionKey(ActorInfo, &ActivationInfo) && RollShieldEffect)
+	{
+		UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo();
+		if (ASC)
+		{
+			FGameplayEffectSpecHandle SpecHandle = ASC->MakeOutgoingSpec(
+				RollShieldEffect, GetAbilityLevel(Handle, ActorInfo), ASC->MakeEffectContext());
+			RollShieldEffectHandle = ASC->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+		}
+	}
 
 	StartRollPhase();
 }
