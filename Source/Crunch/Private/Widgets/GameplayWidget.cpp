@@ -17,6 +17,8 @@ void UGameplayWidget::NativeConstruct()
 	if (OwnerAbilitySystemComponent)
 	{
 		HealthBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent,UCAttributeSet::GetHealthAttribute(),UCAttributeSet::GetMaxHealthAttribute());
+		HealthBar->SetAndBoundToShieldAttribute(OwnerAbilitySystemComponent);
+		HealthBar->SetShieldFillColor(FLinearColor(1.0f, 0.8f, 0.0f));  // 金色护盾
 		ManaBar->SetAndBoundToGameplayAttribute(OwnerAbilitySystemComponent,UCAttributeSet::GetManaAttribute(),UCAttributeSet::GetMaxManaAttribute());
 	}
 

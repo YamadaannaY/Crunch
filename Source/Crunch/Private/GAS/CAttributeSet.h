@@ -22,6 +22,7 @@ public:
 	//目的是使用宏定义的函数
 	ATTRIBUTE_ACCESSORS(UCAttributeSet,Health);
 	ATTRIBUTE_ACCESSORS(UCAttributeSet,MaxHealth);
+	ATTRIBUTE_ACCESSORS(UCAttributeSet,Shield);
 	ATTRIBUTE_ACCESSORS(UCAttributeSet,Mana);
 	ATTRIBUTE_ACCESSORS(UCAttributeSet,MaxMana);
 	ATTRIBUTE_ACCESSORS(UCAttributeSet,Armor);
@@ -40,10 +41,14 @@ private:
 	
 	UPROPERTY(ReplicatedUsing=OnRep_Health)
 	FGameplayAttributeData Health;
-	
+
 	UPROPERTY(ReplicatedUsing=OnRep_MaxHealth)
 	FGameplayAttributeData MaxHealth;
-	
+
+	// 临时护盾值（用于技能护盾如 Roll），吸收伤害优先于 Health，金色血条显示
+	UPROPERTY(ReplicatedUsing=OnRep_Shield)
+	FGameplayAttributeData Shield;
+
 	UPROPERTY(ReplicatedUsing=OnRep_Mana)
 	FGameplayAttributeData Mana;
 	UPROPERTY(ReplicatedUsing=OnRep_MaxMana)
@@ -61,10 +66,13 @@ private:
 
 	UFUNCTION()
 	void OnRep_Health(const FGameplayAttributeData& OldValue);
-	
+
 	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldValue);
-	
+
+	UFUNCTION()
+	void OnRep_Shield(const FGameplayAttributeData& OldValue);
+
 	UFUNCTION()
 	void OnRep_Mana(const FGameplayAttributeData& OldValue);
 	
@@ -79,4 +87,7 @@ private:
 
 	UFUNCTION()
 	void OnRep_MoveSpeed(const FGameplayAttributeData& OldValue);
+
+	// 护盾吸收伤害的重入防护：SetShield 触发 PreAttributeChange 时跳过吸收逻辑
+	bool bProcessingShieldAbsorption = false;
 };

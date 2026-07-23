@@ -5,6 +5,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveGameplayEffectHandle.h"
 #include "GAS/CGameplayAbility.h"
 #include "GA_Roll_WuKong.generated.h"
 
@@ -54,6 +55,13 @@ private:
 	// 是否允许输入转向
 	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	bool bAllowSteering = true;
+
+	// 翻滚时附加的护盾 GE（Duration=10s，添加 Shield 属性，到期自动移除）
+	UPROPERTY(EditDefaultsOnly, Category = "GameplayEffect")
+	TSubclassOf<UGameplayEffect> RollShieldEffect;
+
+	// 护盾 GE 的 ActiveHandle，用于 EndAbility 时确保移除
+	FActiveGameplayEffectHandle RollShieldEffectHandle;
 
 	FTimerHandle RollTimerHandle;
 };
