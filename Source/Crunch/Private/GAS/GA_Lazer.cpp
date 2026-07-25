@@ -4,8 +4,6 @@
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Abilities/Tasks/AbilityTask_WaitCancel.h"
-#include "Abilities/Tasks/AbilityTask_WaitConfirm.h"
-#include "Abilities/Tasks/AbilityTask_WaitGameplayTagBase.h"
 #include "GAS/TargetActor_Line.h"
 #include "Abilities/Tasks/AbilityTask_WaitTargetData.h"
 

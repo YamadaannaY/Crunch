@@ -52,7 +52,6 @@ void UGA_GroundBlast::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
 
 void UGA_GroundBlast::TargetConfirmed(const FGameplayAbilityTargetDataHandle& Handle)
 {
-	//由于不是GA激活就直接进行Cost/Cooldown，需要在实际作用时手动Commit
 	if (!K2_CommitAbility())
 	{
 		K2_EndAbility();
