@@ -44,7 +44,7 @@ protected:
 	// 本地客户端生成 GameplayWidget（血条/蓝条/技能列表/属性面板/准星）
 	void SpawnGameplayWidget();
 
-	// GamplayWidget 蓝图类
+	// GameplayWidget 蓝图类
 	UPROPERTY(EditDefaultsOnly, Category = "Sandbox|UI")
 	TSubclassOf<UGameplayWidget> GameplayWidgetClass;
 
